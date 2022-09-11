@@ -1,8 +1,9 @@
 {
-  "name": "nest-typescript-starter",
+  "name": "quizae",
+  "author": "Martin Mička <hey@martinmicka.me>",
   "private": true,
-  "version": "1.0.0",
-  "description": "Nest TypeScript starter repository",
+  "version": "0.0.1",
+  "description": "My quiz and trivia app",
   "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
@@ -23,6 +24,8 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@prisma/client": "^4.3.1",
+    "hbs": "^4.2.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.5.5"
@@ -42,6 +45,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "jest": "^28.1.2",
     "prettier": "^2.7.1",
+    "prisma": "^4.3.1",
     "source-map-support": "^0.5.21",
     "supertest": "^6.2.4",
     "ts-jest": "^28.0.5",

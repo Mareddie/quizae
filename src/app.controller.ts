@@ -1,12 +1,14 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Render } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { UserRepository } from './User/Repository/user.repository';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Render('index')
+  async getUsers(): Promise<any> {
+    return { message: 'Hellooo' };
   }
 }
