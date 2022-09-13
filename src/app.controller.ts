@@ -7,7 +7,7 @@ export class AppController {
   constructor(private readonly userRepository: UserRepository) {}
 
   @Get()
-  @Render('index')
+  @Render('pages/index')
   async getUsers(): Promise<any> {
     return { message: 'Hellooo' };
   }
