@@ -11,4 +11,10 @@ export class AppController {
   async getUsers(): Promise<any> {
     return { message: 'Hellooo' };
   }
+
+  @Get('/login')
+  @Render('pages/login')
+  async loginUser(): Promise<any> {
+    return { message: 'Hellooo' };
+  }
 }

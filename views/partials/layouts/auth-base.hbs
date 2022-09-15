@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>
+        {{#if title}}
+            {{title}}
+        {{else}}
+            Quizae
+        {{/if}}
+    </title>
+
+    {{> includes/styles }}
+
+    <!-- icheck bootstrap -->
+    <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+
+    {{#> optional-styles-block}}
+
+    {{/optional-styles-block}}
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+    <div class="card card-outline card-primary">
+        <div class="card-header text-center">
+            <p class="h1"><b>Quizae</b></p>
+        </div>
+        <div class="card-body">
+            <p class="login-box-msg">Let's Roll!</p>
+
+            {{#> content-block}}
+
+            {{/content-block}}
+        </div>
+        <!-- /.card-body -->
+    </div>
+    <!-- /.card -->
+</div>
+<!-- /.login-box -->
+
+{{> includes/scripts }}
+
+{{# optional-scripts-block}}
+
+{{/optional-scripts-block}}
+</body>
+</html>
