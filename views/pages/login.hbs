@@ -1,6 +1,18 @@
 {{#> layouts/auth_base title="Login | Quizae" }}
     {{#* inline "content-block" }}
-        <form action="#" method="post">
+        <form action="/login" method="post">
+            {{#if success}}
+                <div class="alert alert-success" role="alert">
+                    {{ success }}
+                </div>
+            {{/if}}
+
+            {{#if error}}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {{/if}}
+
             <div class="input-group mb-3">
                 <label for="email"></label>
                 <input type="email" id="email" name="email" class="form-control"  placeholder="Email" required>
