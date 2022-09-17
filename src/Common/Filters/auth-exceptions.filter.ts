@@ -6,7 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { InvalidCredentialsException } from '../Exception/invalid-credentials.exception';
+import { InvalidCredentialsException } from '../Exceptions/invalid-credentials.exception';
 
 @Catch(HttpException)
 export class AuthExceptionFilter implements ExceptionFilter {
