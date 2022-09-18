@@ -1,14 +1,17 @@
-import { Controller, Get, Render } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Controller, Get, Render, UseFilters, UseGuards } from '@nestjs/common';
 import { UserRepository } from './User/Repository/user.repository';
+import { AuthenticatedGuard } from './Auth/Guard/authenticated.guard';
+import { AuthExceptionFilter } from './Common/Filters/auth-exceptions.filter';
 
 @Controller()
+@UseFilters(AuthExceptionFilter)
 export class AppController {
   constructor(private readonly userRepository: UserRepository) {}
 
-  @Get()
+  @Get('/')
+  @UseGuards(AuthenticatedGuard)
   @Render('pages/index')
-  async getUsers(): Promise<any> {
+  async index(): Promise<any> {
     return { message: 'Hellooo' };
   }
 }
