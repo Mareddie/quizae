@@ -39,6 +39,9 @@ async function bootstrap() {
       secret: configService.get<string>('APP_SECRET', 'changeme'),
       resave: false,
       saveUninitialized: false,
+      cookie: {
+        maxAge: 2 * 24 * 60 * 60 * 1000, // 1000 milliseconds * 60 seconds * 60 minutes * 24 hours * 2 days
+      },
     }),
   );
 
