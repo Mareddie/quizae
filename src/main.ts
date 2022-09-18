@@ -16,9 +16,15 @@ async function bootstrap() {
   const publicPath = join(__dirname, '..', 'public');
   const viewsPath = join(__dirname, '..', 'views');
   const partialsPath = join(__dirname, '..', 'views/partials');
+  const env = configService.get<string>('APP_ENV', 'prod');
 
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
+
+  // development environment specific settings
+  if (env === 'dev') {
+    app.disable('etag');
+  }
 
   app.useStaticAssets(publicPath);
   app.setBaseViewsDir(viewsPath);

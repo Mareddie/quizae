@@ -15,7 +15,8 @@
 
             <div class="input-group mb-3">
                 <label for="email"></label>
-                <input type="email" id="email" name="email" class="form-control"  placeholder="Email" required>
+                <input type="email" id="email" name="email" class="form-control"  placeholder="Email"
+                    {{#if lastUsedEmail}}value="{{lastUsedEmail}}"{{/if}} required>
 
                 <div class="input-group-append">
                     <div class="input-group-text">
@@ -26,7 +27,8 @@
 
             <div class="input-group mb-3">
                 <label for="password"></label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
+                <input type="password" id="password" name="password" class="form-control"
+                       placeholder="Password" required>
 
                 <div class="input-group-append">
                     <div class="input-group-text">

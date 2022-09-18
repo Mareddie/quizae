@@ -17,6 +17,13 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
 
     if (
+      exception instanceof InvalidCredentialsException &&
+      request.body.email
+    ) {
+      request.flash('lastUsedEmail', request.body.email);
+    }
+
+    if (
       exception instanceof ForbiddenException ||
       exception instanceof InvalidCredentialsException
     ) {

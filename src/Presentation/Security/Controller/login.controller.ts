@@ -1,8 +1,8 @@
 import {
   Controller,
   Get,
-  Request,
-  Response,
+  Req,
+  Res,
   Post,
   UseGuards,
   Next,
@@ -11,12 +11,13 @@ import {
 } from '@nestjs/common';
 import { LocalAuthGuard } from '../../../Auth/Guard/local-auth.guard';
 import { AuthExceptionFilter } from '../../../Common/Filters/auth-exceptions.filter';
+import { Response, Request } from 'express';
 
 @Controller()
 @UseFilters(AuthExceptionFilter)
 export class LoginController {
   @Get('/login')
-  loginUserPage(@Request() req, @Response() res) {
+  loginUserPage(@Req() req: Request, @Res() res: Response) {
     if (req.user) {
       return res.redirect('/');
     }
@@ -24,6 +25,7 @@ export class LoginController {
     return res.render('pages/login', {
       success: req.flash('success'),
       error: req.flash('error'),
+      lastUsedEmail: req.flash('lastUsedEmail'),
     });
   }
 
@@ -34,8 +36,13 @@ export class LoginController {
     return;
   }
 
-  @Get('/user-logout')
-  logoutUser(@Request() req, @Response() res, @Next() next) {
+  @Get('/logout')
+  logoutUser(@Req() req: Request, @Res() res: Response, @Next() next) {
+    // If the User isn't logged in, we should redirect without flash message
+    if (!req.user) {
+      return res.redirect('/login');
+    }
+
     req.logOut(function (error) {
       if (error) {
         return next(error);
