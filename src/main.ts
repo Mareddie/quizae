@@ -1,14 +1,15 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { PrismaService } from './Common/Service/prisma.service';
+import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ConfigService } from '@nestjs/config';
+import { AppModule } from './app.module';
 import { join } from 'path';
 import * as hbs from 'hbs';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import flash = require('connect-flash');
-import { ConfigService } from '@nestjs/config';
+import fileStore = require('session-file-store');
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -36,6 +37,7 @@ async function bootstrap() {
 
   app.use(
     session({
+      store: new (fileStore(session))(),
       secret: configService.get<string>('APP_SECRET', 'changeme'),
       resave: false,
       saveUninitialized: false,

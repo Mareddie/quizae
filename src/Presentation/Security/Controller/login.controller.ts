@@ -5,7 +5,6 @@ import {
   Res,
   Post,
   UseGuards,
-  Next,
   Redirect,
   UseFilters,
 } from '@nestjs/common';
@@ -32,12 +31,14 @@ export class LoginController {
   @UseGuards(LocalAuthGuard)
   @Post('/login')
   @Redirect('/')
-  loginUser() {
+  loginUser(@Req() req: Request) {
+    // TODO: implement middleware that checks whether the origin matches to prevent CSRF
+    console.log(req.header('Origin'));
     return;
   }
 
   @Get('/logout')
-  logoutUser(@Req() req: Request, @Res() res: Response, @Next() next) {
+  logoutUser(@Req() req: Request, @Res() res: Response) {
     // If the User isn't logged in, we should redirect without flash message
     if (!req.user) {
       return res.redirect('/login');
@@ -45,7 +46,8 @@ export class LoginController {
 
     req.logOut(function (error) {
       if (error) {
-        return next(error);
+        req.flash('error', 'Something wrong happened. Oh well...');
+        return res.redirect('/login');
       }
 
       req.flash('success', 'Logged out.');
