@@ -11,6 +11,7 @@ import {
 import { LocalAuthGuard } from '../../../Auth/Guard/local-auth.guard';
 import { AuthExceptionFilter } from '../../../Common/Filters/auth-exceptions.filter';
 import { Response, Request } from 'express';
+import { CheckOriginGuard } from '../../../Common/Guard/check-origin.guard';
 
 @Controller()
 @UseFilters(AuthExceptionFilter)
@@ -28,12 +29,10 @@ export class LoginController {
     });
   }
 
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(CheckOriginGuard, LocalAuthGuard)
   @Post('/login')
   @Redirect('/')
-  loginUser(@Req() req: Request) {
-    // TODO: implement middleware that checks whether the origin matches to prevent CSRF
-    console.log(req.header('Origin'));
+  loginUser() {
     return;
   }
 
