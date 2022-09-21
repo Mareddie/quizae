@@ -1,0 +1,91 @@
+{{#> layouts/base title="Groups | Quizae" contentTitle="Groups" }}
+    {{#* inline "content-block" }}
+        <div class="row mb-3">
+            <div class="col-md-1">
+                <button type="button" class="btn btn-block btn-success">Create Group</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">My Groups</h3>
+
+<!--                        <div class="card-tools">-->
+<!--                            <ul class="pagination pagination-sm float-right">-->
+<!--                                <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>-->
+<!--                                <li class="page-item"><a class="page-link" href="#">1</a></li>-->
+<!--                                <li class="page-item"><a class="page-link" href="#">2</a></li>-->
+<!--                                <li class="page-item"><a class="page-link" href="#">3</a></li>-->
+<!--                                <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>-->
+<!--                            </ul>-->
+<!--                        </div>-->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>My Group</td>
+                                <td style="width: 300px">
+                                    <button type="button" class="btn btn-primary"><i class="fa fa-pen"></i></button>
+                                    <button class="btn btn-danger"><i class="fa fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">I'm member of</h3>
+
+                        <!--                        <div class="card-tools">-->
+                        <!--                            <ul class="pagination pagination-sm float-right">-->
+                        <!--                                <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>-->
+                        <!--                                <li class="page-item"><a class="page-link" href="#">1</a></li>-->
+                        <!--                                <li class="page-item"><a class="page-link" href="#">2</a></li>-->
+                        <!--                                <li class="page-item"><a class="page-link" href="#">3</a></li>-->
+                        <!--                                <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>-->
+                        <!--                            </ul>-->
+                        <!--                        </div>-->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Owner</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>Dead On Arrival</td>
+                                <td>tester@test.com</td>
+                                <td style="width: 300px">
+                                    <button class="btn btn-danger"><i class="fa fa-door-open"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    {{/inline}}
+{{/layouts/base}}
