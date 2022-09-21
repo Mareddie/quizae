@@ -16,4 +16,17 @@ model User {
     password String
     firstName String
     lastName String
+    ownedGroups Group[] @relation("OwnedGroups")
+    joinedGroupIDs String[] @db.ObjectId
+    joinedGroups Group[] @relation("JoinedGroups", fields: [joinedGroupIDs], references: [id])
+}
+
+model Group {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    name String
+    createdAt DateTime @default(now())
+    owner User @relation("OwnedGroups", fields: [ownerId], references: [id])
+    ownerId String @db.ObjectId
+    memberIDs String[] @db.ObjectId
+    members User[] @relation("JoinedGroups", fields: [memberIDs], references: [id])
 }
