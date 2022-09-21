@@ -17,7 +17,7 @@ import { CheckOriginGuard } from '../../../Common/Guard/check-origin.guard';
 @UseFilters(AuthExceptionFilter)
 export class LoginController {
   @Get('/login')
-  loginUserPage(@Req() req: Request, @Res() res: Response) {
+  loginUserPage(@Req() req: Request, @Res() res: Response): void {
     if (req.user) {
       return res.redirect('/');
     }
@@ -32,12 +32,12 @@ export class LoginController {
   @UseGuards(CheckOriginGuard, LocalAuthGuard)
   @Post('/login')
   @Redirect('/')
-  loginUser() {
+  loginUser(): void {
     return;
   }
 
   @Get('/logout')
-  logoutUser(@Req() req: Request, @Res() res: Response) {
+  logoutUser(@Req() req: Request, @Res() res: Response): void {
     // If the User isn't logged in, we should redirect without flash message
     if (!req.user) {
       return res.redirect('/login');

@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 export class CheckOriginGuard implements CanActivate {
   constructor(private readonly config: ConfigService) {}
 
-  async canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
     const originHeader = request.header('Origin');

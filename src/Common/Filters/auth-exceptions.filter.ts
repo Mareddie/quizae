@@ -10,7 +10,7 @@ import { InvalidCredentialsException } from '../Exceptions/invalid-credentials.e
 
 @Catch(HttpException)
 export class AuthExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
+  catch(exception: HttpException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
