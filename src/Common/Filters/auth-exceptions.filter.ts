@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { InvalidCredentialsException } from '../Exceptions/invalid-credentials.exception';
@@ -30,6 +31,11 @@ export class AuthExceptionFilter implements ExceptionFilter {
       request.flash('error', exception.message);
 
       response.redirect('/login');
+      return;
+    }
+
+    if (exception instanceof BadRequestException) {
+      response.status(status).json(exception.getResponse());
       return;
     }
 

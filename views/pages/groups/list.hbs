@@ -1,8 +1,36 @@
 {{#> layouts/base title="Groups | Quizae" contentTitle="Groups" }}
     {{#* inline "content-block" }}
         <div class="row mb-3">
-            <div class="col-md-1">
-                <button type="button" class="btn btn-block btn-success">Create Group</button>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-block btn-success" data-toggle="modal" data-target="#createGroupModal">New Group</button>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="createGroupModal" tabindex="-1" role="dialog" aria-labelledby="createGroupLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <form method="POST" action="/groups/create">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createGroupLabel">Create Group</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="groupName">Name</label>
+                                    <input type="text" class="form-control" id="groupName" name="name" required>
+                                </div>
+
+                                <!-- TODO: Adding people to new group-->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-success">Create Group</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row">

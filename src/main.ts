@@ -10,6 +10,7 @@ import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import flash = require('connect-flash');
 import fileStore = require('session-file-store');
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -26,6 +27,8 @@ async function bootstrap() {
   if (env === 'dev') {
     app.disable('etag');
   }
+
+  app.useGlobalPipes(new ValidationPipe());
 
   app.useStaticAssets(publicPath);
   app.setBaseViewsDir(viewsPath);
