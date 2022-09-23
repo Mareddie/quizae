@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateGroupDTO } from '../../Presentation/UserGroup/DTO/create-group.dto';
 import { PrismaService } from '../../Common/Service/prisma.service';
-import { create } from 'domain';
 
 @Injectable()
 export class CreateGroupHandler {
