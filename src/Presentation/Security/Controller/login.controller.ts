@@ -1,56 +1,28 @@
-import {
-  Controller,
-  Get,
-  Req,
-  Res,
-  Post,
-  UseGuards,
-  Redirect,
-  UseFilters,
-} from '@nestjs/common';
+import { Controller, Req, Post, UseGuards, Get } from '@nestjs/common';
 import { LocalAuthGuard } from '../../../Auth/Guard/local-auth.guard';
-import { AuthExceptionFilter } from '../../../Common/Filters/auth-exceptions.filter';
-import { Response, Request } from 'express';
+import { Request } from 'express';
 import { CheckOriginGuard } from '../../../Common/Guard/check-origin.guard';
+import { AuthService } from '../../../Auth/Service/auth.service';
+import { AuthenticatedUser } from '../../../User/Type/authenticated-user';
+import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 
 @Controller()
-@UseFilters(AuthExceptionFilter)
 export class LoginController {
-  @Get('/login')
-  loginUserPage(@Req() req: Request, @Res() res: Response): void {
-    if (req.user) {
-      return res.redirect('/');
-    }
-
-    return res.render('pages/login', {
-      success: req.flash('success'),
-      error: req.flash('error'),
-      lastUsedEmail: req.flash('lastUsedEmail'),
-    });
-  }
+  constructor(private readonly authService: AuthService) {}
 
   @UseGuards(CheckOriginGuard, LocalAuthGuard)
   @Post('/login')
-  @Redirect('/')
-  loginUser(): void {
-    return;
+  async loginUser(@Req() req: Request) {
+    return {
+      accessToken: await this.authService.generateToken(
+        req.user as AuthenticatedUser,
+      ),
+    };
   }
 
-  @Get('/logout')
-  logoutUser(@Req() req: Request, @Res() res: Response): void {
-    // If the User isn't logged in, we should redirect without flash message
-    if (!req.user) {
-      return res.redirect('/login');
-    }
-
-    req.logOut(function (error) {
-      if (error) {
-        req.flash('error', 'Something wrong happened. Oh well...');
-        return res.redirect('/login');
-      }
-
-      req.flash('success', 'Logged out.');
-      return res.redirect('/login');
-    });
+  @UseGuards(AuthenticatedGuard)
+  @Get('profile')
+  checkToken(@Req() req: Request): object {
+    return req.user;
   }
 }
