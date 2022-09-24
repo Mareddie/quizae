@@ -6,10 +6,6 @@ import { User } from '@prisma/client';
 export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async users(): Promise<User[]> {
-    return this.prisma.user.findMany();
-  }
-
   public async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { email: email } });
   }

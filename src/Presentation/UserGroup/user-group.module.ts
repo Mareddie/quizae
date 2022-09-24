@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from '../../User/user.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), UserModule],
+  imports: [ConfigModule, UserModule],
   controllers: [GroupResourceController],
 })
 export class UserGroupModule {}

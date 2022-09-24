@@ -1,10 +1,9 @@
-import { Controller, Req, Post, UseGuards, Get } from '@nestjs/common';
+import { Controller, Req, Post, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from '../../../Auth/Guard/local-auth.guard';
 import { Request } from 'express';
 import { CheckOriginGuard } from '../../../Common/Guard/check-origin.guard';
 import { AuthService } from '../../../Auth/Service/auth.service';
 import { AuthenticatedUser } from '../../../User/Type/authenticated-user';
-import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 
 @Controller()
 export class LoginController {
@@ -18,11 +17,5 @@ export class LoginController {
         req.user as AuthenticatedUser,
       ),
     };
-  }
-
-  @UseGuards(AuthenticatedGuard)
-  @Get('profile')
-  checkToken(@Req() req: Request): object {
-    return req.user;
   }
 }

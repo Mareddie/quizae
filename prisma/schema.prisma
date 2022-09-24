@@ -17,7 +17,7 @@ model User {
     firstName String
     lastName String
     ownedGroups Group[] @relation("OwnedGroups")
-    joinedGroupIDs String[] @db.ObjectId
+    joinedGroupIDs String[] @db.ObjectId @default([])
     joinedGroups Group[] @relation("JoinedGroups", fields: [joinedGroupIDs], references: [id])
 }
 
@@ -27,6 +27,6 @@ model Group {
     createdAt DateTime @default(now())
     owner User @relation("OwnedGroups", fields: [ownerId], references: [id])
     ownerId String @db.ObjectId
-    memberIDs String[] @db.ObjectId
+    memberIDs String[] @db.ObjectId @default([])
     members User[] @relation("JoinedGroups", fields: [memberIDs], references: [id])
 }

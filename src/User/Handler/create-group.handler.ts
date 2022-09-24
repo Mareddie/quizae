@@ -1,19 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateGroupDTO } from '../../Presentation/UserGroup/DTO/create-group.dto';
-import { PrismaService } from '../../Common/Service/prisma.service';
+import { Group } from '@prisma/client';
+import { GroupRepository } from '../Repository/group.repository';
 
 @Injectable()
 export class CreateGroupHandler {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly groupRepository: GroupRepository) {}
 
-  async createGroup(data: CreateGroupDTO, ownerId: string): Promise<any> {
-    const createdGroup = await this.prisma.group.create({
-      data: {
-        name: data.name,
-        ownerId: ownerId,
-      },
-    });
+  async createGroup(data: CreateGroupDTO, ownerId: string): Promise<Group> {
+    const existingGroups = await this.groupRepository.findByNameForOwner(
+      data.name,
+      ownerId,
+    );
 
-    console.log(createdGroup);
+    if (existingGroups.length > 0) {
+      throw new ConflictException(
+        `You already have a group named '${data.name}'`,
+      );
+    }
+
+    return await this.groupRepository.createGroup(data, ownerId);
   }
 }

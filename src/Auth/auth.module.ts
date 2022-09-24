@@ -9,9 +9,9 @@ import { JwtStrategy } from './Strategy/jwt.strategy';
 @Module({
   imports: [
     UserModule,
-    ConfigModule.forRoot(),
+    ConfigModule,
     JwtModule.registerAsync({
-      imports: [ConfigModule.forRoot()],
+      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET', 'changeme'),
