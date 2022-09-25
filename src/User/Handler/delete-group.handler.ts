@@ -4,24 +4,23 @@ import { Group } from '@prisma/client';
 import { GroupRepository } from '../Repository/group.repository';
 
 @Injectable()
-export class CreateGroupHandler {
+export class DeleteGroupHandler {
   constructor(private readonly groupRepository: GroupRepository) {}
 
-  async createGroup(
-    data: CreateUpdateGroupDTO,
-    ownerId: string,
-  ): Promise<Group> {
-    const existingGroups = await this.groupRepository.findByNameForOwner(
-      data.name,
+  async deleteGroup(groupId: string, ownerId: string): Promise<void> {
+    const deleteCandidate = await this.groupRepository.findByIdAndOwner(
+      groupId,
       ownerId,
     );
 
-    if (existingGroups.length > 0) {
+    if (deleteCandidate === null) {
       throw new ConflictException(
-        `You already have a group named '${data.name}'`,
+        'Group was not found or is not owned by authenticated User',
       );
     }
 
-    return await this.groupRepository.createGroup(data, ownerId);
+    const deleteGroup = await this.groupRepository.deleteGroup(groupId);
+
+    console.log(deleteGroup);
   }
 }
