@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../Common/Service/prisma.service';
 import { Group } from '@prisma/client';
 import { CreateUpdateGroupDTO } from '../../Presentation/UserGroup/DTO/create-update-group.dto';
+import { IdentifiedUser } from '../Type/identified-user';
 
 @Injectable()
 export class GroupRepository {
@@ -55,13 +56,34 @@ export class GroupRepository {
   async createGroup(
     data: CreateUpdateGroupDTO,
     ownerId: string,
+    members?: IdentifiedUser[],
   ): Promise<Group> {
-    return await this.prisma.group.create({
+    const createQuery = {
       data: {
         name: data.name,
         ownerId: ownerId,
+        userMemberships: {
+          createMany: {
+            data: [],
+          },
+        },
       },
-    });
+      include: {
+        userMemberships: true,
+      },
+    };
+
+    if (members !== undefined) {
+      for (const key in members) {
+        createQuery.data.userMemberships.createMany.data.push({
+          userId: members[key].id,
+        });
+      }
+    }
+
+    console.log(createQuery);
+
+    return await this.prisma.group.create(createQuery);
   }
 
   async updateGroup(

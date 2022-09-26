@@ -35,4 +35,6 @@ model GroupMembership {
     userId String @db.ObjectId
     group Group @relation("HasMembers", fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     groupId String @db.ObjectId
+
+    @@unique([userId, groupId])
 }

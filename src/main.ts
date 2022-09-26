@@ -20,7 +20,11 @@ async function bootstrap() {
     app.disable('etag');
   }
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      skipUndefinedProperties: true,
+    }),
+  );
 
   app.use(cookieParser(configService.get<string>('COOKIE_SECRET', 'changeme')));
 
