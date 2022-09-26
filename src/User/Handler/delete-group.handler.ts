@@ -1,6 +1,4 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateUpdateGroupDTO } from '../../Presentation/UserGroup/DTO/create-update-group.dto';
-import { Group } from '@prisma/client';
 import { GroupRepository } from '../Repository/group.repository';
 
 @Injectable()
@@ -19,8 +17,6 @@ export class DeleteGroupHandler {
       );
     }
 
-    const deleteGroup = await this.groupRepository.deleteGroup(groupId);
-
-    console.log(deleteGroup);
+    await this.groupRepository.deleteGroup(groupId);
   }
 }

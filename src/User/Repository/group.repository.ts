@@ -38,11 +38,12 @@ export class GroupRepository {
     }
 
     if (filter === 'myMemberships') {
-      // TODO: search via memberships
       return await this.prisma.group.findMany({
         where: {
-          memberIDs: {
-            has: ownerId,
+          userMemberships: {
+            every: {
+              userId: ownerId,
+            },
           },
         },
       });
@@ -77,7 +78,13 @@ export class GroupRepository {
     });
   }
 
-  async deleteGroup(groupId: string): Promise<any> {
-    // TODO: delete group
+  async deleteGroup(groupId: string): Promise<void> {
+    await this.prisma.group.delete({
+      where: {
+        id: groupId,
+      },
+    });
+
+    return;
   }
 }
