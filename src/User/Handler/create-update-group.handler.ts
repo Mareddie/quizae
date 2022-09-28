@@ -1,15 +1,43 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateUpdateGroupDTO } from '../../Presentation/UserGroup/DTO/create-update-group.dto';
+import { CreateUpdateGroupDTO } from '../DTO/create-update-group.dto';
 import { Group } from '@prisma/client';
 import { GroupRepository } from '../Repository/group.repository';
 import { UserRepository } from '../Repository/user.repository';
+import { IdentifiedUser } from '../Type/identified-user';
 
 @Injectable()
-export class CreateGroupHandler {
+export class CreateUpdateGroupHandler {
   constructor(
     private readonly groupRepository: GroupRepository,
     private readonly userRepository: UserRepository,
   ) {}
+
+  async updateGroup(
+    data: CreateUpdateGroupDTO,
+    groupId: string,
+    ownerId: string,
+  ): Promise<Group> {
+    const updateCandidate = await this.groupRepository.findByIdAndOwner(
+      groupId,
+      ownerId,
+    );
+
+    if (updateCandidate === null) {
+      throw new ConflictException(
+        'Group was not found or is not owned by authenticated User',
+      );
+    }
+
+    if (data.users === undefined) {
+      return await this.groupRepository.updateGroup(data, groupId);
+    }
+
+    return await this.groupRepository.updateGroup(
+      data,
+      groupId,
+      await this.prepareMembers(data.users, ownerId),
+    );
+  }
 
   async createGroup(
     data: CreateUpdateGroupDTO,
@@ -40,7 +68,7 @@ export class CreateGroupHandler {
   private async prepareMembers(
     userEmails: string[],
     ownerId: string,
-  ): Promise<any> {
+  ): Promise<IdentifiedUser[]> {
     const usersByEmails = await this.userRepository.getUserIdsByEmails(
       userEmails,
     );

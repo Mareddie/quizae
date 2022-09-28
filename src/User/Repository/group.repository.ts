@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../Common/Service/prisma.service';
 import { Group } from '@prisma/client';
-import { CreateUpdateGroupDTO } from '../../Presentation/UserGroup/DTO/create-update-group.dto';
+import { CreateUpdateGroupDTO } from '../DTO/create-update-group.dto';
 import { IdentifiedUser } from '../Type/identified-user';
 
 @Injectable()
@@ -89,15 +89,45 @@ export class GroupRepository {
   async updateGroup(
     data: CreateUpdateGroupDTO,
     groupId: string,
+    members?: IdentifiedUser[],
   ): Promise<Group> {
-    return await this.prisma.group.update({
+    const deleteMembershipsQuery = {
+      where: {
+        groupId: groupId,
+      },
+    };
+
+    const updateQuery = {
       where: {
         id: groupId,
       },
       data: {
         name: data.name,
+        userMemberships: {
+          createMany: {
+            data: [],
+          },
+        },
       },
-    });
+      include: {
+        userMemberships: true,
+      },
+    };
+
+    if (members !== undefined) {
+      for (const key in members) {
+        updateQuery.data.userMemberships.createMany.data.push({
+          userId: members[key].id,
+        });
+      }
+    }
+
+    const [, updateResult] = await this.prisma.$transaction([
+      this.prisma.groupMembership.deleteMany(deleteMembershipsQuery),
+      this.prisma.group.update(updateQuery),
+    ]);
+
+    return updateResult;
   }
 
   async deleteGroup(groupId: string): Promise<void> {
@@ -108,5 +138,14 @@ export class GroupRepository {
     });
 
     return;
+  }
+
+  async deleteGroupMembership(groupId: string, userId: string): Promise<void> {
+    await this.prisma.groupMembership.deleteMany({
+      where: {
+        userId: userId,
+        groupId: groupId,
+      },
+    });
   }
 }
