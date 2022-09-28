@@ -9,7 +9,7 @@ export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   public async getUserIdsByEmails(emails: string[]): Promise<IdentifiedUser[]> {
-    return await this.prisma.user.findMany({
+    return this.prisma.user.findMany({
       select: {
         id: true,
         email: true,
