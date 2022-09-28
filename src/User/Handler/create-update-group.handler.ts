@@ -29,10 +29,10 @@ export class CreateUpdateGroupHandler {
     }
 
     if (data.users === undefined) {
-      return await this.groupRepository.updateGroup(data, groupId);
+      return this.groupRepository.updateGroup(data, groupId);
     }
 
-    return await this.groupRepository.updateGroup(
+    return this.groupRepository.updateGroup(
       data,
       groupId,
       await this.prepareMembers(data.users, ownerId),
@@ -55,10 +55,10 @@ export class CreateUpdateGroupHandler {
     }
 
     if (data.users === undefined) {
-      return await this.groupRepository.createGroup(data, ownerId);
+      return this.groupRepository.createGroup(data, ownerId);
     }
 
-    return await this.groupRepository.createGroup(
+    return this.groupRepository.createGroup(
       data,
       ownerId,
       await this.prepareMembers(data.users, ownerId),

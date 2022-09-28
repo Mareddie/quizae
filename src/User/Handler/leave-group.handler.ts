@@ -17,6 +17,6 @@ export class LeaveGroupHandler {
       );
     }
 
-    return await this.groupRepository.deleteGroupMembership(groupId, userId);
+    await this.groupRepository.deleteGroupMembership(groupId, userId);
   }
 }

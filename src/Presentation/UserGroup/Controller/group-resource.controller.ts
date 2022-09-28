@@ -32,7 +32,7 @@ export class GroupResourceController {
   ) {}
 
   @Get()
-  async resourceList(@Req() req: Request): Promise<object> {
+  async resourceList(@Req() req: Request): Promise<Group[]> {
     if (
       req.query.hasOwnProperty('filter') &&
       typeof req.query.filter === 'string'

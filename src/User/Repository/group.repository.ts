@@ -12,7 +12,7 @@ export class GroupRepository {
     groupId: string,
     ownerId: string,
   ): Promise<Group | null> {
-    return await this.prisma.group.findFirst({
+    return this.prisma.group.findFirst({
       where: {
         id: groupId,
         ownerId: ownerId,
@@ -21,7 +21,7 @@ export class GroupRepository {
   }
 
   async findByNameForOwner(name: string, ownerId: string): Promise<Group[]> {
-    return await this.prisma.group.findMany({
+    return this.prisma.group.findMany({
       where: {
         name: name,
         ownerId: ownerId,
@@ -31,7 +31,7 @@ export class GroupRepository {
 
   async findGroupsForUser(filter: string, ownerId: string): Promise<Group[]> {
     if (filter === 'myOwn') {
-      return await this.prisma.group.findMany({
+      return this.prisma.group.findMany({
         where: {
           ownerId: ownerId,
         },
@@ -39,7 +39,7 @@ export class GroupRepository {
     }
 
     if (filter === 'myMemberships') {
-      return await this.prisma.group.findMany({
+      return this.prisma.group.findMany({
         where: {
           userMemberships: {
             every: {
@@ -81,9 +81,7 @@ export class GroupRepository {
       }
     }
 
-    console.log(createQuery);
-
-    return await this.prisma.group.create(createQuery);
+    return this.prisma.group.create(createQuery);
   }
 
   async updateGroup(
@@ -130,18 +128,16 @@ export class GroupRepository {
     return updateResult;
   }
 
-  async deleteGroup(groupId: string): Promise<void> {
-    await this.prisma.group.delete({
+  async deleteGroup(groupId: string): Promise<Group> {
+    return this.prisma.group.delete({
       where: {
         id: groupId,
       },
     });
-
-    return;
   }
 
-  async deleteGroupMembership(groupId: string, userId: string): Promise<void> {
-    await this.prisma.groupMembership.deleteMany({
+  async deleteGroupMembership(groupId: string, userId: string): Promise<any> {
+    return this.prisma.groupMembership.deleteMany({
       where: {
         userId: userId,
         groupId: groupId,

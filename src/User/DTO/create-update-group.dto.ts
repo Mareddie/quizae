@@ -14,5 +14,5 @@ export class CreateUpdateGroupDTO {
   @IsArray()
   @ArrayUnique()
   @IsEmail({}, { each: true, message: 'users must be a set of unique emails' })
-  users: string[];
+  users?: string[];
 }
