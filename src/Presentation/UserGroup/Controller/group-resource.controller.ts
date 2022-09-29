@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -32,13 +33,13 @@ export class GroupResourceController {
   ) {}
 
   @Get()
-  async resourceList(@Req() req: Request): Promise<Group[]> {
-    if (
-      req.query.hasOwnProperty('filter') &&
-      typeof req.query.filter === 'string'
-    ) {
+  async resourceList(
+    @Req() req: Request,
+    @Query('filter') filter?: string,
+  ): Promise<Group[]> {
+    if (typeof filter === 'string') {
       return await this.groupRepository.findGroupsForUser(
-        req.query.filter,
+        filter,
         req.user['id'],
       );
     }
