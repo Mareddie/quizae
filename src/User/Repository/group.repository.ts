@@ -3,10 +3,22 @@ import { PrismaService } from '../../Common/Service/prisma.service';
 import { Group } from '@prisma/client';
 import { CreateUpdateGroupDTO } from '../DTO/create-update-group.dto';
 import { IdentifiedUser } from '../Type/identified-user';
+import { GroupWithMemberships } from '../Type/group-with-memberships';
 
 @Injectable()
 export class GroupRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findByAccess(groupId: string, userId: string): Promise<Group | null> {
+    return this.prisma.group.findFirst({
+      where: {
+        OR: [
+          { ownerId: userId, id: groupId },
+          { userMemberships: { every: { userId: userId } }, id: groupId },
+        ],
+      },
+    });
+  }
 
   async findByIdAndOwner(
     groupId: string,
@@ -57,7 +69,7 @@ export class GroupRepository {
     data: CreateUpdateGroupDTO,
     ownerId: string,
     members?: IdentifiedUser[],
-  ): Promise<Group> {
+  ): Promise<GroupWithMemberships> {
     const createQuery = {
       data: {
         name: data.name,
@@ -88,7 +100,7 @@ export class GroupRepository {
     data: CreateUpdateGroupDTO,
     groupId: string,
     members?: IdentifiedUser[],
-  ): Promise<Group> {
+  ): Promise<GroupWithMemberships> {
     const deleteMembershipsQuery = {
       where: {
         groupId: groupId,

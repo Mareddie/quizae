@@ -4,6 +4,7 @@ import { Group } from '@prisma/client';
 import { GroupRepository } from '../Repository/group.repository';
 import { UserRepository } from '../Repository/user.repository';
 import { IdentifiedUser } from '../Type/identified-user';
+import { GroupWithMemberships } from '../Type/group-with-memberships';
 
 @Injectable()
 export class CreateUpdateGroupHandler {
@@ -16,7 +17,7 @@ export class CreateUpdateGroupHandler {
     data: CreateUpdateGroupDTO,
     groupId: string,
     ownerId: string,
-  ): Promise<Group> {
+  ): Promise<GroupWithMemberships> {
     const updateCandidate = await this.groupRepository.findByIdAndOwner(
       groupId,
       ownerId,
@@ -42,7 +43,7 @@ export class CreateUpdateGroupHandler {
   async createGroup(
     data: CreateUpdateGroupDTO,
     ownerId: string,
-  ): Promise<Group> {
+  ): Promise<GroupWithMemberships> {
     const existingGroups = await this.groupRepository.findByNameForOwner(
       data.name,
       ownerId,

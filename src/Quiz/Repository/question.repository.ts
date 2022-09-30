@@ -1,13 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../Common/Service/prisma.service';
-import { Question } from '@prisma/client';
+import { QuestionWithAnswers } from '../../Presentation/Quiz/Type/question-with-answers';
 
 @Injectable()
 export class QuestionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async fetchQuestions(groupId: string, filter?: string): Promise<Question[]> {
-    // TODO: implement this method
-    return [];
+  async fetchQuestions(
+    groupId: string,
+    userId?: string,
+  ): Promise<QuestionWithAnswers[]> {
+    return this.prisma.question.findMany({
+      where: {
+        groupId: groupId,
+        userId: userId,
+      },
+      include: {
+        answers: true,
+      },
+    });
   }
 }

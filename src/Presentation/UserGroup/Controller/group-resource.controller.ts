@@ -21,6 +21,7 @@ import { GroupRepository } from '../../../User/Repository/group.repository';
 import { DeleteGroupHandler } from '../../../User/Handler/delete-group.handler';
 import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
 import { LeaveGroupHandler } from '../../../User/Handler/leave-group.handler';
+import { GroupWithMemberships } from '../../../User/Type/group-with-memberships';
 
 @Controller('groups')
 @UseGuards(AuthenticatedGuard)
@@ -52,7 +53,7 @@ export class GroupResourceController {
   async createResource(
     @Body() createGroup: CreateUpdateGroupDTO,
     @Req() request: Request,
-  ): Promise<Group> {
+  ): Promise<GroupWithMemberships> {
     return await this.createUpdateHandler.createGroup(
       createGroup,
       request.user['id'],
@@ -65,7 +66,7 @@ export class GroupResourceController {
     @Param('groupId') groupId: string,
     @Body() updateGroup: CreateUpdateGroupDTO,
     @Req() request: Request,
-  ): Promise<Group> {
+  ): Promise<GroupWithMemberships> {
     return await this.createUpdateHandler.updateGroup(
       updateGroup,
       groupId,

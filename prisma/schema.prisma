@@ -48,7 +48,8 @@ model Question {
     user User @relation("AskedQuestion", fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     userId String @db.ObjectId
     answers Answer[] @relation("BelongsToQuestion")
-    correctAnswer String @db.ObjectId
+    correctAnswer String? @db.ObjectId
+    text String
 }
 
 model Answer {
