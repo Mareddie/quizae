@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../Common/Service/prisma.service';
-import { QuestionWithAnswers } from '../../Presentation/Quiz/Type/question-with-answers';
+import { QuestionWithAnswers } from '../Type/question-with-answers';
 
 @Injectable()
 export class QuestionRepository {

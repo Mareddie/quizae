@@ -4,7 +4,7 @@ import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard'
 import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
 import { Request } from 'express';
 import { CanAccessGroupGuard } from '../Guard/can-access-group.guard';
-import { QuestionWithAnswers } from '../Type/question-with-answers';
+import { QuestionWithAnswers } from '../../../Quiz/Type/question-with-answers';
 
 @Controller('questions')
 @UseGuards(AuthenticatedGuard)
