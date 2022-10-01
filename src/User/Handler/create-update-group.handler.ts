@@ -1,6 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUpdateGroupDTO } from '../DTO/create-update-group.dto';
-import { Group } from '@prisma/client';
 import { GroupRepository } from '../Repository/group.repository';
 import { UserRepository } from '../Repository/user.repository';
 import { IdentifiedUser } from '../Type/identified-user';

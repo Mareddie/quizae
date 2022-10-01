@@ -1,6 +1,13 @@
-import { IsString, IsEmail, IsNotEmpty, ValidateIf } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsNotEmpty,
+  ValidateIf,
+  IsDefined,
+} from 'class-validator';
 
 export class CreateUpdateUserDTO {
+  @IsDefined()
   @IsString()
   @IsEmail()
   @IsNotEmpty()
@@ -11,10 +18,12 @@ export class CreateUpdateUserDTO {
   @IsNotEmpty()
   password?: string;
 
+  @IsDefined()
   @IsString()
   @IsNotEmpty()
   firstName: string;
 
+  @IsDefined()
   @IsString()
   @IsNotEmpty()
   lastName: string;

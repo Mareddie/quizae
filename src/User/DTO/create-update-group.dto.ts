@@ -4,9 +4,11 @@ import {
   ArrayUnique,
   IsString,
   IsEmail,
+  IsDefined,
 } from 'class-validator';
 
 export class CreateUpdateGroupDTO {
+  @IsDefined()
   @IsString()
   @IsNotEmpty()
   name: string;
