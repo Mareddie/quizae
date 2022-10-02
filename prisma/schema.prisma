@@ -57,5 +57,5 @@ model Answer {
     question Question @relation("BelongsToQuestion", fields: [questionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     questionId String @db.ObjectId
     text String
-    order Int
+    order Int?
 }

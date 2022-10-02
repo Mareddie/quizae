@@ -86,9 +86,9 @@ export class GroupRepository {
     };
 
     if (members !== undefined) {
-      for (const key in members) {
+      for (const member of members) {
         createQuery.data.userMemberships.createMany.data.push({
-          userId: members[key].id,
+          userId: member.id,
         });
       }
     }
@@ -125,9 +125,9 @@ export class GroupRepository {
     };
 
     if (members !== undefined) {
-      for (const key in members) {
+      for (const member of members) {
         updateQuery.data.userMemberships.createMany.data.push({
-          userId: members[key].id,
+          userId: member.id,
         });
       }
     }

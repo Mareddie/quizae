@@ -22,4 +22,8 @@ export class CreateUpdateQuestionDTO {
   @ArrayMinSize(1)
   @Type(() => CreateUpdateAnswerDTO)
   answers?: CreateUpdateAnswerDTO[];
+
+  @IsString()
+  @IsNotEmpty()
+  correctAnswer?: string;
 }
