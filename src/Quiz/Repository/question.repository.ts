@@ -9,12 +9,12 @@ export class QuestionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async fetchQuestions(
-    groupId: string,
+    categoryId: string,
     userId?: string,
   ): Promise<QuestionWithAnswers[]> {
     return this.prisma.question.findMany({
       where: {
-        groupId: groupId,
+        categoryId: categoryId,
         userId: userId,
       },
       include: {
@@ -23,13 +23,13 @@ export class QuestionRepository {
     });
   }
 
-  async fetchByIdAndGroup(
-    groupId: string,
+  async fetchByIdAndCategory(
+    categoryId: string,
     questionId: string,
   ): Promise<QuestionWithAnswers | null> {
     return this.prisma.question.findFirst({
       where: {
-        groupId: groupId,
+        categoryId: categoryId,
         id: questionId,
       },
       include: {
@@ -38,13 +38,13 @@ export class QuestionRepository {
     });
   }
 
-  async fetchByTextAndGroup(
-    groupId: string,
+  async fetchByTextAndCategory(
+    categoryId: string,
     text: string,
   ): Promise<Question | null> {
     return this.prisma.question.findFirst({
       where: {
-        groupId: groupId,
+        categoryId: categoryId,
         text: {
           equals: text,
           mode: 'insensitive',
@@ -111,13 +111,13 @@ export class QuestionRepository {
   }
 
   async createQuestion(
-    groupId: string,
+    categoryId: string,
     userId: string,
     data: CreateUpdateQuestionDTO,
   ): Promise<QuestionWithAnswers> {
     const createQuery = {
       data: {
-        groupId: groupId,
+        categoryId: categoryId,
         userId: userId,
         correctAnswer: data.correctAnswer,
         text: data.text,

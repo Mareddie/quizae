@@ -9,15 +9,20 @@ import { GroupWithMemberships } from '../Type/group-with-memberships';
 export class GroupRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByAccess(groupId: string, userId: string): Promise<Group | null> {
-    return this.prisma.group.findFirst({
+  async getAccessibleGroups(userId: string): Promise<string[]> {
+    const ids = await this.prisma.group.findMany({
+      select: {
+        id: true,
+      },
       where: {
         OR: [
-          { ownerId: userId, id: groupId },
-          { userMemberships: { every: { userId: userId } }, id: groupId },
+          { ownerId: userId },
+          { userMemberships: { every: { userId: userId } } },
         ],
       },
     });
+
+    return ids.map((row) => row.id);
   }
 
   async findByIdAndOwner(
