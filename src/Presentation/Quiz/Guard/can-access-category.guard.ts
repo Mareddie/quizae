@@ -31,10 +31,8 @@ export class CanAccessCategoryGuard implements CanActivate {
     }
 
     // The group of the Category must match with accessible groups of authenticated User
-    return (
-      accessibleGroups.filter(
-        (accessibleGroup) => accessibleGroup === categoryCandidate.groupId,
-      ).length > 0
+    return accessibleGroups.some(
+      (accessibleGroup) => accessibleGroup === categoryCandidate.groupId,
     );
   }
 }

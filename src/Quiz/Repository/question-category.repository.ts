@@ -13,4 +13,12 @@ export class QuestionCategoryRepository {
       },
     });
   }
+
+  async fetchForGroup(groupId: string): Promise<QuestionCategory[]> {
+    return this.prisma.questionCategory.findMany({
+      where: {
+        groupId: groupId,
+      },
+    });
+  }
 }

@@ -17,7 +17,7 @@ export class GroupRepository {
       where: {
         OR: [
           { ownerId: userId },
-          { userMemberships: { every: { userId: userId } } },
+          { userMemberships: { some: { userId: { equals: userId } } } },
         ],
       },
     });
