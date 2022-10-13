@@ -3,10 +3,11 @@ import { QuestionResourceController } from './Controller/question-resource.contr
 import { QuizModule as DomainQuizModule } from '../../Quiz/quiz.module';
 import { UserModule } from '../../User/user.module';
 import { ConfigModule } from '@nestjs/config';
+import { QuestionCategoryResourceController } from './Controller/question-category-resource.controller';
 
 @Module({
   imports: [DomainQuizModule, UserModule, ConfigModule],
-  controllers: [QuestionResourceController],
+  controllers: [QuestionResourceController, QuestionCategoryResourceController],
   providers: [],
 })
 export class QuizModule {}

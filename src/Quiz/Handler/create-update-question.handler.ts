@@ -11,17 +11,18 @@ export class CreateUpdateQuestionHandler {
 
   async updateQuestion(
     questionId: string,
-    groupId: string,
+    categoryId: string,
     data: CreateUpdateQuestionDTO,
   ): Promise<QuestionWithAnswers> {
-    const questionCandidate = await this.questionRepository.fetchByIdAndGroup(
-      groupId,
-      questionId,
-    );
+    const questionCandidate =
+      await this.questionRepository.fetchByIdAndCategory(
+        categoryId,
+        questionId,
+      );
 
     if (questionCandidate === null) {
       throw new ConflictException(
-        "Group for update was not found - it probably doesn't exist or belongs to another group.",
+        "Question for update was not found - it probably doesn't exist or belongs to another category.",
       );
     }
 
@@ -35,28 +36,29 @@ export class CreateUpdateQuestionHandler {
   }
 
   async createQuestion(
-    groupId: string,
+    categoryId: string,
     userId: string,
     data: CreateUpdateQuestionDTO,
   ): Promise<QuestionWithAnswers> {
-    const questionCandidate = await this.questionRepository.fetchByTextAndGroup(
-      groupId,
-      data.text,
-    );
+    const questionCandidate =
+      await this.questionRepository.fetchByTextAndCategory(
+        categoryId,
+        data.text,
+      );
 
-    // Questions should have a unique text inside a group
+    // Questions should have a unique text inside a category
     if (questionCandidate !== null) {
       throw new ConflictException('Question with provided text already exists');
     }
 
-    // At this point, we can trust the upper application layer that the provided userId has access to groupId
+    // At this point, we can trust the upper application layer that the provided userId has access to categoryId
     if (data.answers !== undefined) {
       this.prepareQuestionAnswers(data.answers);
 
       data.correctAnswer = this.determineCorrectAnswerId(data.answers);
     }
 
-    return this.questionRepository.createQuestion(groupId, userId, data);
+    return this.questionRepository.createQuestion(categoryId, userId, data);
   }
 
   private prepareQuestionAnswers(

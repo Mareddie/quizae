@@ -14,11 +14,16 @@ export class CanAccessGroupGuard implements CanActivate {
       return false;
     }
 
-    const groupCandidate = await this.groupRepository.findByAccess(
-      groupId,
+    const accessibleGroups = await this.groupRepository.getAccessibleGroups(
       userId,
     );
 
-    return groupCandidate !== null;
+    if (accessibleGroups.length === 0) {
+      return false;
+    }
+
+    return accessibleGroups.some(
+      (accessibleGroup) => accessibleGroup === groupId,
+    );
   }
 }

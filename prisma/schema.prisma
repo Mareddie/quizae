@@ -16,45 +16,56 @@ model User {
     password String
     firstName String
     lastName String
-    ownedGroups Group[] @relation("OwnedGroups")
-    ownedQuestions Question[] @relation("AskedQuestion")
-    memberships GroupMembership[] @relation("IsMember")
+    ownedGroups Group[] @relation()
+    ownedQuestions Question[] @relation()
+    memberships GroupMembership[] @relation()
 }
 
 model Group {
     id String @id @default(auto()) @map("_id") @db.ObjectId
     name String
     createdAt DateTime @default(now())
-    owner User @relation("OwnedGroups", fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    owner User @relation(fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     ownerId String @db.ObjectId
-    userMemberships GroupMembership[] @relation("HasMembers")
-    questions Question[] @relation("HasQuestions")
+    userMemberships GroupMembership[] @relation()
+    questionCategories QuestionCategory[] @relation()
 }
 
 model GroupMembership {
     id String @id @default(auto()) @map("_id") @db.ObjectId
-    user User @relation("IsMember", fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     userId String @db.ObjectId
-    group Group @relation("HasMembers", fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     groupId String @db.ObjectId
 
     @@unique([userId, groupId])
 }
 
+model QuestionCategory {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    name String
+    group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    groupId String @db.ObjectId
+    questions Question[] @relation()
+    order Int?
+
+    @@unique([groupId, name])
+}
+
 model Question {
     id String @id @default(auto()) @map("_id") @db.ObjectId
-    group Group @relation("HasQuestions", fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    groupId String @db.ObjectId
-    user User @relation("AskedQuestion", fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     userId String @db.ObjectId
-    answers Answer[] @relation("BelongsToQuestion")
+    category QuestionCategory @relation(fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    categoryId String @db.ObjectId
+    answers Answer[] @relation()
     correctAnswer String? @db.ObjectId
     text String
 }
 
 model Answer {
     id String @id @default(auto()) @map("_id") @db.ObjectId
-    question Question @relation("BelongsToQuestion", fields: [questionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    question Question @relation(fields: [questionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     questionId String @db.ObjectId
     text String
     order Int?
