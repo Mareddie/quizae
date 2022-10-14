@@ -19,6 +19,7 @@ model User {
     ownedGroups Group[] @relation()
     ownedQuestions Question[] @relation()
     memberships GroupMembership[] @relation()
+    startedGames Game[] @relation()
 }
 
 model Group {
@@ -41,12 +42,32 @@ model GroupMembership {
     @@unique([userId, groupId])
 }
 
+model Game {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    startedById String @db.ObjectId
+    startedBy User @relation(fields: [startedById], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    questionCategoryIds String[] @db.ObjectId
+    questionCategories QuestionCategory[] @relation(fields: [questionCategoryIds], references: [id])
+    players Player[] @relation()
+}
+
+model Player {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    name String
+    frameColor String
+    points Int @default(0)
+    gameId String @db.ObjectId
+    game Game @relation(fields: [gameId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+}
+
 model QuestionCategory {
     id String @id @default(auto()) @map("_id") @db.ObjectId
     name String
     group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     groupId String @db.ObjectId
     questions Question[] @relation()
+    gameIds String[] @db.ObjectId
+    games Game[] @relation(fields: [gameIds], references: [id])
     order Int?
 
     @@unique([groupId, name])
