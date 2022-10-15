@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { GroupRepository } from '../../../User/Repository/group.repository';
+import { GroupRepository } from '../../User/Repository/group.repository';
 
 @Injectable()
 export class CanAccessGroupGuard implements CanActivate {

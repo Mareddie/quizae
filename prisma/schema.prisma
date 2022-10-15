@@ -49,12 +49,12 @@ model Game {
     questionCategoryIds String[] @db.ObjectId
     questionCategories QuestionCategory[] @relation(fields: [questionCategoryIds], references: [id])
     players Player[] @relation()
+    startedAt DateTime @default(now())
 }
 
 model Player {
     id String @id @default(auto()) @map("_id") @db.ObjectId
     name String
-    frameColor String
     points Int @default(0)
     gameId String @db.ObjectId
     game Game @relation(fields: [gameId], references: [id], onUpdate: Cascade, onDelete: Cascade)
