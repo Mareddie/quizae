@@ -48,8 +48,16 @@ model Game {
     startedBy User @relation(fields: [startedById], references: [id], onUpdate: Cascade, onDelete: Cascade)
     questionCategoryIds String[] @db.ObjectId
     questionCategories QuestionCategory[] @relation(fields: [questionCategoryIds], references: [id])
+    currentPlayerId String? @db.ObjectId
+    nextPlayerId String? @db.ObjectId
+    state GameState
     players Player[] @relation()
     startedAt DateTime @default(now())
+}
+
+enum GameState {
+    IN_PROGRESS
+    FINISHED
 }
 
 model Player {
@@ -58,6 +66,7 @@ model Player {
     points Int @default(0)
     gameId String @db.ObjectId
     game Game @relation(fields: [gameId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    order Int
 }
 
 model QuestionCategory {
