@@ -46,8 +46,7 @@ model Game {
     id String @id @default(auto()) @map("_id") @db.ObjectId
     startedById String @db.ObjectId
     startedBy User @relation(fields: [startedById], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    questionCategoryIds String[] @db.ObjectId
-    questionCategories QuestionCategory[] @relation(fields: [questionCategoryIds], references: [id])
+    questionCategories GameQuestionCategory[]
     currentPlayerId String? @db.ObjectId
     nextPlayerId String? @db.ObjectId
     state GameState
@@ -58,6 +57,28 @@ model Game {
 enum GameState {
     IN_PROGRESS
     FINISHED
+}
+
+type GameQuestionCategory {
+    id String @db.ObjectId
+    name String
+    questions GameQuestion[]
+    order Int?
+}
+
+type GameQuestion {
+    id String @db.ObjectId
+    categoryId String @db.ObjectId
+    correctAnswer String @db.ObjectId
+    answers GameQuestionAnswer[]
+    text String
+}
+
+type GameQuestionAnswer {
+    id String @db.ObjectId
+    questionId String @db.ObjectId
+    text String
+    order Int?
 }
 
 model Player {
@@ -75,8 +96,6 @@ model QuestionCategory {
     group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     groupId String @db.ObjectId
     questions Question[] @relation()
-    gameIds String[] @db.ObjectId
-    games Game[] @relation(fields: [gameIds], references: [id])
     order Int?
 
     @@unique([groupId, name])

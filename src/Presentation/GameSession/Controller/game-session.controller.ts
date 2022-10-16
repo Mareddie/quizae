@@ -7,7 +7,7 @@ import { CreateGameSessionRequestDTO } from '../../../GameSession/DTO/create-gam
 import { CreateGameSessionHandler } from '../../../GameSession/Handler/create-game-session.handler';
 import { Request } from 'express';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
-import { GameWithPlayers } from '../../../GameSession/Type/game-with-players';
+import { CreatedGameWithPlayers } from '../../../GameSession/Type/created-game-with-players';
 
 @Controller('/game-session/:groupId')
 @UseGuards(
@@ -27,13 +27,13 @@ export class GameSessionController {
     @Req() request: Request,
     @Param('groupId') groupId: string,
     @Body() createGameSession: CreateGameSessionRequestDTO,
-  ): Promise<GameWithPlayers> {
+  ): Promise<CreatedGameWithPlayers> {
     const questionCategories =
-      await this.questionCategoryRepository.fetchForGroup(groupId);
+      await this.questionCategoryRepository.fetchForGame(groupId);
 
     return await this.createHandler.createGame(
       request.user['id'],
-      questionCategories.map((questionCategory) => questionCategory.id),
+      questionCategories,
       createGameSession.players,
     );
   }
