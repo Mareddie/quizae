@@ -3,6 +3,7 @@ import {
   IsArray,
   IsDefined,
   IsNotEmpty,
+  IsNumber,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -22,4 +23,9 @@ export class InitGameSessionPlayerDTO {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsDefined()
+  @IsNumber()
+  @IsNotEmpty()
+  order: number;
 }

@@ -18,6 +18,9 @@ export class CreateGameSessionHandler {
       );
     }
 
+    // Ensure that the order of players is correct
+    players.sort((a, b) => a.order - b.order);
+
     return this.gameSessionRepository.createGame(
       ownerId,
       questionCategoryIds,
