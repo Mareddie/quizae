@@ -9,10 +9,14 @@ import {
 } from '@prisma/client';
 import { CategoriesWithQuestionsAndAnswers } from '../../Quiz/Type/categories-with-questions-and-answers';
 import { QuestionWithAnswers } from '../../Quiz/Type/question-with-answers';
+import { ReorderService } from '../../Common/Service/reorder.service';
 
 @Injectable()
 export class CreateGameSessionHandler {
-  constructor(private readonly gameSessionRepository: GameSessionRepository) {}
+  constructor(
+    private readonly gameSessionRepository: GameSessionRepository,
+    private readonly reorderService: ReorderService,
+  ) {}
 
   async createGame(
     ownerId: string,
@@ -26,7 +30,9 @@ export class CreateGameSessionHandler {
     }
 
     // Ensure that the order of players is correct
-    players.sort((a, b) => this.reorderWithNull(a.order, b.order));
+    players.sort((a, b) =>
+      this.reorderService.reorderWithNull(a.order, b.order),
+    );
 
     // Ensure that the order of categories, questions and answers is correct
     this.sortGameData(categoriesWithQuestions);
@@ -123,21 +129,15 @@ export class CreateGameSessionHandler {
     categoriesWithQuestions: CategoriesWithQuestionsAndAnswers[],
   ): void {
     categoriesWithQuestions.sort((a, b) =>
-      this.reorderWithNull(a.order, b.order),
+      this.reorderService.reorderWithNull(a.order, b.order),
     );
 
     for (const categoryWithQuestion of categoriesWithQuestions) {
       for (const question of categoryWithQuestion.questions) {
-        question.answers.sort((a, b) => this.reorderWithNull(a.order, b.order));
+        question.answers.sort((a, b) =>
+          this.reorderService.reorderWithNull(a.order, b.order),
+        );
       }
     }
-  }
-
-  private reorderWithNull(a: null | number, b: null | number): number {
-    if (a === null || b === null) {
-      return -1;
-    }
-
-    return a - b;
   }
 }

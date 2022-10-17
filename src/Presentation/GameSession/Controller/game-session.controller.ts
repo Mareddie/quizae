@@ -17,6 +17,8 @@ import { Request } from 'express';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { CreatedGameWithPlayers } from '../../../GameSession/Type/created-game-with-players';
 import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
+import { GameStatusFacade } from '../../../GameSession/Facade/game-status.facade';
+import { GameStatus } from '../../../GameSession/Type/game-status';
 
 @Controller('game-session')
 @UseGuards(AuthenticatedGuard)
@@ -24,6 +26,7 @@ export class GameSessionController {
   constructor(
     private readonly createHandler: CreateGameSessionHandler,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
+    private readonly statusFacade: GameStatusFacade,
   ) {}
 
   @Post(':groupId/create')
@@ -47,16 +50,12 @@ export class GameSessionController {
     );
   }
 
-  @Get(':gameId/status')
+  @Get(':gameId')
   @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
-  async getGameStatus(
-    @Param('gameId') gameId: string,
-    @Req() request: Request,
-  ): Promise<any> {
-    return;
+  async getGameStatus(@Param('gameId') gameId: string): Promise<GameStatus> {
+    return this.statusFacade.getGameStatus(gameId);
   }
 
-  // TODO: Endpoint (or endpoints) for getting game progress data
   // TODO: Endpoint for progressing the game
   // TODO: Endpoint for concluding the game
 }
