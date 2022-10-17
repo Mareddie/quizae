@@ -3,10 +3,19 @@ import { PrismaService } from '../../Common/Service/prisma.service';
 import { CreatedGameWithPlayers } from '../Type/created-game-with-players';
 import { GameQuestionCategory, GameState } from '@prisma/client';
 import { InitGameSessionPlayerDTO } from '../DTO/create-game-session-request.dto';
+import { Game } from '@prisma/client';
 
 @Injectable()
 export class GameSessionRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async fetchForUser(userId: string): Promise<Game[]> {
+    return this.prisma.game.findMany({
+      where: {
+        startedById: userId,
+      },
+    });
+  }
 
   async createGame(
     startedBy: string,

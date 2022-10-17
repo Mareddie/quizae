@@ -1,4 +1,12 @@
-import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { CanAccessGroupGuard } from '../../../Common/Guard/can-access-group.guard';
@@ -8,21 +16,22 @@ import { CreateGameSessionHandler } from '../../../GameSession/Handler/create-ga
 import { Request } from 'express';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { CreatedGameWithPlayers } from '../../../GameSession/Type/created-game-with-players';
+import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
 
-@Controller('/game-session/:groupId')
-@UseGuards(
-  new CheckObjectIdGuard('groupId'),
-  AuthenticatedGuard,
-  CanAccessGroupGuard,
-)
+@Controller('game-session')
+@UseGuards(AuthenticatedGuard)
 export class GameSessionController {
   constructor(
     private readonly createHandler: CreateGameSessionHandler,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
   ) {}
 
-  @Post('create')
-  @UseGuards(CheckOriginGuard)
+  @Post(':groupId/create')
+  @UseGuards(
+    new CheckObjectIdGuard('groupId'),
+    CanAccessGroupGuard,
+    CheckOriginGuard,
+  )
   async createGame(
     @Req() request: Request,
     @Param('groupId') groupId: string,
@@ -37,4 +46,17 @@ export class GameSessionController {
       createGameSession.players,
     );
   }
+
+  @Get(':gameId/status')
+  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
+  async getGameStatus(
+    @Param('gameId') gameId: string,
+    @Req() request: Request,
+  ): Promise<any> {
+    return;
+  }
+
+  // TODO: Endpoint (or endpoints) for getting game progress data
+  // TODO: Endpoint for progressing the game
+  // TODO: Endpoint for concluding the game
 }
