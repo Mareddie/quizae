@@ -56,6 +56,19 @@ export class GameSessionController {
     return this.statusFacade.getGameStatus(gameId);
   }
 
-  // TODO: Endpoint for progressing the game
-  // TODO: Endpoint for concluding the game
+  @Post(':gameId/progress')
+  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
+  async progressGame(@Param('gameId') gameId: string): Promise<any> {
+    // TODO: There should be body with selected question ID, answer ID, and Player ID
+    // TODO: Handler should resolve logic check - is the player in the game present? Can player answer (is it his turn)? Is question present? Is answer correct?
+    // TODO: After logic check, resolve game logic - add points, switch current and next player
+    return;
+  }
+
+  @Post(':gameId/finish')
+  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
+  async finishGame(@Param('gameId') gameId: string): Promise<any> {
+    // TODO: handler that should switch a game state and return a response with player scores
+    return;
+  }
 }
