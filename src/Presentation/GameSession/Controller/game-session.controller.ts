@@ -19,6 +19,9 @@ import { CreatedGameWithPlayers } from '../../../GameSession/Type/created-game-w
 import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
 import { GameStatusFacade } from '../../../GameSession/Facade/game-status.facade';
 import { GameStatus } from '../../../GameSession/Type/game-status';
+import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-request.dto';
+import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.facade';
+import { QuestionForGame } from '../../../GameSession/Type/question-for-game';
 
 @Controller('game-session')
 @UseGuards(AuthenticatedGuard)
@@ -27,6 +30,7 @@ export class GameSessionController {
     private readonly createHandler: CreateGameSessionHandler,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
     private readonly statusFacade: GameStatusFacade,
+    private readonly gameQuestionFacade: GameQuestionFacade,
   ) {}
 
   @Post(':groupId/create')
@@ -56,17 +60,41 @@ export class GameSessionController {
     return this.statusFacade.getGameStatus(gameId);
   }
 
+  @Get(':gameId/get-question/:categoryId')
+  @UseGuards(
+    new CheckObjectIdGuard('gameId'),
+    new CheckObjectIdGuard('categoryId'),
+    CanAccessGameGuard,
+  )
+  async getGameQuestion(
+    @Param('gameId') gameId: string,
+    @Param('categoryId') categoryId: string,
+  ): Promise<QuestionForGame> {
+    return await this.gameQuestionFacade.getQuestionForGame(gameId, categoryId);
+  }
+
   @Post(':gameId/progress')
-  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
-  async progressGame(@Param('gameId') gameId: string): Promise<any> {
-    // TODO: There should be body with selected question ID, answer ID, and Player ID
-    // TODO: Handler should resolve logic check - is the player in the game present? Can player answer (is it his turn)? Is question present? Is answer correct?
+  @UseGuards(
+    new CheckObjectIdGuard('gameId'),
+    CanAccessGameGuard,
+    CheckOriginGuard,
+  )
+  async progressGame(
+    @Param('gameId') gameId: string,
+    @Body() progressGameData: ProgressGameRequestDTO,
+  ): Promise<any> {
+    // TODO: Handler should resolve logic check - is the player in the game present?
+    //  Can player answer (is it his turn)? Is question present? Is answer correct?
     // TODO: After logic check, resolve game logic - add points, switch current and next player
-    return;
+    return progressGameData;
   }
 
   @Post(':gameId/finish')
-  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
+  @UseGuards(
+    new CheckObjectIdGuard('gameId'),
+    CanAccessGameGuard,
+    CheckOriginGuard,
+  )
   async finishGame(@Param('gameId') gameId: string): Promise<any> {
     // TODO: handler that should switch a game state and return a response with player scores
     return;
