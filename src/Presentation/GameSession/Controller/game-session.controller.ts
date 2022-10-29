@@ -22,6 +22,8 @@ import { GameStatus } from '../../../GameSession/Type/game-status';
 import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-request.dto';
 import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.facade';
 import { QuestionForGame } from '../../../GameSession/Type/question-for-game';
+import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progress-game-session.handler';
+import { GameProgressResult } from '../../../GameSession/Type/game-progress-result';
 
 @Controller('game-session')
 @UseGuards(AuthenticatedGuard)
@@ -29,6 +31,7 @@ export class GameSessionController {
   constructor(
     private readonly createHandler: CreateGameSessionHandler,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
+    private readonly progressGameHandler: ProgressGameSessionHandler,
     private readonly statusFacade: GameStatusFacade,
     private readonly gameQuestionFacade: GameQuestionFacade,
   ) {}
@@ -82,11 +85,11 @@ export class GameSessionController {
   async progressGame(
     @Param('gameId') gameId: string,
     @Body() progressGameData: ProgressGameRequestDTO,
-  ): Promise<any> {
-    // TODO: Handler should resolve logic check - is the player in the game present?
-    //  Can player answer (is it his turn)? Is question present? Is answer correct?
-    // TODO: After logic check, resolve game logic - add points, switch current and next player
-    return progressGameData;
+  ): Promise<GameProgressResult> {
+    return await this.progressGameHandler.progressGame(
+      progressGameData,
+      gameId,
+    );
   }
 
   @Post(':gameId/finish')
