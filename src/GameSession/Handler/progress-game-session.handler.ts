@@ -5,6 +5,7 @@ import { GameQuestion, GameState, Player } from '@prisma/client';
 import { GameWithPlayers } from '../Type/game-with-players';
 import { ReorderService } from '../../Common/Service/reorder.service';
 import { GameProgressResult } from '../Type/game-progress-result';
+import { FinishedGameResult } from '../Type/finished-game-result';
 
 @Injectable()
 export class ProgressGameSessionHandler {
@@ -14,6 +15,10 @@ export class ProgressGameSessionHandler {
     private readonly gameRepository: GameSessionRepository,
     private readonly reorderService: ReorderService,
   ) {}
+
+  async endGame(gameId: string): Promise<FinishedGameResult> {
+    return this.gameRepository.endGame(gameId);
+  }
 
   async progressGame(
     requestData: ProgressGameRequestDTO,
@@ -25,7 +30,7 @@ export class ProgressGameSessionHandler {
     this.checkCurrentPlayer(requestData, gameData);
 
     const selectedQuestion = this.determineQuestion(gameData, requestData);
-    const selectedPlayer = await this.determinePlayer(gameData, requestData);
+    const selectedPlayer = this.determinePlayer(gameData, requestData);
 
     const returnData = {
       answeredCorrectly: false,
@@ -88,10 +93,10 @@ export class ProgressGameSessionHandler {
       );
   }
 
-  private async determinePlayer(
+  private determinePlayer(
     gameData: GameWithPlayers,
     requestData: ProgressGameRequestDTO,
-  ): Promise<Player> {
+  ): Player {
     const selectedPlayer = gameData.players.find(
       (player) => player.id === requestData.playerId,
     );

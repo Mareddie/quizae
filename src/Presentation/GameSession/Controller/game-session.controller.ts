@@ -24,6 +24,7 @@ import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.fa
 import { QuestionForGame } from '../../../GameSession/Type/question-for-game';
 import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progress-game-session.handler';
 import { GameProgressResult } from '../../../GameSession/Type/game-progress-result';
+import { FinishedGameResult } from '../../../GameSession/Type/finished-game-result';
 
 @Controller('game-session')
 @UseGuards(AuthenticatedGuard)
@@ -98,8 +99,9 @@ export class GameSessionController {
     CanAccessGameGuard,
     CheckOriginGuard,
   )
-  async finishGame(@Param('gameId') gameId: string): Promise<any> {
-    // TODO: handler that should switch a game state and return a response with player scores
-    return;
+  async finishGame(
+    @Param('gameId') gameId: string,
+  ): Promise<FinishedGameResult> {
+    return await this.progressGameHandler.endGame(gameId);
   }
 }

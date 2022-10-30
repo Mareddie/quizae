@@ -6,6 +6,7 @@ import { InitGameSessionPlayerDTO } from '../DTO/create-game-session-request.dto
 import { Game } from '@prisma/client';
 import { GameWithPlayers } from '../Type/game-with-players';
 import { UpdateGameInternalDTO } from '../DTO/update-game.internal.dto';
+import { FinishedGameResult } from '../Type/finished-game-result';
 
 @Injectable()
 export class GameSessionRepository {
@@ -33,6 +34,23 @@ export class GameSessionRepository {
     return this.prisma.game.findMany({
       where: {
         startedById: userId,
+      },
+    });
+  }
+
+  async endGame(gameId: string): Promise<FinishedGameResult> {
+    return this.prisma.game.update({
+      select: {
+        id: true,
+        state: true,
+        players: true,
+      },
+      where: {
+        id: gameId,
+      },
+      data: {
+        state: GameState.FINISHED,
+        questionCategories: [],
       },
     });
   }
