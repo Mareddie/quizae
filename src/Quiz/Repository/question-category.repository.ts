@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../Common/Service/prisma.service';
 import { QuestionCategory } from '@prisma/client';
 import { CreateUpdateQuestionCategoryDTO } from '../DTO/create-update-question-category.dto';
+import { CategoriesWithQuestionsAndAnswers } from '../Type/categories-with-questions-and-answers';
 
 @Injectable()
 export class QuestionCategoryRepository {
@@ -25,6 +26,30 @@ export class QuestionCategoryRepository {
         name: {
           equals: name,
           mode: 'insensitive',
+        },
+      },
+    });
+  }
+
+  async fetchForGame(
+    groupId: string,
+  ): Promise<CategoriesWithQuestionsAndAnswers[]> {
+    return this.prisma.questionCategory.findMany({
+      orderBy: {
+        order: 'asc',
+      },
+      where: {
+        groupId: groupId,
+      },
+      include: {
+        questions: {
+          include: {
+            answers: {
+              orderBy: {
+                order: 'asc',
+              },
+            },
+          },
         },
       },
     });

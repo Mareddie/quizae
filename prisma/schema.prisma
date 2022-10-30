@@ -19,6 +19,7 @@ model User {
     ownedGroups Group[] @relation()
     ownedQuestions Question[] @relation()
     memberships GroupMembership[] @relation()
+    startedGames Game[] @relation()
 }
 
 model Group {
@@ -39,6 +40,54 @@ model GroupMembership {
     groupId String @db.ObjectId
 
     @@unique([userId, groupId])
+}
+
+model Game {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    startedById String @db.ObjectId
+    startedBy User @relation(fields: [startedById], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    questionCategories GameQuestionCategory[]
+    currentPlayerId String? @db.ObjectId
+    nextPlayerId String? @db.ObjectId
+    state GameState
+    players Player[] @relation()
+    startedAt DateTime @default(now())
+}
+
+enum GameState {
+    IN_PROGRESS
+    FINISHED
+}
+
+type GameQuestionCategory {
+    id String @db.ObjectId
+    name String
+    questions GameQuestion[]
+    order Int?
+}
+
+type GameQuestion {
+    id String @db.ObjectId
+    categoryId String @db.ObjectId
+    correctAnswer String @db.ObjectId
+    answers GameQuestionAnswer[]
+    text String
+}
+
+type GameQuestionAnswer {
+    id String @db.ObjectId
+    questionId String @db.ObjectId
+    text String
+    order Int?
+}
+
+model Player {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+    name String
+    points Int @default(0)
+    gameId String @db.ObjectId
+    game Game @relation(fields: [gameId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    order Int
 }
 
 model QuestionCategory {
