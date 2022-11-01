@@ -4,13 +4,12 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import * as passport from 'passport';
-import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
-  const env = configService.get<string>('APP_ENV', 'prod');
+  const env = configService.get<string>('NODE_ENV', 'prod');
 
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
@@ -26,8 +25,6 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
-
-  app.use(cookieParser(configService.get<string>('COOKIE_SECRET', 'changeme')));
 
   app.use(passport.initialize());
 

@@ -395,5 +395,7 @@ Temporary Items
 =======
 # Local
 .env
+.env.test
+.env.dev
 dist
 sessions
