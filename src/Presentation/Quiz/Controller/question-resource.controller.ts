@@ -17,7 +17,6 @@ import { QuestionRepository } from '../../../Quiz/Repository/question.repository
 import { Request, Response } from 'express';
 import { CanAccessCategoryGuard } from '../Guard/can-access-category.guard';
 import { QuestionWithAnswers } from '../../../Quiz/Type/question-with-answers';
-import { CheckOriginGuard } from '../../../Common/Guard/check-origin.guard';
 import { CreateUpdateQuestionDTO } from '../../../Quiz/DTO/create-update-question.dto';
 import { CreateUpdateQuestionHandler } from '../../../Quiz/Handler/create-update-question.handler';
 import { DeleteQuestionHandler } from '../../../Quiz/Handler/delete-question.handler';
@@ -52,7 +51,6 @@ export class QuestionResourceController {
   }
 
   @Post('create')
-  @UseGuards(CheckOriginGuard)
   async createResource(
     @Param('categoryId') categoryId: string,
     @Body() createQuestion: CreateUpdateQuestionDTO,
@@ -66,7 +64,7 @@ export class QuestionResourceController {
   }
 
   @Patch(':questionId')
-  @UseGuards(new CheckObjectIdGuard('questionId'), CheckOriginGuard)
+  @UseGuards(new CheckObjectIdGuard('questionId'))
   async updateResource(
     @Param('categoryId') categoryId: string,
     @Param('questionId') questionId: string,
@@ -81,7 +79,7 @@ export class QuestionResourceController {
   }
 
   @Delete(':questionId')
-  @UseGuards(new CheckObjectIdGuard('questionId'), CheckOriginGuard)
+  @UseGuards(new CheckObjectIdGuard('questionId'))
   async deleteResource(
     @Param('categoryId') categoryId: string,
     @Param('questionId') questionId: string,
