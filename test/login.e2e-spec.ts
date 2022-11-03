@@ -2,9 +2,6 @@ import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { INestApplication } from '@nestjs/common';
-import { PrismaService } from '../src/Common/Service/prisma.service';
-import * as argon2 from 'argon2';
-
 describe('Login', () => {
   let app: INestApplication;
 
@@ -15,28 +12,6 @@ describe('Login', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
-
-    const service = await app.resolve<PrismaService>(PrismaService);
-    const testPassword = await argon2.hash('testing');
-
-    // Prepare testing user
-    await service.user.upsert({
-      where: {
-        email: 'tester@runner.test',
-      },
-      update: {
-        email: 'tester@runner.test',
-        password: testPassword,
-        firstName: 'Tester',
-        lastName: 'Testerovic',
-      },
-      create: {
-        email: 'tester@runner.test',
-        password: testPassword,
-        firstName: 'Tester',
-        lastName: 'Testerovic',
-      },
-    });
   });
 
   it('fetches JWT token', async () => {

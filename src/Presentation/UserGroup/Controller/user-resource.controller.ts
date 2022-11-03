@@ -6,7 +6,6 @@ import {
   Post,
   Req,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { Request } from 'express';
@@ -28,7 +27,7 @@ export class UserResourceController {
   @HttpCode(204)
   async updateProfile(
     @Req() req: Request,
-    @Body(new ValidationPipe()) createUpdateUser: CreateUpdateUserDTO,
+    @Body() createUpdateUser: CreateUpdateUserDTO,
   ): Promise<void> {
     await this.updateHandler.updateUser(req.user['id'], createUpdateUser);
   }
