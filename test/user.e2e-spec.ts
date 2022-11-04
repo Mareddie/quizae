@@ -1,11 +1,10 @@
 import * as request from 'supertest';
-import { Test } from '@nestjs/testing';
-import { AppModule } from '../src/app.module';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { AuthService } from '../src/Auth/Service/auth.service';
 import { PrismaService } from '../src/Common/Service/prisma.service';
 import { AuthenticatedUser } from '../src/User/Type/authenticated-user';
 import * as argon2 from 'argon2';
+import { bootstrapApplication } from './testUtils';
 
 describe('User', () => {
   let app: INestApplication;
@@ -15,24 +14,12 @@ describe('User', () => {
   let authUser: AuthenticatedUser;
 
   beforeAll(async () => {
-    const moduleFixture = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-
-    app.useGlobalPipes(
-      new ValidationPipe({
-        skipUndefinedProperties: true,
-        whitelist: true,
-      }),
-    );
-
-    await app.init();
+    app = await bootstrapApplication();
 
     prisma = app.get<PrismaService>(PrismaService);
     authService = app.get<AuthService>(AuthService);
 
+    // TODO: Prepare a fixture class for this
     await prisma.user.create({
       data: {
         email: 'updatetest@runner.test',
@@ -52,11 +39,14 @@ describe('User', () => {
 
   afterAll(async () => {
     // Delete test User
+    // TODO: Prepare a fixture class for this
     await prisma.user.delete({
       where: {
         id: authUser.id,
       },
     });
+
+    await app.close();
   });
 
   it('requires authentication', async () => {
