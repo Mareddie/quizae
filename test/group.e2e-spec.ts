@@ -21,7 +21,6 @@ describe('User Groups', () => {
     fixture = new GroupFixture(prisma);
 
     testData = await fixture.up();
-
     authToken = await authService.generateToken(testData.firstUser);
   });
 

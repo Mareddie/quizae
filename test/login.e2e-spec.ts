@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { bootstrapApplication } from './testUtils';
 import { LoginFixture } from './fixtures/login.fixture';
 import { PrismaService } from '../src/Common/Service/prisma.service';
+
 describe('Login', () => {
   let app: INestApplication;
   let fixture: LoginFixture;

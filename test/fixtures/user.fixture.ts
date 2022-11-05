@@ -5,7 +5,7 @@ import * as argon2 from 'argon2';
 import { AuthenticatedUser } from '../../src/User/Type/authenticated-user';
 
 export class UserFixture implements AbstractFixture<LoginFixtureData> {
-  private createdUserId: string;
+  private data: AuthenticatedUser;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -20,7 +20,7 @@ export class UserFixture implements AbstractFixture<LoginFixtureData> {
     });
 
     delete createdUser.password;
-    this.createdUserId = createdUser.id;
+    this.data = createdUser;
 
     return { user: createdUser as AuthenticatedUser };
   }
@@ -28,7 +28,7 @@ export class UserFixture implements AbstractFixture<LoginFixtureData> {
   public async down(): Promise<void> {
     await this.prisma.user.delete({
       where: {
-        id: this.createdUserId,
+        id: this.data.id,
       },
     });
   }

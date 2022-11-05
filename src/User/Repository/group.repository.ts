@@ -59,7 +59,7 @@ export class GroupRepository {
       return this.prisma.group.findMany({
         where: {
           userMemberships: {
-            every: {
+            some: {
               userId: ownerId,
             },
           },
