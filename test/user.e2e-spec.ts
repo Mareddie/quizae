@@ -3,12 +3,13 @@ import { INestApplication } from '@nestjs/common';
 import { AuthService } from '../src/Auth/Service/auth.service';
 import { PrismaService } from '../src/Common/Service/prisma.service';
 import { AuthenticatedUser } from '../src/User/Type/authenticated-user';
-import * as argon2 from 'argon2';
 import { bootstrapApplication } from './testUtils';
+import { UserFixture } from './fixtures/user.fixture';
 
 describe('User', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let fixture: UserFixture;
   let authService: AuthService;
   let authToken: string;
   let authUser: AuthenticatedUser;
@@ -17,35 +18,16 @@ describe('User', () => {
     app = await bootstrapApplication();
 
     prisma = app.get<PrismaService>(PrismaService);
+
+    fixture = new UserFixture(prisma);
     authService = app.get<AuthService>(AuthService);
 
-    // TODO: Prepare a fixture class for this
-    await prisma.user.create({
-      data: {
-        email: 'updatetest@runner.test',
-        firstName: 'Updater',
-        lastName: 'Updating',
-        password: await argon2.hash('testing'),
-      },
-    });
-
-    authUser = await authService.validateUser(
-      'updatetest@runner.test',
-      'testing',
-    );
-
+    authUser = (await fixture.up()).user;
     authToken = await authService.generateToken(authUser);
   });
 
   afterAll(async () => {
-    // Delete test User
-    // TODO: Prepare a fixture class for this
-    await prisma.user.delete({
-      where: {
-        id: authUser.id,
-      },
-    });
-
+    await fixture.down();
     await app.close();
   });
 

@@ -1,14 +1,21 @@
 import * as request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { bootstrapApplication } from './testUtils';
+import { LoginFixture } from './fixtures/login.fixture';
+import { PrismaService } from '../src/Common/Service/prisma.service';
 describe('Login', () => {
   let app: INestApplication;
+  let fixture: LoginFixture;
 
   beforeAll(async () => {
     app = await bootstrapApplication();
+    fixture = new LoginFixture(app.get(PrismaService));
+
+    await fixture.up();
   });
 
   afterAll(async () => {
+    await fixture.down();
     await app.close();
   });
 
