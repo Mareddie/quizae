@@ -79,18 +79,20 @@ export class GroupRepository {
       data: {
         name: data.name,
         ownerId: ownerId,
-        userMemberships: {
-          createMany: {
-            data: [],
-          },
-        },
+        userMemberships: undefined,
       },
       include: {
         userMemberships: true,
       },
     };
 
-    if (members !== undefined) {
+    if (members !== undefined && members.length > 0) {
+      createQuery.data.userMemberships = {
+        createMany: {
+          data: [],
+        },
+      };
+
       for (const member of members) {
         createQuery.data.userMemberships.createMany.data.push({
           userId: member.id,
@@ -118,18 +120,20 @@ export class GroupRepository {
       },
       data: {
         name: data.name,
-        userMemberships: {
-          createMany: {
-            data: [],
-          },
-        },
+        userMemberships: undefined,
       },
       include: {
         userMemberships: true,
       },
     };
 
-    if (members !== undefined) {
+    if (members !== undefined && members.length > 0) {
+      updateQuery.data.userMemberships = {
+        createMany: {
+          data: [],
+        },
+      };
+
       for (const member of members) {
         updateQuery.data.userMemberships.createMany.data.push({
           userId: member.id,

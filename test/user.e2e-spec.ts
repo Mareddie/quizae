@@ -45,40 +45,6 @@ describe('User', () => {
     expect(response.headers['content-type']).toMatch(/json/);
   });
 
-  it("shouldn't pass validation", async () => {
-    const response = await request(app.getHttpServer())
-      .post('/users/profile')
-      .set('Authorization', `Bearer ${authToken}`)
-      .set('Accept', 'application/json')
-      .send({
-        email: 'notanemail',
-        firstName: '',
-        lastName: 'User',
-      });
-
-    expect(response.statusCode).toEqual(400);
-    expect(response.headers['content-type']).toMatch(/json/);
-    expect(response.body).toMatchObject({
-      statusCode: expect.any(Number),
-      message: expect.any(Array),
-      error: expect.any(String),
-    });
-
-    // Test whether the user is unchanged
-    const fetchedUser = await prisma.user.findUnique({
-      where: { id: authUser.id },
-    });
-
-    expect(authUser.email).toEqual(fetchedUser.email);
-
-    expect(authUser).toMatchObject({
-      id: fetchedUser.id,
-      email: fetchedUser.email,
-      firstName: fetchedUser.firstName,
-      lastName: fetchedUser.lastName,
-    });
-  });
-
   it('should update user', async () => {
     const payload = {
       email: 'changedemail@testing.com',

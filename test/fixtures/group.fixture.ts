@@ -91,6 +91,7 @@ export class GroupFixture implements AbstractFixture<GroupFixtureData> {
   }
 
   public async down(): Promise<void> {
+    // Because Groups and Memberships have cascade deletion, this will ensure that everything is deleted
     await this.prisma.user.deleteMany({
       where: {
         id: {
