@@ -1,23 +1,20 @@
 import { AuthenticatedUser } from '../../src/User/Type/authenticated-user';
+import { Group, QuestionCategory } from '@prisma/client';
 import { AbstractFixture } from './abstract.fixture';
 import { PrismaService } from '../../src/Common/Service/prisma.service';
 import * as argon2 from 'argon2';
-import { Group, QuestionCategory } from '@prisma/client';
 
-export interface QuestionCategoryFixtureData {
-  firstUser: AuthenticatedUser;
-  secondUser: AuthenticatedUser;
+export interface QuestionFixtureData {
+  user: AuthenticatedUser;
   group: Group;
-  categories: QuestionCategory[];
+  questionCategory: QuestionCategory;
 }
 
-export class QuestionCategoryFixture
-  implements AbstractFixture<QuestionCategoryFixtureData>
-{
+export class QuestionFixture implements AbstractFixture<QuestionFixtureData> {
   constructor(private readonly prisma: PrismaService) {}
-  private data: QuestionCategoryFixtureData;
+  private data: QuestionFixtureData;
 
-  public async up(): Promise<QuestionCategoryFixtureData> {
+  public async up(): Promise<QuestionFixtureData> {
     const selectQuery = {
       id: true,
       email: true,
@@ -27,20 +24,14 @@ export class QuestionCategoryFixture
 
     const usersToCreate = [
       {
-        email: 'quescat@testing.test',
-        firstName: 'Alfa',
-        lastName: 'QuestionUser',
-        password: await argon2.hash('testing'),
-      },
-      {
-        email: 'secondquescat@testing.test',
-        firstName: 'Beta',
-        lastName: 'QuestionUser',
+        email: 'questiontester@testing.com',
+        firstName: 'Uther',
+        lastName: 'Creator',
         password: await argon2.hash('testing'),
       },
     ];
 
-    const [firstUser, secondUser] = await this.prisma.$transaction(
+    const [firstUser] = await this.prisma.$transaction(
       usersToCreate.map((userData) =>
         this.prisma.user.create({ select: selectQuery, data: userData }),
       ),
@@ -51,18 +42,14 @@ export class QuestionCategoryFixture
         questionCategories: true,
       },
       data: {
-        name: 'Group With Questions',
+        name: 'Testing of Question Creation',
         ownerId: firstUser.id,
         questionCategories: {
           createMany: {
             data: [
               {
-                name: 'Essentials',
+                name: 'Testing',
                 order: 1,
-              },
-              {
-                name: 'History',
-                order: 2,
               },
             ],
           },
@@ -73,10 +60,9 @@ export class QuestionCategoryFixture
     const { questionCategories, ...group } = groupWithCategory;
 
     this.data = {
-      firstUser,
-      secondUser,
+      user: firstUser,
       group,
-      categories: questionCategories,
+      questionCategory: questionCategories[0],
     };
 
     return this.data;
@@ -86,7 +72,7 @@ export class QuestionCategoryFixture
     await this.prisma.user.deleteMany({
       where: {
         id: {
-          in: [this.data.firstUser.id, this.data.secondUser.id],
+          in: [this.data.user.id],
         },
       },
     });
