@@ -1,3 +1,4 @@
+import * as request from 'supertest';
 import { bootstrapApplication } from './testUtils';
 import { AuthService } from '../src/Auth/Service/auth.service';
 import { PrismaService } from '../src/Common/Service/prisma.service';
@@ -32,7 +33,9 @@ describe('Question Categories', () => {
   });
 
   it('requires authentication', async () => {
-    expect(1).toBe(1);
+    await request(app.getHttpServer())
+      .get(`/question-categories/${testData.group.id}`)
+      .expect(401);
   });
 
   // TODO: implement tests
