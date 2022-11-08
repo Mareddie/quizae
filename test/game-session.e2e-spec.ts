@@ -8,6 +8,7 @@ import {
 } from './fixtures/game-session.fixture';
 import * as request from 'supertest';
 import { ObjectID } from 'bson';
+import { GameState } from '@prisma/client';
 
 describe('Game Session', () => {
   let app: INestApplication;
@@ -57,5 +58,73 @@ describe('Game Session', () => {
       .expect(401);
   });
 
-  // TODO: e2e tests for all endpoints
+  it('creates Game Session', async () => {
+    const createResponse = await request(app.getHttpServer())
+      .post(`/game-session/${testData.group.id}/create`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json')
+      .send({
+        players: [
+          {
+            name: 'Charlie',
+            order: 1,
+          },
+          {
+            name: 'Matt',
+            order: 2,
+          },
+        ],
+      });
+
+    expect(createResponse.statusCode).toEqual(201);
+
+    expect(createResponse.body).toMatchObject({
+      id: expect.any(String),
+      startedById: testData.user.id,
+      state: GameState.IN_PROGRESS,
+      startedAt: expect.any(String),
+      players: expect.any(Array),
+    });
+
+    expect(createResponse.body.players).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: 'Charlie',
+          points: 0,
+          gameId: createResponse.body.id,
+          order: 1,
+        }),
+        expect.objectContaining({
+          id: expect.any(String),
+          name: 'Matt',
+          points: 0,
+          gameId: createResponse.body.id,
+          order: 2,
+        }),
+      ]),
+    );
+
+    expect(createResponse.body.players.length).toEqual(2);
+
+    const createdGame = await prisma.game.findUnique({
+      select: {
+        id: true,
+        startedById: true,
+        state: true,
+        startedAt: true,
+        players: true,
+      },
+      where: {
+        id: createResponse.body.id,
+      },
+    });
+
+    // In response, the date is parsed to String - in order to simplify in tests, we can cast it back to Date
+    createResponse.body.startedAt = new Date(createResponse.body.startedAt);
+
+    expect(createResponse.body).toMatchObject(createdGame);
+  });
+
+  // TODO: e2e tests for the rest of endpoints
 });
