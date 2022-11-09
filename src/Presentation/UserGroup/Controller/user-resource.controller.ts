@@ -6,12 +6,10 @@ import {
   Post,
   Req,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { Request } from 'express';
 import { AuthenticatedUser } from '../../../User/Type/authenticated-user';
-import { CheckOriginGuard } from '../../../Common/Guard/check-origin.guard';
 import { CreateUpdateUserDTO } from '../../../User/DTO/create-update-user.dto';
 import { UpdateUserHandler } from '../../../User/Handler/update-user.handler';
 
@@ -27,10 +25,9 @@ export class UserResourceController {
 
   @Post('profile')
   @HttpCode(204)
-  @UseGuards(CheckOriginGuard)
   async updateProfile(
     @Req() req: Request,
-    @Body(new ValidationPipe()) createUpdateUser: CreateUpdateUserDTO,
+    @Body() createUpdateUser: CreateUpdateUserDTO,
   ): Promise<void> {
     await this.updateHandler.updateUser(req.user['id'], createUpdateUser);
   }

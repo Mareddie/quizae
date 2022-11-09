@@ -13,7 +13,6 @@ import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard'
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { QuestionCategory } from '@prisma/client';
-import { CheckOriginGuard } from '../../../Common/Guard/check-origin.guard';
 import { CreateUpdateQuestionCategoryDTO } from '../../../Quiz/DTO/create-update-question-category.dto';
 import { CreateUpdateQuestionCategoryHandler } from '../../../Quiz/Handler/create-update-question-category.handler';
 import { Response } from 'express';
@@ -41,7 +40,6 @@ export class QuestionCategoryResourceController {
   }
 
   @Post('create')
-  @UseGuards(CheckOriginGuard)
   async createResource(
     @Param('groupId') groupId: string,
     @Body() createQuestionCategory: CreateUpdateQuestionCategoryDTO,
@@ -50,7 +48,7 @@ export class QuestionCategoryResourceController {
   }
 
   @Patch(':questionCategoryId')
-  @UseGuards(new CheckObjectIdGuard('questionCategoryId'), CheckOriginGuard)
+  @UseGuards(new CheckObjectIdGuard('questionCategoryId'))
   async updateResource(
     @Param('groupId') groupId: string,
     @Param('questionCategoryId') questionCategoryId: string,
@@ -64,7 +62,7 @@ export class QuestionCategoryResourceController {
   }
 
   @Delete(':questionCategoryId')
-  @UseGuards(new CheckObjectIdGuard('questionCategoryId'), CheckOriginGuard)
+  @UseGuards(new CheckObjectIdGuard('questionCategoryId'))
   async deleteResource(
     @Param('groupId') groupId: string,
     @Param('questionCategoryId') questionCategoryId: string,

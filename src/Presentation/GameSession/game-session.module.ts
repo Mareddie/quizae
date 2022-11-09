@@ -2,11 +2,10 @@ import { GameSessionModule as DomainGameSessionModule } from '../../GameSession/
 import { Module } from '@nestjs/common';
 import { GameSessionController } from './Controller/game-session.controller';
 import { UserModule } from '../../User/user.module';
-import { ConfigModule } from '@nestjs/config';
 import { QuizModule } from '../../Quiz/quiz.module';
 
 @Module({
-  imports: [DomainGameSessionModule, UserModule, ConfigModule, QuizModule],
+  imports: [DomainGameSessionModule, UserModule, QuizModule],
   controllers: [GameSessionController],
   providers: [],
 })
