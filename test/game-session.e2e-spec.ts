@@ -9,6 +9,8 @@ import {
 import * as request from 'supertest';
 import { ObjectID } from 'bson';
 import { GameState } from '@prisma/client';
+import { CreatedGameWithPlayers } from '../src/GameSession/Type/created-game-with-players';
+import { GameStatus } from '../src/GameSession/Type/game-status';
 
 describe('Game Session', () => {
   let app: INestApplication;
@@ -16,6 +18,8 @@ describe('Game Session', () => {
   let fixture: GameSessionFixture;
   let testData: GameSessionFixtureData;
   let authToken: string;
+  let game: CreatedGameWithPlayers;
+  let gameStatus: GameStatus;
 
   beforeAll(async () => {
     app = await bootstrapApplication();
@@ -124,7 +128,70 @@ describe('Game Session', () => {
     createResponse.body.startedAt = new Date(createResponse.body.startedAt);
 
     expect(createResponse.body).toMatchObject(createdGame);
+
+    game = createdGame;
   });
 
-  // TODO: e2e tests for the rest of endpoints
+  it('fetches Game status', async () => {
+    const statusResponse = await request(app.getHttpServer())
+      .get(`/game-session/${game.id}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json');
+
+    expect(statusResponse.statusCode).toEqual(200);
+
+    expect(statusResponse.body).toMatchObject({
+      id: game.id,
+      startedById: testData.user.id,
+      state: GameState.IN_PROGRESS,
+      currentPlayerId: game.players[0].id,
+      nextPlayerId: game.players[1].id,
+      players: game.players,
+      categoryStatuses: expect.any(Array),
+      startedAt: expect.any(String),
+    });
+
+    expect(statusResponse.body.categoryStatuses).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: 'Games',
+          order: 1,
+          questionCount: 2,
+        }),
+      ]),
+    );
+
+    gameStatus = statusResponse.body;
+  });
+
+  it('fetches Game Question', async () => {
+    const questionResponse = await request(app.getHttpServer())
+      .get(
+        `/game-session/${gameStatus.id}/get-question/${gameStatus.categoryStatuses[0].id}`,
+      )
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json');
+
+    expect(questionResponse.statusCode).toEqual(200);
+
+    // The question can be totally random, but the response structure should be the same
+    expect(questionResponse.body).toMatchObject({
+      id: expect.any(String),
+      categoryId: gameStatus.categoryStatuses[0].id,
+      answers: expect.any(Array),
+      text: expect.any(String),
+    });
+  });
+
+  it('progresses the Game', async () => {
+    // TODO
+    // Progress the Game with questions from testData - one answer should be correct and the other not
+    // Test whether player turns are correct as well as point counts
+  });
+
+  it('finalizes the Game', async () => {
+    // TODO
+    // Finalize the Game and check response with Player point count
+  });
 });
