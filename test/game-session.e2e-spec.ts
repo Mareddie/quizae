@@ -184,14 +184,137 @@ describe('Game Session', () => {
     });
   });
 
-  it('progresses the Game', async () => {
-    // TODO
-    // Progress the Game with questions from testData - one answer should be correct and the other not
-    // Test whether player turns are correct as well as point counts
+  it('progresses the Game - 1st question answer', async () => {
+    const progressResponse = await request(app.getHttpServer())
+      .post(`/game-session/${gameStatus.id}/progress`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json')
+      .send({
+        categoryId: testData.questionCategory.id,
+        questionId: testData.questions[0].id,
+        answerId: testData.questions[0].correctAnswer,
+        playerId: gameStatus.players[0].id,
+      });
+
+    expect(progressResponse.statusCode).toEqual(201);
+
+    expect(progressResponse.body).toMatchObject({
+      answeredCorrectly: true,
+      correctAnswerId: testData.questions[0].correctAnswer,
+    });
+
+    const statusResponse = await request(app.getHttpServer())
+      .get(`/game-session/${gameStatus.id}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json');
+
+    expect(statusResponse.statusCode).toEqual(200);
+
+    expect(statusResponse.body).toMatchObject({
+      currentPlayerId: gameStatus.players[1].id,
+      nextPlayerId: gameStatus.players[0].id,
+    });
+
+    expect(statusResponse.body.players[0]).toMatchObject({
+      id: gameStatus.players[0].id,
+      name: gameStatus.players[0].name,
+      points: 10,
+    });
+
+    expect(statusResponse.body.players[1]).toMatchObject({
+      id: gameStatus.players[1].id,
+      name: gameStatus.players[1].name,
+      points: 0,
+    });
+
+    expect(statusResponse.body.categoryStatuses[0]).toMatchObject({
+      id: testData.questionCategory.id,
+      name: testData.questionCategory.name,
+      order: testData.questionCategory.order,
+      questionCount: 1,
+    });
+  });
+
+  it('progresses the Game - 2nd question answer', async () => {
+    const answer = await prisma.answer.findFirst({
+      where: {
+        questionId: testData.questions[1].id,
+        NOT: {
+          id: testData.questions[1].correctAnswer,
+        },
+      },
+    });
+
+    const progressResponse = await request(app.getHttpServer())
+      .post(`/game-session/${gameStatus.id}/progress`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json')
+      .send({
+        categoryId: testData.questionCategory.id,
+        questionId: testData.questions[1].id,
+        answerId: answer.id,
+        playerId: gameStatus.players[1].id,
+      });
+
+    expect(progressResponse.statusCode).toEqual(201);
+
+    expect(progressResponse.body).toMatchObject({
+      answeredCorrectly: false,
+      correctAnswerId: testData.questions[1].correctAnswer,
+    });
+
+    const statusResponse = await request(app.getHttpServer())
+      .get(`/game-session/${gameStatus.id}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json');
+
+    expect(statusResponse.statusCode).toEqual(200);
+
+    expect(statusResponse.body).toMatchObject({
+      currentPlayerId: gameStatus.players[0].id,
+      nextPlayerId: gameStatus.players[1].id,
+    });
+
+    expect(statusResponse.body.players[0]).toMatchObject({
+      id: gameStatus.players[0].id,
+      name: gameStatus.players[0].name,
+      points: 10,
+    });
+
+    expect(statusResponse.body.players[1]).toMatchObject({
+      id: gameStatus.players[1].id,
+      name: gameStatus.players[1].name,
+      points: 0,
+    });
+
+    expect(statusResponse.body.categoryStatuses.length).toEqual(0);
   });
 
   it('finalizes the Game', async () => {
-    // TODO
-    // Finalize the Game and check response with Player point count
+    const endGameResponse = await request(app.getHttpServer())
+      .post(`/game-session/${gameStatus.id}/finish`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json');
+
+    expect(endGameResponse.statusCode).toEqual(201);
+
+    expect(endGameResponse.body).toMatchObject({
+      id: gameStatus.id,
+      state: GameState.FINISHED,
+      players: expect.any(Array),
+    });
+
+    expect(endGameResponse.body.players).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'Charlie',
+          points: 10,
+        }),
+        expect.objectContaining({
+          name: 'Matt',
+          points: 0,
+        }),
+      ]),
+    );
   });
 });

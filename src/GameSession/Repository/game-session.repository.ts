@@ -59,7 +59,7 @@ export class GameSessionRepository {
     gameData: Game,
     answerer: Player,
   ): Promise<void> {
-    const updateGame = this.prisma.game.update({
+    await this.prisma.game.update({
       where: {
         id: gameData.id,
       },
@@ -70,7 +70,7 @@ export class GameSessionRepository {
       },
     });
 
-    const updatePlayer = this.prisma.player.update({
+    await this.prisma.player.update({
       where: {
         id: answerer.id,
       },
@@ -78,10 +78,6 @@ export class GameSessionRepository {
         points: answerer.points,
       },
     });
-
-    this.prisma.$transaction([updateGame, updatePlayer]);
-
-    return;
   }
 
   async createGame(
