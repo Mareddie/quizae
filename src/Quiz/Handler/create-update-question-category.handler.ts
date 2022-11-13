@@ -9,21 +9,21 @@ export class CreateUpdateQuestionCategoryHandler {
     private readonly questionCategoryRepository: QuestionCategoryRepository,
   ) {}
 
-  async createQuestion(
+  async createQuestionCategory(
     groupId: string,
     data: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
-    await this.testQuestionUniqueness(groupId, data.name);
+    await this.testQuestionCategoryUniqueness(groupId, data.name);
 
     return this.questionCategoryRepository.createForGroup(groupId, data);
   }
 
-  async updateQuestion(
+  async updateQuestionCategory(
     questionCategoryId: string,
     groupId: string,
     data: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
-    await this.testQuestionUniqueness(groupId, data.name);
+    await this.testQuestionCategoryUniqueness(groupId, data.name);
 
     return this.questionCategoryRepository.updateQuestionCategory(
       questionCategoryId,
@@ -31,7 +31,7 @@ export class CreateUpdateQuestionCategoryHandler {
     );
   }
 
-  private async testQuestionUniqueness(
+  private async testQuestionCategoryUniqueness(
     groupId: string,
     name: string,
   ): Promise<void> {

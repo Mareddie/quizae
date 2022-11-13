@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -74,27 +75,21 @@ export class GroupResourceController {
 
   @Delete(':groupId')
   @UseGuards(new CheckObjectIdGuard('groupId'))
+  @HttpCode(204)
   async deleteResource(
     @Param('groupId') groupId: string,
     @Req() request: Request,
-    @Res() response: Response,
-  ): Promise<Response> {
+  ): Promise<void> {
     await this.deleteHandler.deleteGroup(groupId, request.user['id']);
-
-    response.status(204).json();
-    return response;
   }
 
   @Patch(':groupId/leave')
   @UseGuards(new CheckObjectIdGuard('groupId'))
+  @HttpCode(204)
   async leaveGroup(
     @Param('groupId') groupId: string,
     @Req() request: Request,
-    @Res() response: Response,
-  ): Promise<Response> {
+  ): Promise<void> {
     await this.leaveHandler.leaveGroup(groupId, request.user['id']);
-
-    response.status(204).json();
-    return response;
   }
 }

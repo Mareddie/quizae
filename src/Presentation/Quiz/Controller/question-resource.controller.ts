@@ -3,18 +3,18 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
   Query,
   Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
 import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { CanAccessCategoryGuard } from '../Guard/can-access-category.guard';
 import { QuestionWithAnswers } from '../../../Quiz/Type/question-with-answers';
 import { CreateUpdateQuestionDTO } from '../../../Quiz/DTO/create-update-question.dto';
@@ -80,15 +80,12 @@ export class QuestionResourceController {
 
   @Delete(':questionId')
   @UseGuards(new CheckObjectIdGuard('questionId'))
+  @HttpCode(204)
   async deleteResource(
     @Param('categoryId') categoryId: string,
     @Param('questionId') questionId: string,
-    @Res() response: Response,
-  ): Promise<Response> {
+  ): Promise<void> {
     // Anyone inside the group can delete questions (with answers)
     await this.deleteHandler.deleteQuestion(categoryId, questionId);
-
-    response.status(204).json();
-    return response;
   }
 }
