@@ -3,6 +3,8 @@ import { GameSessionRepository } from '../Repository/game-session.repository';
 import { GameWithPlayers } from '../Type/game-with-players';
 import { ReorderService } from '../../Common/Service/reorder.service';
 import { CategoryStatus, GameStatus } from '../Type/game-status';
+import { plainToClass } from 'class-transformer';
+import { UpdateGameInternalDTO } from '../DTO/update-game.internal.dto';
 
 @Injectable()
 export class GameStatusFacade {
@@ -59,11 +61,13 @@ export class GameStatusFacade {
     gameData.currentPlayerId = currentPlayerId;
     gameData.nextPlayerId = nextPlayerId;
 
-    await this.gameRepository.updateGameFromInternalData({
-      gameId: gameData.id,
-      currentPlayerId: gameData.currentPlayerId,
-      nextPlayerId: gameData.nextPlayerId,
-    });
+    await this.gameRepository.updateGameFromInternalData(
+      plainToClass(UpdateGameInternalDTO, {
+        gameId: gameData.id,
+        currentPlayerId: gameData.currentPlayerId,
+        nextPlayerId: gameData.nextPlayerId,
+      }),
+    );
   }
 
   private determinePlayersForGame(gameData: GameWithPlayers): {
