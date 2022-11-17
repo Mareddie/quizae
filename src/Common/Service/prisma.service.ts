@@ -1,3 +1,6 @@
+// This class only serves as bootstrap for Prisma in Nest Framework. We can exclude it from coverage.
+/* istanbul ignore file */
+
 import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
