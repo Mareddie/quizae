@@ -55,10 +55,18 @@ export class CreateGameSessionHandler {
         continue;
       }
 
+      const preparedQuestions = this.prepareGameQuestions(
+        categoryWithQuestion.questions,
+      );
+
+      if (preparedQuestions.length === 0) {
+        continue;
+      }
+
       preparedCategories.push({
         id: categoryWithQuestion.id,
         name: categoryWithQuestion.name,
-        questions: this.prepareGameQuestions(categoryWithQuestion.questions),
+        questions: preparedQuestions,
         order: categoryWithQuestion.order,
       });
     }
