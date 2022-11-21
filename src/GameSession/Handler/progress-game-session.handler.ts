@@ -29,8 +29,8 @@ export class ProgressGameSessionHandler {
     this.checkGameState(gameData);
     this.checkCurrentPlayer(requestData, gameData);
 
-    const selectedQuestion = this.determineQuestion(gameData, requestData);
     const selectedPlayer = this.determinePlayer(gameData, requestData);
+    const selectedQuestion = this.determineQuestion(gameData, requestData);
 
     const returnData = {
       answeredCorrectly: false,
