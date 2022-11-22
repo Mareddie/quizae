@@ -29,7 +29,7 @@ export class CreateUpdateQuestionHandler {
     if (data.answers !== undefined) {
       this.prepareQuestionAnswers(data.answers);
 
-      data.correctAnswer = this.determineCorrectAnswerId(data.answers);
+      data.correctAnswer = this.getCorrectAnswerFromList(data.answers).id;
     }
 
     return this.questionRepository.updateQuestion(questionId, data);
@@ -55,7 +55,7 @@ export class CreateUpdateQuestionHandler {
     if (data.answers !== undefined) {
       this.prepareQuestionAnswers(data.answers);
 
-      data.correctAnswer = this.determineCorrectAnswerId(data.answers);
+      data.correctAnswer = this.getCorrectAnswerFromList(data.answers).id;
     }
 
     return this.questionRepository.createQuestion(categoryId, userId, data);
@@ -79,16 +79,6 @@ export class CreateUpdateQuestionHandler {
     answers.map((answer) => (answer.id = new ObjectID().toString()));
 
     return answers;
-  }
-
-  private determineCorrectAnswerId(answers: CreateUpdateAnswerDTO[]): string {
-    const correctAnswer = this.getCorrectAnswerFromList(answers);
-
-    if (correctAnswer.id === undefined) {
-      throw new ConflictException('The correct answer does not have any id');
-    }
-
-    return correctAnswer.id;
   }
 
   private getCorrectAnswerFromList(
