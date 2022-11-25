@@ -1,3 +1,6 @@
+// There's only Passport-specific code that isn't worth covering
+/* istanbul ignore file */
+
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';

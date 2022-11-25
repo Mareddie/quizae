@@ -1,3 +1,6 @@
+// There's only Passport-specific code that isn't worth covering
+/* istanbul ignore file */
+
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';

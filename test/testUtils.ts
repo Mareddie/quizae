@@ -1,6 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { getMockReq } from '@jest-mock/express';
+import { AuthenticatedRequest } from '../src/Common/Type/authenticated-request';
 
 export async function bootstrapApplication(): Promise<INestApplication> {
   const moduleFixture = await Test.createTestingModule({
@@ -19,4 +21,15 @@ export async function bootstrapApplication(): Promise<INestApplication> {
   await app.init();
 
   return app;
+}
+
+export function getMockedAuthRequest(): AuthenticatedRequest {
+  return getMockReq<AuthenticatedRequest>({
+    user: {
+      id: '1',
+      email: 'test@test.com',
+      firstName: 'Tester',
+      lastName: 'Testerovic',
+    },
+  });
 }

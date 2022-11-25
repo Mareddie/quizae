@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -44,7 +45,10 @@ export class QuestionCategoryResourceController {
     @Param('groupId') groupId: string,
     @Body() createQuestionCategory: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
-    return await this.handler.createQuestion(groupId, createQuestionCategory);
+    return await this.handler.createQuestionCategory(
+      groupId,
+      createQuestionCategory,
+    );
   }
 
   @Patch(':questionCategoryId')
@@ -54,7 +58,7 @@ export class QuestionCategoryResourceController {
     @Param('questionCategoryId') questionCategoryId: string,
     @Body() updateQuestionCategory: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
-    return await this.handler.updateQuestion(
+    return await this.handler.updateQuestionCategory(
       questionCategoryId,
       groupId,
       updateQuestionCategory,
@@ -63,17 +67,14 @@ export class QuestionCategoryResourceController {
 
   @Delete(':questionCategoryId')
   @UseGuards(new CheckObjectIdGuard('questionCategoryId'))
+  @HttpCode(204)
   async deleteResource(
     @Param('groupId') groupId: string,
     @Param('questionCategoryId') questionCategoryId: string,
-    @Res() response: Response,
-  ): Promise<Response> {
+  ): Promise<void> {
     await this.deleteHandler.deleteQuestionCategory(
       groupId,
       questionCategoryId,
     );
-
-    response.status(204).json();
-    return response;
   }
 }

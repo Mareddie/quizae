@@ -1,3 +1,6 @@
+// There's no logic that needs to be tested
+/* istanbul ignore file */
+
 import { PrismaService } from './Common/Service/prisma.service';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
