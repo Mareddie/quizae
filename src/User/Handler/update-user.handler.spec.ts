@@ -33,8 +33,6 @@ describe('UpdateUserHandler', () => {
 
       const result = await handler.updateUser('123', dto);
 
-      console.log(result);
-
       expect(repositoryMock['updateUser']).toHaveBeenCalledWith(
         '123',
         expect.objectContaining({
