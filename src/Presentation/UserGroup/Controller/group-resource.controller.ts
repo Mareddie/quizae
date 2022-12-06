@@ -9,19 +9,18 @@ import {
   Post,
   Query,
   Req,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { CreateUpdateGroupDTO } from '../../../User/DTO/create-update-group.dto';
 import { CreateUpdateGroupHandler } from '../../../User/Handler/create-update-group.handler';
-import { Request, Response } from 'express';
-import { Group } from '@prisma/client';
+import { Request } from 'express';
 import { GroupRepository } from '../../../User/Repository/group.repository';
 import { DeleteGroupHandler } from '../../../User/Handler/delete-group.handler';
 import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
 import { LeaveGroupHandler } from '../../../User/Handler/leave-group.handler';
 import { GroupWithMemberships } from '../../../User/Type/group-with-memberships';
+import { GroupWithOwnerAndMemberships } from '../../../User/Type/group-with-owner-and-memberships';
 
 @Controller('groups')
 @UseGuards(AuthenticatedGuard)
@@ -37,7 +36,7 @@ export class GroupResourceController {
   async resourceList(
     @Req() req: Request,
     @Query('filter') filter?: string,
-  ): Promise<Group[]> {
+  ): Promise<GroupWithOwnerAndMemberships[]> {
     if (typeof filter === 'string') {
       return await this.groupRepository.findGroupsForUser(
         filter,

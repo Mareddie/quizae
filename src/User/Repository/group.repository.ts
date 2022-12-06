@@ -4,6 +4,7 @@ import { Group } from '@prisma/client';
 import { CreateUpdateGroupDTO } from '../DTO/create-update-group.dto';
 import { IdentifiedUser } from '../Type/identified-user';
 import { GroupWithMemberships } from '../Type/group-with-memberships';
+import { GroupWithOwnerAndMemberships } from '../Type/group-with-owner-and-memberships';
 
 @Injectable()
 export class GroupRepository {
@@ -46,9 +47,31 @@ export class GroupRepository {
     });
   }
 
-  async findGroupsForUser(filter: string, ownerId: string): Promise<Group[]> {
+  async findGroupsForUser(
+    filter: string,
+    ownerId: string,
+  ): Promise<GroupWithOwnerAndMemberships[]> {
+    const include = {
+      owner: {
+        select: {
+          email: true,
+        },
+      },
+      userMemberships: {
+        select: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+            },
+          },
+        },
+      },
+    };
+
     if (filter === 'myOwn') {
       return this.prisma.group.findMany({
+        include,
         where: {
           ownerId: ownerId,
         },
@@ -57,6 +80,7 @@ export class GroupRepository {
 
     if (filter === 'myMemberships') {
       return this.prisma.group.findMany({
+        include,
         where: {
           userMemberships: {
             some: {
