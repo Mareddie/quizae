@@ -1,0 +1,20 @@
+providers:
+    docker:
+        endpoint: "unix:///var/run/docker.sock"
+        exposedByDefault: false
+
+    # Dynamic configuration for TLS
+    file:
+        filename: /etc/traefik/dev-dynamic-config/config.yml
+        watch: true
+entryPoints:
+    web:
+        address: :80
+        http:
+            redirections:
+                entryPoint:
+                    to: websecure
+                    scheme: https
+
+    websecure:
+        address: :443
