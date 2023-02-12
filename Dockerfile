@@ -25,6 +25,8 @@ RUN npm ci --only=production && npm cache clean --force
 
 FROM node:19-alpine AS production
 
+WORKDIR /usr/src/app
+
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 
@@ -36,6 +38,8 @@ CMD [ "node", "dist/main.js" ]
 
 FROM node:19 AS development
 
+WORKDIR /usr/src/app
+
 COPY package*.json ./
 COPY prisma ./
 
@@ -46,4 +50,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD [ "npm", "run", "start" ]
+CMD [ "npm", "run", "start:dev" ]

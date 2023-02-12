@@ -10,7 +10,6 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock:ro
             - ./development-environment/traefik:/etc/traefik:ro
         networks:
-            - default
             - traefik
         labels:
             - traefik.enable=true
@@ -20,8 +19,23 @@ services:
             - traefik.http.routers.traefik.tls=true
             - traefik.http.routers.traefik.service=api@internal
 
+    backend:
+        build:
+            context: ./
+            dockerfile: Dockerfile
+            target: development
+        volumes:
+            - ./:/usr/src/app:rw
+        networks:
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=quizae_traefik
+            - traefik.http.routers.backend.entrypoints=websecure
+            - traefik.http.routers.backend.rule=Host(`api.quizae.wtf`)
+            - traefik.http.routers.backend.tls=true
+        restart: on-failure
+
 networks:
-    default:
-        name: quizae_default
     traefik:
         name: quizae_traefik
