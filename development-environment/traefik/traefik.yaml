@@ -1,3 +1,6 @@
+api:
+    dashboard: true
+
 providers:
     docker:
         endpoint: "unix:///var/run/docker.sock"
@@ -5,8 +8,9 @@ providers:
 
     # Dynamic configuration for TLS
     file:
-        filename: /etc/traefik/dev-dynamic-config/config.yml
+        filename: /etc/traefik/dynamic/config.yml
         watch: true
+
 entryPoints:
     web:
         address: :80
@@ -18,3 +22,11 @@ entryPoints:
 
     websecure:
         address: :443
+
+log:
+    level: DEBUG
+
+serversTransport:
+    insecureSkipVerify: true
+    rootCAs:
+        - /etc/traefik/ssl/minica.pem

@@ -1,4 +1,0 @@
-tls:
-    certificates:
-        - certFile: /etc/traefik/dev-ssl/_.quizae.wtf/cert.pem
-          keyFile: /etc/traefik/dev-ssl/_.quizae.wtf/key.pem

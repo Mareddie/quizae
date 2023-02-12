@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+    traefik:
+        image: traefik:v2.9
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./development-environment/traefik:/etc/traefik:ro
+        networks:
+            - default
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=quizae_traefik
+            - traefik.http.routers.traefik.entrypoints=websecure
+            - traefik.http.routers.traefik.rule=Host(`traefik.quizae.wtf`)
+            - traefik.http.routers.traefik.tls=true
+            - traefik.http.routers.traefik.service=api@internal
+
+networks:
+    default:
+        name: quizae_default
+    traefik:
+        name: quizae_traefik
