@@ -1,21 +1,17 @@
-FROM node:19-alpine AS warmup
-
-WORKDIR /usr/src/app
-
-COPY --chown=node:node package*.json ./
-COPY --chown=node:node prisma ./
-
-RUN npm ci
-RUN npx prisma generate
-
-COPY --chown=node:node . .
-
 FROM node:19-alpine AS build
 
 WORKDIR /usr/src/app
 
-COPY --chown=node:node --from=warmup /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node . .
+COPY package*.json .
+COPY /prisma ./prisma
+
+RUN npm ci
+RUN npx prisma generate
+
+COPY nest-cli.json .
+COPY tsconfig* .
+COPY /src ./src
+COPY /test ./test
 
 RUN npm run build
 
