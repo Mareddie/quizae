@@ -399,4 +399,6 @@ Temporary Items
 .env.dev
 .env.prod
 dist
-sessions
+/production-environment
+!/production-environment/traefik/dynamic.yaml
+!/production-environment/traefik/traefik.yaml

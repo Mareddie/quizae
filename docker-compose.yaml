@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+    traefik:
+        image: traefik:v2.9
+        restart: on-failure
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ${DOCKER_INFRA_TRAEFIK_CONFIG}:/etc/traefik:ro
+        networks:
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=quizae_traefik
+            - traefik.http.routers.traefik.entrypoints=websecure
+            - traefik.http.routers.traefik.rule=Host(`traefik.${DOCKER_INFRA_DOMAIN}`)
+            - traefik.http.routers.traefik.tls=true
+            - traefik.http.routers.traefik.service=api@internal
+
+    backend:
+        depends_on:
+            - mongodb
+        build:
+            context: ./
+            dockerfile: Dockerfile
+            target: ${DOCKER_INFRA_BACKEND_BUILD_TARGET}
+        volumes:
+            - ./:/usr/src/app:rw
+        networks:
+            - traefik
+        labels:
+            - traefik.enable=true
+            - traefik.docker.network=quizae_traefik
+            - traefik.http.routers.backend.entrypoints=websecure
+            - traefik.http.routers.backend.rule=Host(`api.${DOCKER_INFRA_DOMAIN}`)
+            - traefik.http.routers.backend.tls=true
+        restart: on-failure
+
+networks:
+    traefik:
+        name: quizae_traefik
+    dbaccess:
+        name: quizae_db_access
+
+volumes:
+    mongo_data:

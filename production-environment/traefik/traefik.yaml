@@ -6,7 +6,7 @@ providers:
         endpoint: "unix:///var/run/docker.sock"
         exposedByDefault: false
 
-    # Dynamic configuration for TLS
+    # Dynamic configuration
     file:
         filename: /etc/traefik/dynamic.yaml
         watch: true
@@ -23,10 +23,9 @@ entryPoints:
     websecure:
         address: :443
 
-log:
-    level: DEBUG
-
-serversTransport:
-    insecureSkipVerify: true
-    rootCAs:
-        - /etc/traefik/ssl/minica.pem
+certificatesResolvers:
+    defaultResolver:
+        acme:
+            email: hey@martinmicka.me
+            storage: acme.json
+            tlsChallenge: {}
