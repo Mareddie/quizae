@@ -3,7 +3,7 @@ version: "3.8"
 services:
     traefik:
         image: traefik:v2.9
-        restart: on-failure
+        restart: unless-stopped
         ports:
             - "80:80"
             - "443:443"
@@ -23,6 +23,7 @@ services:
     backend:
         depends_on:
             - mongodb
+        restart: unless-stopped
         build:
             context: ./
             dockerfile: Dockerfile
@@ -37,7 +38,6 @@ services:
             - traefik.http.routers.backend.entrypoints=websecure
             - traefik.http.routers.backend.rule=Host(`api.${DOCKER_INFRA_DOMAIN}`)
             - traefik.http.routers.backend.tls=true
-        restart: on-failure
 
 networks:
     traefik:
