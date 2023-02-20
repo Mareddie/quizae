@@ -1,15 +1,21 @@
+# PRODUCTION-READY ENVIRONMENT
+# For development purposes, please use also docker-compose.dev.yaml
+# e.g. `docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up -d`
+
 version: "3.8"
 
 services:
     traefik:
         image: traefik:v2.9
         restart: unless-stopped
+        container_name: quizae-traefik
         ports:
             - "80:80"
             - "443:443"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro
             - ${DOCKER_INFRA_TRAEFIK_CONFIG}:/etc/traefik:ro
+            # TODO: acme.json binding with correct permissions
         networks:
             - traefik
         labels:
@@ -20,18 +26,38 @@ services:
             - traefik.http.routers.traefik.tls=true
             - traefik.http.routers.traefik.service=api@internal
 
+    mongodb:
+        image: mongo:6.0.4
+        restart: unless-stopped
+        container_name: quizae-mongodb
+        volumes:
+            - mongo_data:/data/db
+        networks:
+            - dbaccess
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: /run/secrets/db_username
+            MONGO_INITDB_ROOT_PASSWORD: /run/secrets/db_password
+        secrets:
+            - db_username
+            - db_password
+
     backend:
+        image: quizae-backend:latest
+        restart: unless-stopped
+        container_name: quizae-backend
         depends_on:
             - mongodb
-        restart: unless-stopped
-        build:
-            context: ./
-            dockerfile: Dockerfile
-            target: ${DOCKER_INFRA_BACKEND_BUILD_TARGET}
-        volumes:
-            - ./:/usr/src/app:rw
+            - traefik
         networks:
             - traefik
+            - dbaccess
+        environment:
+            APP_ENV: 'production'
+            DATABASE_URL: /run/secrets/db_url
+            JWT_SECRET: /run/secrets/jwt_secret
+        secrets:
+            - db_url
+            - jwt_secret
         labels:
             - traefik.enable=true
             - traefik.docker.network=quizae_traefik
