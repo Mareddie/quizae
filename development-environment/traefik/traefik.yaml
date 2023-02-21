@@ -3,6 +3,7 @@ api:
 
 providers:
     docker:
+        network: quizae_traefik
         endpoint: "unix:///var/run/docker.sock"
         exposedByDefault: false
 

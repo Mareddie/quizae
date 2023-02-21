@@ -1,75 +1,89 @@
-# PRODUCTION-READY ENVIRONMENT
-# For development purposes, please use also docker-compose.dev.yaml
-# e.g. `docker compose -f docker-compose.yaml -f docker-compose.dev.yaml up -d`
+# FOR DEVELOPMENT PURPOSES ONLY!
+# Server infrastructure has been moved to a separate project
 
 version: "3.8"
 
 services:
     traefik:
         image: traefik:v2.9
-        restart: unless-stopped
         container_name: quizae-traefik
+        restart: unless-stopped
         ports:
             - "80:80"
             - "443:443"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro
-            - ${DOCKER_INFRA_TRAEFIK_CONFIG}:/etc/traefik:ro
-            # TODO: acme.json binding with correct permissions
+            - ./development-environment/traefik:/etc/traefik:ro
         networks:
-            - traefik
+            - quizae_traefik
         labels:
             - traefik.enable=true
-            - traefik.docker.network=quizae_traefik
             - traefik.http.routers.traefik.entrypoints=websecure
-            - traefik.http.routers.traefik.rule=Host(`traefik.${DOCKER_INFRA_DOMAIN}`)
+            - traefik.http.routers.traefik.rule=Host(`traefik.quizae.wtf`)
             - traefik.http.routers.traefik.tls=true
             - traefik.http.routers.traefik.service=api@internal
 
     mongodb:
         image: mongo:6.0.4
-        restart: unless-stopped
         container_name: quizae-mongodb
+        restart: unless-stopped
         volumes:
             - mongo_data:/data/db
         networks:
-            - dbaccess
+            - quizae_db_access
         environment:
-            MONGO_INITDB_ROOT_USERNAME: /run/secrets/db_username
-            MONGO_INITDB_ROOT_PASSWORD: /run/secrets/db_password
-        secrets:
-            - db_username
-            - db_password
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: root
+            MONGO_INITDB_DATABASE: quizae
 
     backend:
-        image: quizae-backend:latest
-        restart: unless-stopped
+        build:
+            context: ./
+            dockerfile: Dockerfile
+            target: development
         container_name: quizae-backend
+        restart: unless-stopped
         depends_on:
             - mongodb
-            - traefik
+        volumes:
+            - ./:/usr/src/app:rw
         networks:
-            - traefik
-            - dbaccess
-        environment:
-            APP_ENV: 'production'
-            DATABASE_URL: /run/secrets/db_url
-            JWT_SECRET: /run/secrets/jwt_secret
-        secrets:
-            - db_url
-            - jwt_secret
+            - quizae_db_access
+            - quizae_traefik
         labels:
             - traefik.enable=true
-            - traefik.docker.network=quizae_traefik
             - traefik.http.routers.backend.entrypoints=websecure
-            - traefik.http.routers.backend.rule=Host(`api.${DOCKER_INFRA_DOMAIN}`)
+            - traefik.http.routers.backend.rule=Host(`api.quizae.wtf`)
             - traefik.http.routers.backend.tls=true
+        environment:
+            APP_ENV: dev
+            DATABASE_URL: mongodb://root:root@quizae-mongodb/quizae
+            JWT_SECRET: 3493ab26a038b1c70a8273e75ebbc9e7
+
+    mongodb-express:
+        image: mongo-express:latest
+        container_name: quizae-mongodb-express
+        restart: unless-stopped
+        depends_on:
+            - mongodb
+        networks:
+            - quizae_db_access
+            - quizae_traefik
+        environment:
+            ME_CONFIG_MONGODB_SERVER: quizae-mongodb
+            ME_CONFIG_MONGODB_ADMINUSERNAME: root
+            ME_CONFIG_MONGODB_ADMINPASSWORD: root
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.mongodb-express.entrypoints=websecure
+            - traefik.http.routers.mongodb-express.rule=Host(`mongodb-express.quizae.wtf`)
+            - traefik.http.routers.mongodb-express.tls=true
 
 networks:
-    traefik:
-        name: quizae_traefik
-    dbaccess:
-        name: quizae_db_access
+    quizae_traefik:
+        external: true
+    quizae_db_access:
+        external: true
 
 volumes:
     mongo_data:
