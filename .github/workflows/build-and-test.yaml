@@ -24,6 +24,7 @@ jobs:
                   mongodb-version: 6.0
                   mongodb-username: root
                   mongodb-password: password
+                  mongodb-db: quizae-test
 
             - name: Install Dependencies
               run: npm ci
@@ -36,7 +37,7 @@ jobs:
               env:
                   CI: true
                   APP_ENV: test
-                  DATABASE_URL: mongodb://root:password@127.0.0.1:27017/db
+                  DATABASE_URL: mongodb://root:password@127.0.0.1:27017/quizae-test?retryWrites=true&w=majority&authSource=admin
                   JWT_SECRET: 3493ab26a038b1c70a8273e75ebbc9e7
 
             - name: Run Integration Tests
@@ -44,5 +45,5 @@ jobs:
               env:
                   CI: true
                   APP_ENV: test
-                  DATABASE_URL: mongodb://root:password@127.0.0.1:27017/db
+                  DATABASE_URL: mongodb://root:password@127.0.0.1:27017/quizae-test?retryWrites=true&w=majority&authSource=admin
                   JWT_SECRET: 3493ab26a038b1c70a8273e75ebbc9e7
