@@ -24,6 +24,7 @@ jobs:
                   mongodb-version: 6.0
                   mongodb-username: root
                   mongodb-password: password
+                  mongodb-replica-set: quizae-test-rs
                   mongodb-db: quizae-test
 
             - name: Install Dependencies
