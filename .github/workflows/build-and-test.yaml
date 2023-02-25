@@ -38,6 +38,14 @@ jobs:
                   DATABASE_URL: mongodb://127.0.0.1:27017/?retryWrites=true&w=majority&replicaSet=quizae-test
                   JWT_SECRET: 3493ab26a038b1c70a8273e75ebbc9e7
 
+            - name: Update DB Types
+              run: npx prisma db push
+              env:
+                  CI: true
+                  APP_ENV: test
+                  DATABASE_URL: mongodb://127.0.0.1:27017/?retryWrites=true&w=majority&replicaSet=quizae-test
+                  JWT_SECRET: 3493ab26a038b1c70a8273e75ebbc9e7
+
             - name: Run Integration Tests
               run: npm run test:e2e
               env:
