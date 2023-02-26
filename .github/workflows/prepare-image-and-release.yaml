@@ -1,0 +1,15 @@
+name: Prepare Image and Push Release
+
+on:
+    release:
+        types:
+            - published
+
+jobs:
+    echo-release-tag:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Echo Tag
+                run: |
+                    echo "Tag name from GITHUB_REF_NAME: $GITHUB_REF_NAME"
+                    echo "Tag name from github.ref_name: ${{  github.ref_name }}"
