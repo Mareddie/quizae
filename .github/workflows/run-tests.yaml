@@ -1,9 +1,10 @@
 name: Run Tests
 
 on:
-    push:
-        branches:
-            - main
+# Updates to main are locked - therefore, we don't need to run this pipeline on push to main.
+#    push:
+#        branches:
+#            - main
 
     pull_request:
         branches:
