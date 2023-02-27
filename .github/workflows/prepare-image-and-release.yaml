@@ -52,3 +52,5 @@ jobs:
                     push: true
                     tags: ${{ steps.docker-meta.outputs.tags }}
                     labels: ${{ steps.docker-meta.outputs.labels }}
+                    platforms: |
+                        linux/amd64
