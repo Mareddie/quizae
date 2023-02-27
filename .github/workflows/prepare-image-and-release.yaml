@@ -36,6 +36,11 @@ jobs:
                     username: ${{ github.actor }}
                     password: ${{ secrets.GITHUB_TOKEN }}
 
+            -   name: Echo Tags and Labels
+                run: |
+                    echo ${{ steps.docker-meta.outputs.tags }}
+                    echo ${{ steps.docker-meta.outputs.labels }}
+
             -   name: Build and Push Docker Image
                 uses: docker/build-push-action@v4
                 with:
