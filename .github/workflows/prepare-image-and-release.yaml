@@ -15,7 +15,6 @@ jobs:
                 uses: docker/metadata-action@v4
                 with:
                     images: |
-                        Mareddie/quizae-backend,enable=false
                         ghcr.io/Mareddie/quizae-backend
                     tags: |
                         type=semver,pattern={{version}}
@@ -36,10 +35,7 @@ jobs:
             -   name: Build and Push Docker Image
                 uses: docker/build-push-action@v4
                 with:
-                    context: .
                     target: production
                     push: true
                     tags: ${{ steps.docker-meta.outputs.tags }}
                     labels: ${{ steps.docker-meta.outputs.labels }}
-                    platforms: |
-                        linux/amd64
