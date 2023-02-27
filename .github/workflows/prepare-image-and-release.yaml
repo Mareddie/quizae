@@ -10,9 +10,6 @@ jobs:
         name: Build and Push Docker Image
         runs-on: ubuntu-latest
         steps:
-            -   name: Checkout Context
-                uses: actions/checkout@v3
-
             -   name: Generate Docker Meta
                 id: docker-meta
                 uses: docker/metadata-action@v4
@@ -35,14 +32,6 @@ jobs:
                     registry: ghcr.io
                     username: ${{ github.actor }}
                     password: ${{ secrets.GITHUB_TOKEN }}
-
-            -   name: Echo Tags and Labels
-                env:
-                    DOCKER_TAGS: ${{ steps.docker-meta.outputs.tags }}
-                    DOCKER_LABELS: ${{ steps.docker-meta.outputs.labels }}
-                run: |
-                    echo "$DOCKER_TAGS"
-                    echo "$DOCKER_LABELS"
 
             -   name: Build and Push Docker Image
                 uses: docker/build-push-action@v4
