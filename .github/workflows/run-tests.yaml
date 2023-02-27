@@ -18,6 +18,7 @@ env:
 
 jobs:
     install-and-test:
+        name: Install Project and Run Tests
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Branch
