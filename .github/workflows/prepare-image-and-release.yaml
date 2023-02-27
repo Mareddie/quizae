@@ -6,7 +6,8 @@ on:
             - published
 
 jobs:
-    echo-release-tag:
+    build-and-push-image:
+        name: Build and Push Docker Image
         runs-on: ubuntu-latest
         steps:
             -   name: Checkout Context
@@ -16,7 +17,9 @@ jobs:
                 id: docker-meta
                 uses: docker/metadata-action@v4
                 with:
-                    images: ghcr.io/Mareddie/quizae
+                    images: |
+                        Mareddie/quizae-backend
+                        ghcr.io/Mareddie/quizae-backend
                     tags: |
                         type=semver,pattern={{version}}
 
