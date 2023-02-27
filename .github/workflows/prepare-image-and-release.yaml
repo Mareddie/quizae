@@ -37,9 +37,12 @@ jobs:
                     password: ${{ secrets.GITHUB_TOKEN }}
 
             -   name: Echo Tags and Labels
+                env:
+                    DOCKER_TAGS: ${{ steps.docker-meta.outputs.tags }}
+                    DOCKER_LABELS: ${{ steps.docker-meta.outputs.labels }}
                 run: |
-                    echo ${{ steps.docker-meta.outputs.tags }}
-                    echo ${{ steps.docker-meta.outputs.labels }}
+                    echo "$DOCKER_TAGS"
+                    echo "$DOCKER_LABELS"
 
             -   name: Build and Push Docker Image
                 uses: docker/build-push-action@v4
