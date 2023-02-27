@@ -18,7 +18,7 @@ jobs:
                 uses: docker/metadata-action@v4
                 with:
                     images: |
-                        Mareddie/quizae-backend
+                        Mareddie/quizae-backend,enable=false
                         ghcr.io/Mareddie/quizae-backend
                     tags: |
                         type=semver,pattern={{version}}
