@@ -35,7 +35,6 @@ jobs:
             -   name: Build and Push Docker Image
                 uses: docker/build-push-action@v4
                 with:
-                    target: production
                     push: true
                     tags: ${{ steps.docker-meta.outputs.tags }}
                     labels: ${{ steps.docker-meta.outputs.labels }}
