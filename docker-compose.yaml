@@ -39,8 +39,7 @@ services:
     backend:
         build:
             context: ./
-            dockerfile: Dockerfile
-            target: development
+            dockerfile: dev.Dockerfile
         container_name: quizae-backend
         restart: unless-stopped
         depends_on:
