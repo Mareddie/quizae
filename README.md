@@ -2,42 +2,14 @@
 
 ## Room for Improvements
 
-Game model relies on embedded documents for game data (questions, categories, answers).
-This will not scale, if there are games with a lot of data. Prisma cannot filter and query
-this data efficiently, and it would be better if there were proper models for this part of application.
+Data model is not efficient and could be improved (e.g. extract embedded documents into proper models). Transactions in Mongo DB are probably misused as well - working without them could work better as well.
 
-No tests - there should be functional and smoke tests for the app.
+No testing data - maybe introducing some sort of fixtures/seeds isn't a bad idea.
 
-No testing data - maybe introducing some sort of fixtures/seeds isn't a bad idea. 
+Classes and design patterns are all over the place - some classes could be merged together and simplified.
 
-## Installation
+Some domains are completely unnecessary and could be removed / consolidated (e.g. simplification of presentation layer)
 
-```bash
-$ npm install
-```
+## Running Quizae
 
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
+The whole app is containerized, and can be run locally in Docker. Take a look at `docker-compose.yaml` file for local setup, or pull the production image and run it locally.
