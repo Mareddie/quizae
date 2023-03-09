@@ -27,6 +27,8 @@ entryPoints:
 log:
     level: DEBUG
 
+accessLog: {}
+
 serversTransport:
     insecureSkipVerify: true
     rootCAs:
