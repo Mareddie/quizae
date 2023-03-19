@@ -57,7 +57,7 @@ services:
             - traefik.http.routers.backend.tls=true
         environment:
             APP_ENV: dev
-            DATABASE_URL: mongodb://root:root@quizae-mongodb/quizae
+            DATABASE_URL: mongodb://root:root@quizae-mongodb/quizae?authSource=admin
             JWT_SECRET: 3493ab26a038b1c70a8273e75ebbc9e7
 
     mongodb-express:
