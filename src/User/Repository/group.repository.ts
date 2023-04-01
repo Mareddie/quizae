@@ -138,6 +138,8 @@ export class GroupRepository {
       },
     };
 
+    await this.prisma.groupMembership.deleteMany(deleteMembershipsQuery);
+
     const updateQuery = {
       where: {
         id: groupId,
@@ -165,12 +167,7 @@ export class GroupRepository {
       }
     }
 
-    const [, updateResult] = await this.prisma.$transaction([
-      this.prisma.groupMembership.deleteMany(deleteMembershipsQuery),
-      this.prisma.group.update(updateQuery),
-    ]);
-
-    return updateResult;
+    return this.prisma.group.update(updateQuery);
   }
 
   async deleteGroup(groupId: string): Promise<Group> {

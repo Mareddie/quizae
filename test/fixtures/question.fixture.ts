@@ -31,9 +31,13 @@ export class QuestionFixture implements AbstractFixture<QuestionFixtureData> {
       },
     ];
 
-    const [firstUser] = await this.prisma.$transaction(
-      usersToCreate.map((userData) =>
-        this.prisma.user.create({ select: selectQuery, data: userData }),
+    const [firstUser] = await Promise.all(
+      usersToCreate.map(
+        async (userData) =>
+          await this.prisma.user.create({
+            select: selectQuery,
+            data: userData,
+          }),
       ),
     );
 

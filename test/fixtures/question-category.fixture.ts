@@ -40,9 +40,13 @@ export class QuestionCategoryFixture
       },
     ];
 
-    const [firstUser, secondUser] = await this.prisma.$transaction(
-      usersToCreate.map((userData) =>
-        this.prisma.user.create({ select: selectQuery, data: userData }),
+    const [firstUser, secondUser] = await Promise.all(
+      usersToCreate.map(
+        async (userData) =>
+          await this.prisma.user.create({
+            select: selectQuery,
+            data: userData,
+          }),
       ),
     );
 

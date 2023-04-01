@@ -27,8 +27,19 @@ services:
         image: mongo:6.0.4
         container_name: quizae-mongodb
         restart: unless-stopped
+        entrypoint: [
+            "/usr/bin/mongod",
+            "--keyFile",
+            "/data/file.key",
+            "--replSet",
+            "rs0",
+            "--journal",
+            "--bind_ip_all"
+        ]
         volumes:
             - mongo_data:/data/db
+            - ./development-environment/mongo/file.key:/data/file.key
+            - ./development-environment/mongo/change-replica.sh:/tmp/change-replica.sh
         networks:
             - quizae_db_access
         environment:
@@ -57,7 +68,7 @@ services:
             - traefik.http.routers.backend.tls=true
         environment:
             APP_ENV: dev
-            DATABASE_URL: mongodb://root:root@quizae-mongodb/quizae?authSource=admin
+            DATABASE_URL: mongodb://root:root@quizae-mongodb/quizae?authSource=admin&replicaSet=rs0
             JWT_SECRET: 3493ab26a038b1c70a8273e75ebbc9e7
 
     mongodb-express:
