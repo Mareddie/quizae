@@ -7,7 +7,6 @@ services:
     traefik:
         image: traefik:v2.9
         container_name: quizae-traefik
-        restart: unless-stopped
         ports:
             - "80:80"
             - "443:443"
@@ -26,15 +25,16 @@ services:
     mongodb:
         image: mongo:6.0.4
         container_name: quizae-mongodb
-        restart: unless-stopped
+        command: --replSet rs0 --keyFile /data/mongo-replica.key --bind_ip_all
         volumes:
             - mongo_data:/data/db
+            - ./development-environment/mongo/file.key:/data/mongo-replica.key
+            - ./development-environment/mongo/change-replica.sh:/tmp/change-replica.sh
         networks:
             - quizae_db_access
         environment:
             MONGO_INITDB_ROOT_USERNAME: root
             MONGO_INITDB_ROOT_PASSWORD: root
-            MONGO_INITDB_DATABASE: quizae
 
     backend:
         build:
@@ -42,7 +42,6 @@ services:
             dockerfile: Dockerfile
             target: development
         container_name: quizae-backend
-        restart: unless-stopped
         depends_on:
             - mongodb
         volumes:
@@ -57,13 +56,12 @@ services:
             - traefik.http.routers.backend.tls=true
         environment:
             APP_ENV: dev
-            DATABASE_URL: mongodb://root:root@quizae-mongodb/quizae?authSource=admin
+            DATABASE_URL: mongodb://root:root@quizae-mongodb/quizae?authSource=admin&replicaSet=rs0
             JWT_SECRET: 3493ab26a038b1c70a8273e75ebbc9e7
 
     mongodb-express:
         image: mongo-express:latest
         container_name: quizae-mongodb-express
-        restart: unless-stopped
         depends_on:
             - mongodb
         networks:

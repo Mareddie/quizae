@@ -74,6 +74,8 @@ export class QuestionRepository {
       },
     };
 
+    await this.prisma.answer.deleteMany(deleteAnswersQuery);
+
     const updateQuery = {
       where: {
         id: questionId,
@@ -102,12 +104,7 @@ export class QuestionRepository {
       }
     }
 
-    const [, updateResult] = await this.prisma.$transaction([
-      this.prisma.answer.deleteMany(deleteAnswersQuery),
-      this.prisma.question.update(updateQuery),
-    ]);
-
-    return updateResult;
+    return this.prisma.question.update(updateQuery);
   }
 
   async createQuestion(

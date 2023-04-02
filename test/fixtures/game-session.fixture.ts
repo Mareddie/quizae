@@ -36,9 +36,13 @@ export class GameSessionFixture
       },
     ];
 
-    const [firstUser] = await this.prisma.$transaction(
-      usersToCreate.map((userData) =>
-        this.prisma.user.create({ select: selectQuery, data: userData }),
+    const [firstUser] = await Promise.all(
+      usersToCreate.map(
+        async (userData) =>
+          await this.prisma.user.create({
+            select: selectQuery,
+            data: userData,
+          }),
       ),
     );
 
@@ -123,10 +127,8 @@ export class GameSessionFixture
     categoryQuestions[0].correctAnswer = questionsAnswers[1].id;
     categoryQuestions[1].correctAnswer = questionsAnswers[5].id;
 
-    await this.prisma.$transaction([
-      this.prisma.question.createMany({ data: categoryQuestions }),
-      this.prisma.answer.createMany({ data: questionsAnswers }),
-    ]);
+    await this.prisma.question.createMany({ data: categoryQuestions });
+    await this.prisma.answer.createMany({ data: questionsAnswers });
 
     this.data = {
       user: firstUser,

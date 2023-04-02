@@ -38,9 +38,10 @@ export class GroupFixture implements AbstractFixture<GroupFixtureData> {
       },
     ];
 
-    const [firstUser, secondUser] = await this.prisma.$transaction(
-      usersToCreate.map((userData) =>
-        this.prisma.user.create({ select: userSelect, data: userData }),
+    const [firstUser, secondUser] = await Promise.all(
+      usersToCreate.map(
+        async (userData) =>
+          await this.prisma.user.create({ select: userSelect, data: userData }),
       ),
     );
 
@@ -55,9 +56,10 @@ export class GroupFixture implements AbstractFixture<GroupFixtureData> {
       },
     ];
 
-    const [firstGroup, secondGroup] = await this.prisma.$transaction(
-      groupsToCreate.map((groupData) =>
-        this.prisma.group.create({ data: groupData }),
+    const [firstGroup, secondGroup] = await Promise.all(
+      groupsToCreate.map(
+        async (groupData) =>
+          await this.prisma.group.create({ data: groupData }),
       ),
     );
 
@@ -72,9 +74,10 @@ export class GroupFixture implements AbstractFixture<GroupFixtureData> {
       },
     ];
 
-    await this.prisma.$transaction(
-      membershipsToCreate.map((membershipData) =>
-        this.prisma.groupMembership.create({ data: membershipData }),
+    await Promise.all(
+      membershipsToCreate.map(
+        async (membershipData) =>
+          await this.prisma.groupMembership.create({ data: membershipData }),
       ),
     );
 
