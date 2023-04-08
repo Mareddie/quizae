@@ -22,6 +22,8 @@ import { DeleteQuestionCategoryHandler } from '../../../Quiz/Handler/delete-ques
 export class QuestionCategoryResourceController {
   constructor(
     private readonly questionCategoryRepository: QuestionCategoryRepository,
+    // TODO: have one handler for questionCategories
+    // TODO: repurpose questionCategories ownership - user owns them, groups are deleted
     private readonly handler: CreateUpdateQuestionCategoryHandler,
     private readonly deleteHandler: DeleteQuestionCategoryHandler,
   ) {}
