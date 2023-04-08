@@ -5,7 +5,6 @@ import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-ca
 import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progress-game-session.handler';
 import { GameStatusFacade } from '../../../GameSession/Facade/game-status.facade';
 import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.facade';
-import { CanAccessGroupGuard } from '../../../Common/Guard/can-access-group.guard';
 import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
 import { getMockedAuthRequest } from '../../../../test/testUtils';
 import { plainToClass } from 'class-transformer';
@@ -56,8 +55,6 @@ describe('GameSessionController', () => {
             throw new Error(`Undefined token for mocking: ${String(token)}`);
         }
       })
-      .overrideGuard(CanAccessGroupGuard)
-      .useValue({ canActivate: () => true })
       .overrideGuard(CanAccessGameGuard)
       .useValue({ canActivate: () => true })
       .compile();

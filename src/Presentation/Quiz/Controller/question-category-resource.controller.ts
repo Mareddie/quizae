@@ -16,16 +16,10 @@ import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-ca
 import { QuestionCategory } from '@prisma/client';
 import { CreateUpdateQuestionCategoryDTO } from '../../../Quiz/DTO/create-update-question-category.dto';
 import { CreateUpdateQuestionCategoryHandler } from '../../../Quiz/Handler/create-update-question-category.handler';
-import { Response } from 'express';
 import { DeleteQuestionCategoryHandler } from '../../../Quiz/Handler/delete-question-category.handler';
-import { CanAccessGroupGuard } from '../../../Common/Guard/can-access-group.guard';
 
 @Controller('/question-categories/:groupId')
-@UseGuards(
-  new CheckObjectIdGuard('groupId'),
-  AuthenticatedGuard,
-  CanAccessGroupGuard,
-)
+@UseGuards(new CheckObjectIdGuard('groupId'), AuthenticatedGuard)
 export class QuestionCategoryResourceController {
   constructor(
     private readonly questionCategoryRepository: QuestionCategoryRepository,

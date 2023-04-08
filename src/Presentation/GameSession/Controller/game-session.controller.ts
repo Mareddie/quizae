@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
-import { CanAccessGroupGuard } from '../../../Common/Guard/can-access-group.guard';
 import { CreateGameSessionRequestDTO } from '../../../GameSession/DTO/create-game-session-request.dto';
 import { CreateGameSessionHandler } from '../../../GameSession/Handler/create-game-session.handler';
 import { Request } from 'express';
@@ -37,7 +36,7 @@ export class GameSessionController {
   ) {}
 
   @Post(':groupId/create')
-  @UseGuards(new CheckObjectIdGuard('groupId'), CanAccessGroupGuard)
+  @UseGuards(new CheckObjectIdGuard('groupId'))
   async createGame(
     @Req() request: Request,
     @Param('groupId') groupId: string,

@@ -3,7 +3,6 @@ import { Test } from '@nestjs/testing';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { CreateUpdateQuestionCategoryHandler } from '../../../Quiz/Handler/create-update-question-category.handler';
 import { DeleteQuestionCategoryHandler } from '../../../Quiz/Handler/delete-question-category.handler';
-import { CanAccessGroupGuard } from '../../../Common/Guard/can-access-group.guard';
 import { plainToClass } from 'class-transformer';
 import { CreateUpdateQuestionCategoryDTO } from '../../../Quiz/DTO/create-update-question-category.dto';
 
@@ -39,8 +38,6 @@ describe('QuestionCategoryResourceController', () => {
             throw new Error(`Undefined token for mocking: ${String(token)}`);
         }
       })
-      .overrideGuard(CanAccessGroupGuard)
-      .useValue({ canActivate: () => true })
       .compile();
 
     controller = moduleRef.get(QuestionCategoryResourceController);
