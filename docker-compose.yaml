@@ -22,19 +22,18 @@ services:
             - traefik.http.routers.traefik.tls=true
             - traefik.http.routers.traefik.service=api@internal
 
-    mongodb:
-        image: mongo:6.0.4
-        container_name: quizae-mongodb
-        command: --replSet rs0 --keyFile /data/mongo-replica.key --bind_ip_all
+    mysql:
+        image: mysql:8.0.32
+        container_name: quizae-mysql
         volumes:
-            - mongo_data:/data/db
-            - ./development-environment/mongo/file.key:/data/mongo-replica.key
-            - ./development-environment/mongo/change-replica.sh:/tmp/change-replica.sh
+            - mysql_data:/var/lib/mysql
         networks:
             - quizae_db_access
         environment:
-            MONGO_INITDB_ROOT_USERNAME: root
-            MONGO_INITDB_ROOT_PASSWORD: root
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: quizae
+        ports:
+            - "33061:3306"
 
     backend:
         build:
@@ -43,7 +42,7 @@ services:
             target: development
         container_name: quizae-backend
         depends_on:
-            - mongodb
+            - mysql
         volumes:
             - ./:/usr/src/app:rw
         networks:
@@ -56,26 +55,8 @@ services:
             - traefik.http.routers.backend.tls=true
         environment:
             APP_ENV: dev
-            DATABASE_URL: mongodb://root:root@quizae-mongodb/quizae?authSource=admin&replicaSet=rs0
+            DATABASE_URL: mysql://root:root@quizae-mysql:3306/quizae
             JWT_SECRET: 3493ab26a038b1c70a8273e75ebbc9e7
-
-    mongodb-express:
-        image: mongo-express:latest
-        container_name: quizae-mongodb-express
-        depends_on:
-            - mongodb
-        networks:
-            - quizae_db_access
-            - quizae_traefik
-        environment:
-            ME_CONFIG_MONGODB_SERVER: quizae-mongodb
-            ME_CONFIG_MONGODB_ADMINUSERNAME: root
-            ME_CONFIG_MONGODB_ADMINPASSWORD: root
-        labels:
-            - traefik.enable=true
-            - traefik.http.routers.mongodb-express.entrypoints=websecure
-            - traefik.http.routers.mongodb-express.rule=Host(`mongodb-express.quizae.wtf`)
-            - traefik.http.routers.mongodb-express.tls=true
 
 networks:
     quizae_traefik:
@@ -84,4 +65,4 @@ networks:
         external: true
 
 volumes:
-    mongo_data:
+    mysql_data:
