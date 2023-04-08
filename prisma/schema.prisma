@@ -10,112 +10,89 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model User {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    email String  @unique
-    password String
-    firstName String
-    lastName String
-    ownedGroups Group[] @relation()
-    ownedQuestions Question[] @relation()
-    memberships GroupMembership[] @relation()
-    startedGames Game[] @relation()
-}
-
-model Group {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    name String
-    createdAt DateTime @default(now())
-    owner User @relation(fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    ownerId String @db.ObjectId
-    userMemberships GroupMembership[] @relation()
-    questionCategories QuestionCategory[] @relation()
-}
-
-model GroupMembership {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    userId String @db.ObjectId
-    group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    groupId String @db.ObjectId
-
-    @@unique([userId, groupId])
-}
-
-model Game {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    startedById String @db.ObjectId
-    startedBy User @relation(fields: [startedById], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    questionCategories GameQuestionCategory[]
-    currentPlayerId String? @db.ObjectId
-    nextPlayerId String? @db.ObjectId
-    state GameState
-    players Player[] @relation()
-    startedAt DateTime @default(now())
-}
-
 enum GameState {
     IN_PROGRESS
     FINISHED
 }
 
-type GameQuestionCategory {
-    id String @db.ObjectId
+model User {
+    id String @id @default(uuid())
+    email String  @unique
+    password String
+    firstName String
+    lastName String
+    ownedGroups Group[] @relation
+    ownedQuestions Question[] @relation
+    memberships GroupMembership[] @relation
+    startedGames Game[] @relation
+}
+
+model Group {
+    id String @id @default(uuid())
     name String
-    questions GameQuestion[]
-    order Int?
+    createdAt DateTime @default(now())
+    owner User @relation(fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    ownerId String
+    userMemberships GroupMembership[] @relation
+    questionCategories QuestionCategory[] @relation
 }
 
-type GameQuestion {
-    id String @db.ObjectId
-    categoryId String @db.ObjectId
-    correctAnswer String @db.ObjectId
-    answers GameQuestionAnswer[]
-    text String
+model GroupMembership {
+    id String @id @default(uuid())
+    user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    userId String
+    group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    groupId String
+
+    @@unique([userId, groupId])
 }
 
-type GameQuestionAnswer {
-    id String @db.ObjectId
-    questionId String @db.ObjectId
-    text String
-    order Int?
+model Game {
+    id String @id @default(uuid())
+    startedById String
+    startedBy User @relation(fields: [startedById], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    currentPlayerId String?
+    nextPlayerId String?
+    state GameState
+    players Player[] @relation
+    startedAt DateTime @default(now())
 }
 
 model Player {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
+    id String @id @default(uuid())
     name String
     points Int @default(0)
-    gameId String @db.ObjectId
+    gameId String
     game Game @relation(fields: [gameId], references: [id], onUpdate: Cascade, onDelete: Cascade)
     order Int
 }
 
 model QuestionCategory {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
+    id String @id @default(uuid())
     name String
     group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    groupId String @db.ObjectId
-    questions Question[] @relation()
+    groupId String
+    questions Question[] @relation
     order Int?
 
     @@unique([groupId, name])
 }
 
 model Question {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
+    id String @id @default(uuid())
     user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    userId String @db.ObjectId
+    userId String
     category QuestionCategory @relation(fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    categoryId String @db.ObjectId
-    answers Answer[] @relation()
-    correctAnswer String? @db.ObjectId
+    categoryId String
+    answers Answer[] @relation
+    correctAnswer String?
     text String
 }
 
 model Answer {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
+    id String @id @default(uuid())
     question Question @relation(fields: [questionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    questionId String @db.ObjectId
+    questionId String
     text String
     order Int?
 }
