@@ -21,36 +21,42 @@ model User {
     password String
     firstName String
     lastName String
-    ownedGroups Group[] @relation
-    ownedQuestions Question[] @relation
-    memberships GroupMembership[] @relation
+    questionCategories QuestionCategory[] @relation
     startedGames Game[] @relation
 }
 
-model Group {
+model QuestionCategory {
     id String @id @default(uuid())
     name String
-    createdAt DateTime @default(now())
-    owner User @relation(fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    ownerId String
-    userMemberships GroupMembership[] @relation
-    questionCategories QuestionCategory[] @relation
+    user User @relation(fields: [userId], references: [id])
+    userId String
+    questions Question[] @relation
+    order Int?
+
+    @@unique([userId, name])
 }
 
-model GroupMembership {
+model Question {
     id String @id @default(uuid())
-    user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    userId String
-    group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    groupId String
+    category QuestionCategory @relation(fields: [categoryId], references: [id])
+    categoryId String
+    answers Answer[] @relation
+    correctAnswer String?
+    text String
+}
 
-    @@unique([userId, groupId])
+model Answer {
+    id String @id @default(uuid())
+    question Question @relation(fields: [questionId], references: [id])
+    questionId String
+    text String
+    order Int?
 }
 
 model Game {
     id String @id @default(uuid())
     startedById String
-    startedBy User @relation(fields: [startedById], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    startedBy User @relation(fields: [startedById], references: [id])
     currentPlayerId String?
     nextPlayerId String?
     state GameState
@@ -63,36 +69,6 @@ model Player {
     name String
     points Int @default(0)
     gameId String
-    game Game @relation(fields: [gameId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    game Game @relation(fields: [gameId], references: [id])
     order Int
-}
-
-model QuestionCategory {
-    id String @id @default(uuid())
-    name String
-    group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    groupId String
-    questions Question[] @relation
-    order Int?
-
-    @@unique([groupId, name])
-}
-
-model Question {
-    id String @id @default(uuid())
-    user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    userId String
-    category QuestionCategory @relation(fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    categoryId String
-    answers Answer[] @relation
-    correctAnswer String?
-    text String
-}
-
-model Answer {
-    id String @id @default(uuid())
-    question Question @relation(fields: [questionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    questionId String
-    text String
-    order Int?
 }
