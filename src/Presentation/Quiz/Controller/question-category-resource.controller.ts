@@ -7,10 +7,9 @@ import {
   Param,
   Patch,
   Post,
-  Res,
   UseGuards,
 } from '@nestjs/common';
-import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
+import { CheckUuidGuard } from '../../../Common/Guard/check-uuid.guard';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { QuestionCategory } from '@prisma/client';
@@ -19,7 +18,7 @@ import { CreateUpdateQuestionCategoryHandler } from '../../../Quiz/Handler/creat
 import { DeleteQuestionCategoryHandler } from '../../../Quiz/Handler/delete-question-category.handler';
 
 @Controller('/question-categories/:groupId')
-@UseGuards(new CheckObjectIdGuard('groupId'), AuthenticatedGuard)
+@UseGuards(new CheckUuidGuard('groupId'), AuthenticatedGuard)
 export class QuestionCategoryResourceController {
   constructor(
     private readonly questionCategoryRepository: QuestionCategoryRepository,
@@ -46,7 +45,7 @@ export class QuestionCategoryResourceController {
   }
 
   @Patch(':questionCategoryId')
-  @UseGuards(new CheckObjectIdGuard('questionCategoryId'))
+  @UseGuards(new CheckUuidGuard('questionCategoryId'))
   async updateResource(
     @Param('groupId') groupId: string,
     @Param('questionCategoryId') questionCategoryId: string,
@@ -60,7 +59,7 @@ export class QuestionCategoryResourceController {
   }
 
   @Delete(':questionCategoryId')
-  @UseGuards(new CheckObjectIdGuard('questionCategoryId'))
+  @UseGuards(new CheckUuidGuard('questionCategoryId'))
   @HttpCode(204)
   async deleteResource(
     @Param('groupId') groupId: string,

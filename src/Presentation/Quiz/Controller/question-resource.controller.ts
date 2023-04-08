@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
-import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
+import { CheckUuidGuard } from '../../../Common/Guard/check-uuid.guard';
 import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
 import { Request } from 'express';
 import { CanAccessCategoryGuard } from '../Guard/can-access-category.guard';
@@ -23,7 +23,7 @@ import { DeleteQuestionHandler } from '../../../Quiz/Handler/delete-question.han
 
 @Controller('questions/:categoryId')
 @UseGuards(
-  new CheckObjectIdGuard('categoryId'),
+  new CheckUuidGuard('categoryId'),
   AuthenticatedGuard,
   CanAccessCategoryGuard,
 )
@@ -64,7 +64,7 @@ export class QuestionResourceController {
   }
 
   @Patch(':questionId')
-  @UseGuards(new CheckObjectIdGuard('questionId'))
+  @UseGuards(new CheckUuidGuard('questionId'))
   async updateResource(
     @Param('categoryId') categoryId: string,
     @Param('questionId') questionId: string,
@@ -79,7 +79,7 @@ export class QuestionResourceController {
   }
 
   @Delete(':questionId')
-  @UseGuards(new CheckObjectIdGuard('questionId'))
+  @UseGuards(new CheckUuidGuard('questionId'))
   @HttpCode(204)
   async deleteResource(
     @Param('categoryId') categoryId: string,

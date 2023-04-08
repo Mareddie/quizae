@@ -7,7 +7,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
+import { CheckUuidGuard } from '../../../Common/Guard/check-uuid.guard';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { CreateGameSessionRequestDTO } from '../../../GameSession/DTO/create-game-session-request.dto';
 import { CreateGameSessionHandler } from '../../../GameSession/Handler/create-game-session.handler';
@@ -36,7 +36,7 @@ export class GameSessionController {
   ) {}
 
   @Post(':groupId/create')
-  @UseGuards(new CheckObjectIdGuard('groupId'))
+  @UseGuards(new CheckUuidGuard('groupId'))
   async createGame(
     @Req() request: Request,
     @Param('groupId') groupId: string,
@@ -53,15 +53,15 @@ export class GameSessionController {
   }
 
   @Get(':gameId')
-  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
+  @UseGuards(new CheckUuidGuard('gameId'), CanAccessGameGuard)
   async getGameStatus(@Param('gameId') gameId: string): Promise<GameStatus> {
     return this.statusFacade.getGameStatus(gameId);
   }
 
   @Get(':gameId/get-question/:categoryId')
   @UseGuards(
-    new CheckObjectIdGuard('gameId'),
-    new CheckObjectIdGuard('categoryId'),
+    new CheckUuidGuard('gameId'),
+    new CheckUuidGuard('categoryId'),
     CanAccessGameGuard,
   )
   async getGameQuestion(
@@ -72,7 +72,7 @@ export class GameSessionController {
   }
 
   @Post(':gameId/progress')
-  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
+  @UseGuards(new CheckUuidGuard('gameId'), CanAccessGameGuard)
   async progressGame(
     @Param('gameId') gameId: string,
     @Body() progressGameData: ProgressGameRequestDTO,
@@ -84,7 +84,7 @@ export class GameSessionController {
   }
 
   @Post(':gameId/finish')
-  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
+  @UseGuards(new CheckUuidGuard('gameId'), CanAccessGameGuard)
   async finishGame(
     @Param('gameId') gameId: string,
   ): Promise<FinishedGameResult> {

@@ -17,7 +17,7 @@ import { CreateUpdateGroupHandler } from '../../../User/Handler/create-update-gr
 import { Request } from 'express';
 import { GroupRepository } from '../../../User/Repository/group.repository';
 import { DeleteGroupHandler } from '../../../User/Handler/delete-group.handler';
-import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
+import { CheckUuidGuard } from '../../../Common/Guard/check-uuid.guard';
 import { LeaveGroupHandler } from '../../../User/Handler/leave-group.handler';
 import { GroupWithMemberships } from '../../../User/Type/group-with-memberships';
 import { GroupWithOwnerAndMemberships } from '../../../User/Type/group-with-owner-and-memberships';
@@ -59,7 +59,7 @@ export class GroupResourceController {
   }
 
   @Patch(':groupId')
-  @UseGuards(new CheckObjectIdGuard('groupId'))
+  @UseGuards(new CheckUuidGuard('groupId'))
   async updateResource(
     @Param('groupId') groupId: string,
     @Body() updateGroup: CreateUpdateGroupDTO,
@@ -73,7 +73,7 @@ export class GroupResourceController {
   }
 
   @Delete(':groupId')
-  @UseGuards(new CheckObjectIdGuard('groupId'))
+  @UseGuards(new CheckUuidGuard('groupId'))
   @HttpCode(204)
   async deleteResource(
     @Param('groupId') groupId: string,
@@ -83,7 +83,7 @@ export class GroupResourceController {
   }
 
   @Patch(':groupId/leave')
-  @UseGuards(new CheckObjectIdGuard('groupId'))
+  @UseGuards(new CheckUuidGuard('groupId'))
   @HttpCode(204)
   async leaveGroup(
     @Param('groupId') groupId: string,
