@@ -48,25 +48,8 @@ describe('QuestionResourceController', () => {
   });
 
   describe('resourceList', () => {
-    it('fetches my questions', async () => {
-      const req = getMockedAuthRequest();
-
-      const questions = await controller.resourceList('123', req, 'myOwn');
-
-      expect(questions).toEqual([{ test: true }]);
-
-      expect(questionRepositoryMock['fetchQuestions']).toHaveBeenCalledTimes(1);
-
-      expect(questionRepositoryMock['fetchQuestions']).toHaveBeenCalledWith(
-        '123',
-        req.user.id,
-      );
-    });
-
     it('fetches questions within category', async () => {
-      const req = getMockedAuthRequest();
-
-      const questions = await controller.resourceList('123', req);
+      const questions = await controller.resourceList('123');
 
       expect(questions).toEqual([{ test: true }]);
 

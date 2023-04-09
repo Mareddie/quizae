@@ -8,14 +8,10 @@ import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 export class QuestionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async fetchQuestions(
-    categoryId: string,
-    userId?: string,
-  ): Promise<QuestionWithAnswers[]> {
+  async fetchQuestions(categoryId: string): Promise<QuestionWithAnswers[]> {
     return this.prisma.question.findMany({
       where: {
         categoryId: categoryId,
-        userId: userId,
       },
       include: {
         answers: true,
@@ -45,10 +41,7 @@ export class QuestionRepository {
     return this.prisma.question.findFirst({
       where: {
         categoryId: categoryId,
-        text: {
-          equals: text,
-          mode: 'insensitive',
-        },
+        text: text,
       },
     });
   }

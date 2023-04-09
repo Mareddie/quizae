@@ -7,7 +7,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -37,16 +36,7 @@ export class QuestionResourceController {
   @Get()
   async resourceList(
     @Param('categoryId') categoryId: string,
-    @Req() request: Request,
-    @Query('filter') filter?: string,
   ): Promise<QuestionWithAnswers[]> {
-    if (filter === 'myOwn') {
-      return await this.questionRepository.fetchQuestions(
-        categoryId,
-        request.user['id'],
-      );
-    }
-
     return await this.questionRepository.fetchQuestions(categoryId);
   }
 
@@ -85,7 +75,6 @@ export class QuestionResourceController {
     @Param('categoryId') categoryId: string,
     @Param('questionId') questionId: string,
   ): Promise<void> {
-    // Anyone inside the group can delete questions (with answers)
     await this.deleteHandler.deleteQuestion(categoryId, questionId);
   }
 }
