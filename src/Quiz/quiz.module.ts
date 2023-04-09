@@ -5,7 +5,6 @@ import { CreateUpdateQuestionHandler } from './Handler/create-update-question.ha
 import { DeleteQuestionHandler } from './Handler/delete-question.handler';
 import { QuestionCategoryRepository } from './Repository/question-category.repository';
 import { QuestionCategoryHandler } from './Handler/question-category.handler';
-import { DeleteQuestionCategoryHandler } from './Handler/delete-question-category.handler';
 
 @Module({
   imports: [CommonModule],
@@ -15,7 +14,6 @@ import { DeleteQuestionCategoryHandler } from './Handler/delete-question-categor
     CreateUpdateQuestionHandler,
     QuestionCategoryHandler,
     DeleteQuestionHandler,
-    DeleteQuestionCategoryHandler,
   ],
   providers: [
     QuestionRepository,
@@ -23,7 +21,6 @@ import { DeleteQuestionCategoryHandler } from './Handler/delete-question-categor
     CreateUpdateQuestionHandler,
     QuestionCategoryHandler,
     DeleteQuestionHandler,
-    DeleteQuestionCategoryHandler,
   ],
 })
 export class QuizModule {}

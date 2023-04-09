@@ -2,7 +2,6 @@ import { QuestionCategoryResourceController } from './question-category-resource
 import { Test } from '@nestjs/testing';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { QuestionCategoryHandler } from '../../../Quiz/Handler/question-category.handler';
-import { DeleteQuestionCategoryHandler } from '../../../Quiz/Handler/delete-question-category.handler';
 import { plainToClass } from 'class-transformer';
 import { CreateUpdateQuestionCategoryDTO } from '../../../Quiz/DTO/create-update-question-category.dto';
 
@@ -16,9 +15,6 @@ describe('QuestionCategoryResourceController', () => {
   const handlerMock = {
     createQuestionCategory: jest.fn().mockResolvedValue({ test: true }),
     updateQuestionCategory: jest.fn().mockResolvedValue({ test: true }),
-  };
-
-  const deleteHandlerMock = {
     deleteQuestionCategory: jest.fn().mockResolvedValue({ test: true }),
   };
 
@@ -32,8 +28,6 @@ describe('QuestionCategoryResourceController', () => {
             return repositoryMock;
           case QuestionCategoryHandler:
             return handlerMock;
-          case DeleteQuestionCategoryHandler:
-            return deleteHandlerMock;
           default:
             throw new Error(`Undefined token for mocking: ${String(token)}`);
         }
@@ -103,11 +97,9 @@ describe('QuestionCategoryResourceController', () => {
     it('deletes question category', async () => {
       await controller.deleteResource('123', '456');
 
-      expect(deleteHandlerMock['deleteQuestionCategory']).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(handlerMock['deleteQuestionCategory']).toHaveBeenCalledTimes(1);
 
-      expect(deleteHandlerMock['deleteQuestionCategory']).toHaveBeenCalledWith(
+      expect(handlerMock['deleteQuestionCategory']).toHaveBeenCalledWith(
         '123',
         '456',
       );

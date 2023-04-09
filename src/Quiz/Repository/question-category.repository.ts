@@ -16,17 +16,14 @@ export class QuestionCategoryRepository {
     });
   }
 
-  async fetchForGroup(
-    groupId: string,
+  async fetchForUser(
+    userId: string,
     name?: string,
   ): Promise<QuestionCategory[]> {
     return this.prisma.questionCategory.findMany({
       where: {
-        groupId: groupId,
-        name: {
-          equals: name,
-          mode: 'insensitive',
-        },
+        userId: userId,
+        name: name,
       },
     });
   }
@@ -55,14 +52,14 @@ export class QuestionCategoryRepository {
     });
   }
 
-  async createForGroup(
-    groupId: string,
+  async createForUser(
+    userId: string,
     data: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
     return this.prisma.questionCategory.create({
       data: {
         name: data.name,
-        groupId: groupId,
+        userId: userId,
         order: data.order,
       },
     });

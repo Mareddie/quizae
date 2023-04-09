@@ -14,6 +14,12 @@ describe('CreateUpdateQuestionCategoryHandler', () => {
       .fn()
       .mockResolvedValueOnce([{ id: '123', name: 'test category' }])
       .mockResolvedValue([]),
+    fetchById: jest.fn().mockResolvedValue({
+      id: '123',
+      groupId: '123',
+      name: 'Some Question Category',
+    }),
+    deleteQuestionCategory: jest.fn().mockResolvedValue({ test: true }),
   };
 
   beforeEach(() => {
@@ -22,6 +28,22 @@ describe('CreateUpdateQuestionCategoryHandler', () => {
     );
 
     repositoryMock['fetchForGroup'].mockClear();
+  });
+
+  describe('deleteQuestionCategory', () => {
+    it('throws exception on invalid question category', async () => {
+      await expect(
+        handler.deleteQuestionCategory('111', '123'),
+      ).rejects.toThrow(ConflictException);
+
+      expect(repositoryMock.deleteQuestionCategory).not.toHaveBeenCalled();
+    });
+
+    it('deletes question category', async () => {
+      await handler.deleteQuestionCategory('123', '123');
+
+      expect(repositoryMock.deleteQuestionCategory).toHaveBeenCalledWith('123');
+    });
   });
 
   describe('createQuestionCategory', () => {

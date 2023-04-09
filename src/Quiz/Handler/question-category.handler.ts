@@ -10,20 +10,20 @@ export class QuestionCategoryHandler {
   ) {}
 
   async createQuestionCategory(
-    groupId: string,
+    userId: string,
     data: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
-    await this.testQuestionCategoryUniqueness(groupId, data.name);
+    await this.testQuestionCategoryUniqueness(userId, data.name);
 
-    return this.questionCategoryRepository.createForGroup(groupId, data);
+    return this.questionCategoryRepository.createForUser(userId, data);
   }
 
   async updateQuestionCategory(
     questionCategoryId: string,
-    groupId: string,
+    userId: string,
     data: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
-    await this.testQuestionCategoryUniqueness(groupId, data.name);
+    await this.testQuestionCategoryUniqueness(userId, data.name);
 
     return this.questionCategoryRepository.updateQuestionCategory(
       questionCategoryId,
@@ -31,12 +31,31 @@ export class QuestionCategoryHandler {
     );
   }
 
+  async deleteQuestionCategory(
+    userId: string,
+    questionCategoryId: string,
+  ): Promise<void> {
+    const predicate = await this.questionCategoryRepository.fetchById(
+      questionCategoryId,
+    );
+
+    if (predicate === null || predicate.userId !== userId) {
+      throw new ConflictException(
+        'Question Category was not found or does not belong to authenticated User',
+      );
+    }
+
+    await this.questionCategoryRepository.deleteQuestionCategory(
+      questionCategoryId,
+    );
+  }
+
   private async testQuestionCategoryUniqueness(
-    groupId: string,
+    userId: string,
     name: string,
   ): Promise<void> {
-    const predicate = await this.questionCategoryRepository.fetchForGroup(
-      groupId,
+    const predicate = await this.questionCategoryRepository.fetchForUser(
+      userId,
       name,
     );
 
