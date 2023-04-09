@@ -4,7 +4,7 @@ import { QuestionRepository } from './Repository/question.repository';
 import { CreateUpdateQuestionHandler } from './Handler/create-update-question.handler';
 import { DeleteQuestionHandler } from './Handler/delete-question.handler';
 import { QuestionCategoryRepository } from './Repository/question-category.repository';
-import { CreateUpdateQuestionCategoryHandler } from './Handler/create-update-question-category.handler';
+import { QuestionCategoryHandler } from './Handler/question-category.handler';
 import { DeleteQuestionCategoryHandler } from './Handler/delete-question-category.handler';
 
 @Module({
@@ -13,7 +13,7 @@ import { DeleteQuestionCategoryHandler } from './Handler/delete-question-categor
     QuestionRepository,
     QuestionCategoryRepository,
     CreateUpdateQuestionHandler,
-    CreateUpdateQuestionCategoryHandler,
+    QuestionCategoryHandler,
     DeleteQuestionHandler,
     DeleteQuestionCategoryHandler,
   ],
@@ -21,7 +21,7 @@ import { DeleteQuestionCategoryHandler } from './Handler/delete-question-categor
     QuestionRepository,
     QuestionCategoryRepository,
     CreateUpdateQuestionHandler,
-    CreateUpdateQuestionCategoryHandler,
+    QuestionCategoryHandler,
     DeleteQuestionHandler,
     DeleteQuestionCategoryHandler,
   ],

@@ -14,7 +14,7 @@ import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { QuestionCategory } from '@prisma/client';
 import { CreateUpdateQuestionCategoryDTO } from '../../../Quiz/DTO/create-update-question-category.dto';
-import { CreateUpdateQuestionCategoryHandler } from '../../../Quiz/Handler/create-update-question-category.handler';
+import { QuestionCategoryHandler } from '../../../Quiz/Handler/question-category.handler';
 import { DeleteQuestionCategoryHandler } from '../../../Quiz/Handler/delete-question-category.handler';
 
 @Controller('/question-categories/:groupId')
@@ -24,7 +24,7 @@ export class QuestionCategoryResourceController {
     private readonly questionCategoryRepository: QuestionCategoryRepository,
     // TODO: have one handler for questionCategories
     // TODO: repurpose questionCategories ownership - user owns them, groups are deleted
-    private readonly handler: CreateUpdateQuestionCategoryHandler,
+    private readonly handler: QuestionCategoryHandler,
     private readonly deleteHandler: DeleteQuestionCategoryHandler,
   ) {}
 

@@ -4,7 +4,7 @@ import { CreateUpdateQuestionCategoryDTO } from '../DTO/create-update-question-c
 import { QuestionCategory } from '@prisma/client';
 
 @Injectable()
-export class CreateUpdateQuestionCategoryHandler {
+export class QuestionCategoryHandler {
   constructor(
     private readonly questionCategoryRepository: QuestionCategoryRepository,
   ) {}

@@ -1,7 +1,7 @@
 import { QuestionCategoryResourceController } from './question-category-resource.controller';
 import { Test } from '@nestjs/testing';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
-import { CreateUpdateQuestionCategoryHandler } from '../../../Quiz/Handler/create-update-question-category.handler';
+import { QuestionCategoryHandler } from '../../../Quiz/Handler/question-category.handler';
 import { DeleteQuestionCategoryHandler } from '../../../Quiz/Handler/delete-question-category.handler';
 import { plainToClass } from 'class-transformer';
 import { CreateUpdateQuestionCategoryDTO } from '../../../Quiz/DTO/create-update-question-category.dto';
@@ -30,7 +30,7 @@ describe('QuestionCategoryResourceController', () => {
         switch (token) {
           case QuestionCategoryRepository:
             return repositoryMock;
-          case CreateUpdateQuestionCategoryHandler:
+          case QuestionCategoryHandler:
             return handlerMock;
           case DeleteQuestionCategoryHandler:
             return deleteHandlerMock;

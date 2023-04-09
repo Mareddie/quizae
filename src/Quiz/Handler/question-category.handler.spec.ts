@@ -1,11 +1,11 @@
-import { CreateUpdateQuestionCategoryHandler } from './create-update-question-category.handler';
+import { QuestionCategoryHandler } from './question-category.handler';
 import { QuestionCategoryRepository } from '../Repository/question-category.repository';
 import { plainToClass } from 'class-transformer';
 import { CreateUpdateQuestionCategoryDTO } from '../DTO/create-update-question-category.dto';
 import { ConflictException } from '@nestjs/common';
 
 describe('CreateUpdateQuestionCategoryHandler', () => {
-  let handler: CreateUpdateQuestionCategoryHandler;
+  let handler: QuestionCategoryHandler;
 
   const repositoryMock = {
     createForGroup: jest.fn().mockResolvedValue({ test: true }),
@@ -17,7 +17,7 @@ describe('CreateUpdateQuestionCategoryHandler', () => {
   };
 
   beforeEach(() => {
-    handler = new CreateUpdateQuestionCategoryHandler(
+    handler = new QuestionCategoryHandler(
       repositoryMock as unknown as QuestionCategoryRepository,
     );
 
