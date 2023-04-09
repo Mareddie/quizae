@@ -1,11 +1,11 @@
-import { CreateUpdateQuestionHandler } from './create-update-question.handler';
+import { QuestionHandler } from './question.handler';
 import { QuestionRepository } from '../Repository/question.repository';
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 import { ConflictException } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 
 describe('CreateUpdateQuestionHandler', () => {
-  let handler: CreateUpdateQuestionHandler;
+  let handler: QuestionHandler;
 
   const questionWithAnswers = {
     id: '123',
@@ -49,12 +49,29 @@ describe('CreateUpdateQuestionHandler', () => {
 
     updateQuestion: jest.fn().mockResolvedValue({ test: true }),
     createQuestion: jest.fn().mockResolvedValue({ test: true }),
+    deleteQuestion: jest.fn().mockResolvedValue({ test: true }),
   };
 
   beforeEach(() => {
-    handler = new CreateUpdateQuestionHandler(
+    handler = new QuestionHandler(
       repositoryMock as unknown as QuestionRepository,
     );
+  });
+
+  describe('deleteQuestion', () => {
+    it('deletes question', async () => {
+      await handler.deleteQuestion('222', '123');
+
+      expect(repositoryMock['fetchByIdAndCategory']).toHaveBeenCalledTimes(1);
+      expect(repositoryMock['deleteQuestion']).toHaveBeenCalledTimes(1);
+      expect(repositoryMock['deleteQuestion']).toHaveBeenCalledWith('456');
+    });
+
+    it('throws exception because question does not exist', async () => {
+      await expect(handler.deleteQuestion('123', '456')).rejects.toThrow(
+        ConflictException,
+      );
+    });
   });
 
   describe('updateQuestion', () => {

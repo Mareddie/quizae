@@ -1,8 +1,7 @@
 import { QuestionResourceController } from './question-resource.controller';
 import { Test } from '@nestjs/testing';
 import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
-import { CreateUpdateQuestionHandler } from '../../../Quiz/Handler/create-update-question.handler';
-import { DeleteQuestionHandler } from '../../../Quiz/Handler/delete-question.handler';
+import { QuestionHandler } from '../../../Quiz/Handler/question.handler';
 import { getMockedAuthRequest } from '../../../../test/testUtils';
 import { CanAccessCategoryGuard } from '../Guard/can-access-category.guard';
 import { CreateUpdateQuestionDTO } from '../../../Quiz/DTO/create-update-question.dto';
@@ -18,9 +17,6 @@ describe('QuestionResourceController', () => {
   const questionHandlerMock = {
     createQuestion: jest.fn().mockResolvedValue({ test: true }),
     updateQuestion: jest.fn().mockResolvedValue({ test: true }),
-  };
-
-  const deleteHandlerMock = {
     deleteQuestion: jest.fn().mockResolvedValue(undefined),
   };
 
@@ -32,10 +28,8 @@ describe('QuestionResourceController', () => {
         switch (token) {
           case QuestionRepository:
             return questionRepositoryMock;
-          case CreateUpdateQuestionHandler:
+          case QuestionHandler:
             return questionHandlerMock;
-          case DeleteQuestionHandler:
-            return deleteHandlerMock;
           default:
             throw new Error(`Undefined token for mocking: ${String(token)}`);
         }
@@ -131,9 +125,9 @@ describe('QuestionResourceController', () => {
     it('deletes question', async () => {
       await controller.deleteResource('123', '456');
 
-      expect(deleteHandlerMock['deleteQuestion']).toHaveBeenCalledTimes(1);
+      expect(questionHandlerMock['deleteQuestion']).toHaveBeenCalledTimes(1);
 
-      expect(deleteHandlerMock['deleteQuestion']).toHaveBeenCalledWith(
+      expect(questionHandlerMock['deleteQuestion']).toHaveBeenCalledWith(
         '123',
         '456',
       );

@@ -17,8 +17,7 @@ import { Request } from 'express';
 import { CanAccessCategoryGuard } from '../Guard/can-access-category.guard';
 import { QuestionWithAnswers } from '../../../Quiz/Type/question-with-answers';
 import { CreateUpdateQuestionDTO } from '../../../Quiz/DTO/create-update-question.dto';
-import { CreateUpdateQuestionHandler } from '../../../Quiz/Handler/create-update-question.handler';
-import { DeleteQuestionHandler } from '../../../Quiz/Handler/delete-question.handler';
+import { QuestionHandler } from '../../../Quiz/Handler/question.handler';
 
 @Controller('questions/:categoryId')
 @UseGuards(
@@ -29,8 +28,7 @@ import { DeleteQuestionHandler } from '../../../Quiz/Handler/delete-question.han
 export class QuestionResourceController {
   constructor(
     private readonly questionRepository: QuestionRepository,
-    private readonly questionHandler: CreateUpdateQuestionHandler,
-    private readonly deleteHandler: DeleteQuestionHandler,
+    private readonly questionHandler: QuestionHandler,
   ) {}
 
   @Get()
@@ -75,6 +73,6 @@ export class QuestionResourceController {
     @Param('categoryId') categoryId: string,
     @Param('questionId') questionId: string,
   ): Promise<void> {
-    await this.deleteHandler.deleteQuestion(categoryId, questionId);
+    await this.questionHandler.deleteQuestion(categoryId, questionId);
   }
 }
