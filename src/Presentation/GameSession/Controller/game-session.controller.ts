@@ -17,7 +17,6 @@ import { CreatedGameWithPlayers } from '../../../GameSession/Type/created-game-w
 import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
 import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-request.dto';
 import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.facade';
-import { QuestionForGame } from '../../../GameSession/Type/question-for-game';
 import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progress-game-session.handler';
 import { GameProgressResult } from '../../../GameSession/Type/game-progress-result';
 import { FinishedGameResult } from '../../../GameSession/Type/finished-game-result';
@@ -60,7 +59,8 @@ export class GameSessionController {
   async getGameQuestion(
     @Param('gameId') gameId: string,
     @Param('categoryId') categoryId: string,
-  ): Promise<QuestionForGame> {
+  ): Promise<void> {
+    // TODO: reimplement fetch of game question
     return await this.gameQuestionFacade.getQuestionForGame(gameId, categoryId);
   }
 
@@ -69,7 +69,8 @@ export class GameSessionController {
   async progressGame(
     @Param('gameId') gameId: string,
     @Body() progressGameData: ProgressGameRequestDTO,
-  ): Promise<GameProgressResult> {
+  ): Promise<void> {
+    // TODO: reimplement progress logic
     return await this.progressGameHandler.progressGame(
       progressGameData,
       gameId,
