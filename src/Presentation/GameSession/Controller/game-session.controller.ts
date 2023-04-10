@@ -15,8 +15,6 @@ import { Request } from 'express';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { CreatedGameWithPlayers } from '../../../GameSession/Type/created-game-with-players';
 import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
-import { GameStatusFacade } from '../../../GameSession/Facade/game-status.facade';
-import { GameStatus } from '../../../GameSession/Type/game-status';
 import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-request.dto';
 import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.facade';
 import { QuestionForGame } from '../../../GameSession/Type/question-for-game';
@@ -31,7 +29,6 @@ export class GameSessionController {
     private readonly createHandler: CreateGameSessionHandler,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
     private readonly progressGameHandler: ProgressGameSessionHandler,
-    private readonly statusFacade: GameStatusFacade,
     private readonly gameQuestionFacade: GameQuestionFacade,
   ) {}
 
@@ -50,8 +47,8 @@ export class GameSessionController {
 
   @Get(':gameId')
   @UseGuards(new CheckUuidGuard('gameId'), CanAccessGameGuard)
-  async getGameStatus(@Param('gameId') gameId: string): Promise<GameStatus> {
-    return this.statusFacade.getGameStatus(gameId);
+  async getGameStatus(@Param('gameId') gameId: string): Promise<void> {
+    // TODO: reimplement game logic
   }
 
   @Get(':gameId/get-question/:categoryId')
