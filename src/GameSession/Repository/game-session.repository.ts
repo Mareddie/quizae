@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../Common/Service/prisma.service';
 import { CreatedGameWithPlayers } from '../Type/created-game-with-players';
-import { GameQuestionCategory, GameState, Player } from '@prisma/client';
+import { GameState, Player } from '@prisma/client';
 import { InitGameSessionPlayerDTO } from '../DTO/create-game-session-request.dto';
 import { Game } from '@prisma/client';
 import { GameWithPlayers } from '../Type/game-with-players';
@@ -20,7 +20,6 @@ export class GameSessionRepository {
         state: true,
         startedAt: true,
         players: true,
-        questionCategories: true,
         currentPlayerId: true,
         nextPlayerId: true,
       },
@@ -50,7 +49,6 @@ export class GameSessionRepository {
       },
       data: {
         state: GameState.FINISHED,
-        questionCategories: [],
       },
     });
   }
@@ -64,7 +62,6 @@ export class GameSessionRepository {
         id: gameData.id,
       },
       data: {
-        questionCategories: gameData.questionCategories,
         currentPlayerId: gameData.currentPlayerId,
         nextPlayerId: gameData.nextPlayerId,
       },
@@ -82,14 +79,12 @@ export class GameSessionRepository {
 
   async createGame(
     startedBy: string,
-    gameData: GameQuestionCategory[],
     players: InitGameSessionPlayerDTO[],
   ): Promise<CreatedGameWithPlayers> {
     const createQuery = {
       data: {
         startedById: startedBy,
         state: GameState.IN_PROGRESS,
-        questionCategories: gameData,
         players: {
           createMany: {
             data: [],

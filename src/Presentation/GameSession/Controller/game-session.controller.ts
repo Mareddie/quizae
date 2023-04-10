@@ -42,12 +42,8 @@ export class GameSessionController {
     @Param('groupId') groupId: string,
     @Body() createGameSession: CreateGameSessionRequestDTO,
   ): Promise<CreatedGameWithPlayers> {
-    const questionCategories =
-      await this.questionCategoryRepository.fetchForGame(groupId);
-
     return await this.createHandler.createGame(
       request.user['id'],
-      questionCategories,
       createGameSession.players,
     );
   }
