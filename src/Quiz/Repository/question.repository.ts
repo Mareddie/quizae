@@ -102,13 +102,11 @@ export class QuestionRepository {
 
   async createQuestion(
     categoryId: string,
-    userId: string,
     data: CreateUpdateQuestionDTO,
   ): Promise<QuestionWithAnswers> {
     const createQuery = {
       data: {
         categoryId: categoryId,
-        userId: userId,
         correctAnswer: data.correctAnswer,
         text: data.text,
         answers: {

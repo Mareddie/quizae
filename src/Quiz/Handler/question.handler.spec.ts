@@ -175,7 +175,7 @@ describe('CreateUpdateQuestionHandler', () => {
         ],
       });
 
-      await expect(handler.createQuestion('222', '222', dto)).rejects.toThrow(
+      await expect(handler.createQuestion('222', dto)).rejects.toThrow(
         ConflictException,
       );
     });
@@ -192,7 +192,7 @@ describe('CreateUpdateQuestionHandler', () => {
         ],
       });
 
-      await handler.createQuestion('222', '222', dto);
+      await handler.createQuestion('222', dto);
 
       expect(repositoryMock['createQuestion']).toHaveBeenCalledTimes(1);
 

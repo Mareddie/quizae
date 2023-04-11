@@ -7,13 +7,11 @@ import {
   Param,
   Patch,
   Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { CheckUuidGuard } from '../../../Common/Guard/check-uuid.guard';
 import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
-import { Request } from 'express';
 import { CanAccessCategoryGuard } from '../Guard/can-access-category.guard';
 import { QuestionWithAnswers } from '../../../Quiz/Type/question-with-answers';
 import { CreateUpdateQuestionDTO } from '../../../Quiz/DTO/create-update-question.dto';
@@ -42,11 +40,9 @@ export class QuestionResourceController {
   async createResource(
     @Param('categoryId') categoryId: string,
     @Body() createQuestion: CreateUpdateQuestionDTO,
-    @Req() request: Request,
   ): Promise<QuestionWithAnswers> {
     return await this.questionHandler.createQuestion(
       categoryId,
-      request.user['id'],
       createQuestion,
     );
   }

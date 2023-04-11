@@ -53,7 +53,6 @@ export class QuestionHandler {
 
   async createQuestion(
     categoryId: string,
-    userId: string,
     data: CreateUpdateQuestionDTO,
   ): Promise<QuestionWithAnswers> {
     const questionCandidate =
@@ -74,7 +73,7 @@ export class QuestionHandler {
       data.correctAnswer = this.getCorrectAnswerFromList(data.answers).id;
     }
 
-    return this.questionRepository.createQuestion(categoryId, userId, data);
+    return this.questionRepository.createQuestion(categoryId, data);
   }
 
   private prepareQuestionAnswers(
