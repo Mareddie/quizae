@@ -2,7 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 import { QuestionRepository } from '../Repository/question.repository';
 import { CreateUpdateAnswerDTO } from '../DTO/create-update-answer.dto';
-import { ObjectID } from 'bson';
+import { v4 as uuidv4 } from 'uuid';
 import { QuestionWithAnswers } from '../Type/question-with-answers';
 
 @Injectable()
@@ -91,7 +91,7 @@ export class QuestionHandler {
     this.getCorrectAnswerFromList(answers);
 
     // Generate object IDs, so we can later determine the correct answer
-    answers.map((answer) => (answer.id = new ObjectID().toString()));
+    answers.map((answer) => (answer.id = uuidv4()));
 
     return answers;
   }
