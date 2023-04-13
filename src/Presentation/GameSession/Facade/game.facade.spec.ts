@@ -1,10 +1,10 @@
-import { GameQuestionFacade } from './game-question.facade';
-import { GameSessionRepository } from '../Repository/game-session.repository';
+import { GameSessionRepository } from '../../../GameSession/Repository/game-session.repository';
 import { GameState } from '@prisma/client';
 import { BadRequestException } from '@nestjs/common';
+import { GameFacade } from './game.facade';
 
-describe('GameQuestionFacade', () => {
-  let facade: GameQuestionFacade;
+describe('GameFacade', () => {
+  let facade: GameFacade;
 
   const gameRepositoryMock = {
     fetchById: jest
@@ -33,7 +33,7 @@ describe('GameQuestionFacade', () => {
   };
 
   beforeEach(() => {
-    facade = new GameQuestionFacade(
+    facade = new GameFacade(
       gameRepositoryMock as unknown as GameSessionRepository,
     );
   });

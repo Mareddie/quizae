@@ -3,12 +3,12 @@ import { Test } from '@nestjs/testing';
 import { CreateGameSessionHandler } from '../../../GameSession/Handler/create-game-session.handler';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progress-game-session.handler';
-import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.facade';
 import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
 import { getMockedAuthRequest } from '../../../../test/testUtils';
 import { plainToClass } from 'class-transformer';
 import { CreateGameSessionRequestDTO } from '../../../GameSession/DTO/create-game-session-request.dto';
 import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-request.dto';
+import { GameFacade } from '../Facade/game.facade';
 
 describe('GameSessionController', () => {
   let controller: GameSessionController;
@@ -42,7 +42,7 @@ describe('GameSessionController', () => {
             return questionCategoryRepositoryMock;
           case ProgressGameSessionHandler:
             return progressGameHandlerMock;
-          case GameQuestionFacade:
+          case GameFacade:
             return gameQuestionFacadeMock;
           default:
             throw new Error(`Undefined token for mocking: ${String(token)}`);
@@ -76,7 +76,7 @@ describe('GameSessionController', () => {
 
       const req = getMockedAuthRequest();
 
-      const createGame = await controller.createGame(req, '123', dto);
+      const createGame = await controller.createGame(req, dto);
 
       expect(
         questionCategoryRepositoryMock['fetchForGame'],

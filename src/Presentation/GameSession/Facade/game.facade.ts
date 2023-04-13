@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { GameSessionRepository } from '../Repository/game-session.repository';
+import { GameSessionRepository } from '../../../GameSession/Repository/game-session.repository';
 import { GameState } from '@prisma/client';
 
 @Injectable()
-export class GameQuestionFacade {
+export class GameFacade {
   constructor(private readonly gameRepository: GameSessionRepository) {}
 
   async getQuestionForGame(gameId: string, categoryId: string): Promise<void> {

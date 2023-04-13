@@ -16,10 +16,9 @@ import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-ca
 import { CreatedGameWithPlayers } from '../../../GameSession/Type/created-game-with-players';
 import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
 import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-request.dto';
-import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.facade';
 import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progress-game-session.handler';
-import { GameProgressResult } from '../../../GameSession/Type/game-progress-result';
 import { FinishedGameResult } from '../../../GameSession/Type/finished-game-result';
+import { GameFacade } from '../Facade/game.facade';
 
 @Controller('game-session')
 @UseGuards(AuthenticatedGuard)
@@ -28,14 +27,12 @@ export class GameSessionController {
     private readonly createHandler: CreateGameSessionHandler,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
     private readonly progressGameHandler: ProgressGameSessionHandler,
-    private readonly gameQuestionFacade: GameQuestionFacade,
+    private readonly gameQuestionFacade: GameFacade,
   ) {}
 
-  @Post(':groupId/create')
-  @UseGuards(new CheckUuidGuard('groupId'))
+  @Post('/create')
   async createGame(
     @Req() request: Request,
-    @Param('groupId') groupId: string,
     @Body() createGameSession: CreateGameSessionRequestDTO,
   ): Promise<CreatedGameWithPlayers> {
     return await this.createHandler.createGame(
