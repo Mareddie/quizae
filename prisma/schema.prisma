@@ -69,6 +69,6 @@ model Player {
   name   String
   points Int    @default(0)
   gameId String
-  game   Game   @relation(fields: [gameId], references: [id])
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
   order  Int
 }
