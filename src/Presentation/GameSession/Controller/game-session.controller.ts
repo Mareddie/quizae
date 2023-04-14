@@ -27,7 +27,7 @@ export class GameSessionController {
     private readonly createHandler: CreateGameSessionHandler,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
     private readonly progressGameHandler: ProgressGameSessionHandler,
-    private readonly gameQuestionFacade: GameFacade,
+    private readonly gameFacade: GameFacade,
   ) {}
 
   @Post('/create')
@@ -43,7 +43,9 @@ export class GameSessionController {
 
   @Get(':gameId')
   @UseGuards(new CheckUuidGuard('gameId'), CanAccessGameGuard)
-  async getGameStatus(@Param('gameId') gameId: string): Promise<void> {
+  async getGameStatus(@Param('gameId') gameId: string): Promise<any> {
+    return await this.gameFacade.getGameData(gameId);
+    // TODO typing
     // TODO: reimplement game logic
   }
 
@@ -58,7 +60,7 @@ export class GameSessionController {
     @Param('categoryId') categoryId: string,
   ): Promise<void> {
     // TODO: reimplement fetch of game question
-    return await this.gameQuestionFacade.getQuestionForGame(gameId, categoryId);
+    return await this.gameFacade.getQuestionForGame(gameId, categoryId);
   }
 
   @Post(':gameId/progress')

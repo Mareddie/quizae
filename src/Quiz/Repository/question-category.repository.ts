@@ -7,6 +7,20 @@ import { CreateUpdateQuestionCategoryDTO } from '../DTO/create-update-question-c
 export class QuestionCategoryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getForGame(startedById: string): Promise<any> {
+    // TODO typing
+    // TODO show only categories created by startedById
+    return this.prisma.questionCategory.findMany({
+      include: {
+        _count: {
+          select: {
+            questions: true,
+          },
+        },
+      },
+    });
+  }
+
   async fetchById(categoryId: string): Promise<QuestionCategory | null> {
     return this.prisma.questionCategory.findUnique({
       where: {
