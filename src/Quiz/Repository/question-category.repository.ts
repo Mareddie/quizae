@@ -13,6 +13,7 @@ export class QuestionCategoryRepository {
       select: {
         id: true,
         name: true,
+        order: true,
         _count: {
           select: {
             questions: true,

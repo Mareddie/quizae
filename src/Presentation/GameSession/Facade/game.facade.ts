@@ -13,6 +13,7 @@ export class GameFacade {
 
   async getGameData(gameId: string): Promise<GameInfo> {
     // TODO after having implemented scoring and answering, show count without answered questions
+    // TODO reorder players, reorder categories
     const gameData = await this.gameRepository.fetchById(gameId);
 
     if (gameData.state === GameState.FINISHED) {
