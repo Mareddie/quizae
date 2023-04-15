@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { GameSessionRepository } from '../../../GameSession/Repository/game-session.repository';
 import { GameState } from '@prisma/client';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
+import { GameInfo } from '../Type/game-session-types';
 
 @Injectable()
 export class GameFacade {
@@ -10,20 +11,23 @@ export class GameFacade {
     private readonly questionCategoryRepository: QuestionCategoryRepository,
   ) {}
 
-  async getGameData(gameId: string): Promise<any> {
-    // TODO typing
-    // TODO get count of questions for every category
+  async getGameData(gameId: string): Promise<GameInfo> {
     // TODO after having implemented scoring and answering, show count without answered questions
     const gameData = await this.gameRepository.fetchById(gameId);
 
     if (gameData.state === GameState.FINISHED) {
-      return gameData;
+      return {
+        info: gameData,
+      };
     }
 
     const questionsAndAnswers =
       await this.questionCategoryRepository.getForGame(gameData.startedById);
 
-    return questionsAndAnswers;
+    return {
+      info: gameData,
+      categories: questionsAndAnswers,
+    };
   }
 
   async getQuestionForGame(gameId: string, categoryId: string): Promise<void> {

@@ -19,6 +19,7 @@ import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-r
 import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progress-game-session.handler';
 import { FinishedGameResult } from '../../../GameSession/Type/finished-game-result';
 import { GameFacade } from '../Facade/game.facade';
+import { GameInfo } from '../Type/game-session-types';
 
 @Controller('game-session')
 @UseGuards(AuthenticatedGuard)
@@ -43,10 +44,8 @@ export class GameSessionController {
 
   @Get(':gameId')
   @UseGuards(new CheckUuidGuard('gameId'), CanAccessGameGuard)
-  async getGameStatus(@Param('gameId') gameId: string): Promise<any> {
+  async getGameStatus(@Param('gameId') gameId: string): Promise<GameInfo> {
     return await this.gameFacade.getGameData(gameId);
-    // TODO typing
-    // TODO: reimplement game logic
   }
 
   @Get(':gameId/get-question/:categoryId')
