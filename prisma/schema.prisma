@@ -37,12 +37,13 @@ model QuestionCategory {
 }
 
 model Question {
-  id            String           @id @default(uuid())
-  category      QuestionCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId    String
-  answers       Answer[]         @relation
-  correctAnswer String?
-  text          String
+  id               String             @id @default(uuid())
+  category         QuestionCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId       String
+  answers          Answer[]           @relation
+  correctAnswer    String?
+  text             String
+  AnsweredQuestion AnsweredQuestion[]
 }
 
 model Answer {
@@ -54,21 +55,36 @@ model Answer {
 }
 
 model Game {
-  id              String    @id @default(uuid())
-  startedById     String
-  startedBy       User      @relation(fields: [startedById], references: [id])
-  currentPlayerId String?
-  nextPlayerId    String?
-  state           GameState
-  players         Player[]  @relation
-  startedAt       DateTime  @default(now())
+  id               String             @id @default(uuid())
+  startedById      String
+  startedBy        User               @relation(fields: [startedById], references: [id])
+  currentPlayerId  String?
+  nextPlayerId     String?
+  state            GameState
+  players          Player[]           @relation
+  startedAt        DateTime           @default(now())
+  AnsweredQuestion AnsweredQuestion[]
+}
+
+model AnsweredQuestion {
+  id            String    @id @default(uuid())
+  gameId        String
+  game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answeredById  String
+  answeredBy    Player    @relation(fields: [answeredById], references: [id], onDelete: Cascade)
+  questionId    String?
+  question      Question? @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  metadata      Json
+  correctAnswer Boolean
+  answeredAt    DateTime  @default(now())
 }
 
 model Player {
-  id     String @id @default(uuid())
-  name   String
-  points Int    @default(0)
-  gameId String
-  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  order  Int
+  id               String             @id @default(uuid())
+  name             String
+  points           Int                @default(0)
+  gameId           String
+  game             Game               @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  order            Int
+  AnsweredQuestion AnsweredQuestion[]
 }
