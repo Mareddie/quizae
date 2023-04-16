@@ -3,17 +3,19 @@ import { GameSessionRepository } from '../../../GameSession/Repository/game-sess
 import { GameState } from '@prisma/client';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { GameInfo } from '../Type/game-session-types';
+import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
+import { QuestionCandidateForGame } from '../../../Quiz/Type/question-with-answers';
 
 @Injectable()
 export class GameFacade {
   constructor(
     private readonly gameRepository: GameSessionRepository,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
+    private readonly questionRepository: QuestionRepository,
   ) {}
 
   async getGameData(gameId: string): Promise<GameInfo> {
     // TODO after having implemented scoring and answering, show count without answered questions
-    // TODO reorder players, reorder categories
     const gameData = await this.gameRepository.fetchById(gameId);
 
     if (gameData.state === GameState.FINISHED) {
@@ -31,7 +33,10 @@ export class GameFacade {
     };
   }
 
-  async getQuestionForGame(gameId: string, categoryId: string): Promise<void> {
+  async getQuestionForGame(
+    gameId: string,
+    categoryId: string,
+  ): Promise<QuestionCandidateForGame> {
     const gameData = await this.gameRepository.fetchById(gameId);
 
     if (gameData.state === GameState.FINISHED) {
@@ -40,21 +45,21 @@ export class GameFacade {
       );
     }
 
-    // const filteredCategory = gameData.questionCategories.find(
-    //   (questionCategory) => questionCategory.id === categoryId,
-    // );
-    //
-    // if (filteredCategory === undefined) {
-    //   throw new BadRequestException('Category was not found in the game');
-    // }
-    //
-    // const randomQuestionFromCategory =
-    //   filteredCategory.questions[
-    //     Math.floor(Math.random() * filteredCategory.questions.length)
-    //   ];
-    //
-    // delete randomQuestionFromCategory.correctAnswer;
-    //
-    // return randomQuestionFromCategory;
+    const questionCandidates =
+      await this.questionRepository.fetchCandidatesForGame(categoryId, gameId);
+
+    if (questionCandidates.length === 0) {
+      throw new BadRequestException(
+        'There are no available questions for this category anymore.',
+      );
+    }
+
+    if (questionCandidates.length === 1) {
+      return questionCandidates[0];
+    }
+
+    return questionCandidates[
+      Math.floor(Math.random() * questionCandidates.length)
+    ];
   }
 }

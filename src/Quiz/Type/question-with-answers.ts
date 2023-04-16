@@ -16,3 +16,20 @@ export type QuestionCountByCategory = Prisma.QuestionCategoryGetPayload<{
     };
   };
 }>;
+
+export type QuestionCandidateForGame = Prisma.QuestionGetPayload<{
+  select: {
+    id: true;
+    text: true;
+    answers: {
+      select: {
+        id: true;
+        text: true;
+        priority: true;
+      };
+      orderBy: {
+        priority: 'desc';
+      };
+    };
+  };
+}>;

@@ -1,12 +1,48 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../Common/Service/prisma.service';
-import { QuestionWithAnswers } from '../Type/question-with-answers';
+import {
+  QuestionCandidateForGame,
+  QuestionWithAnswers,
+} from '../Type/question-with-answers';
 import { Question } from '@prisma/client';
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 
 @Injectable()
 export class QuestionRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async fetchCandidatesForGame(
+    categoryId: string,
+    gameId: string,
+  ): Promise<QuestionCandidateForGame[]> {
+    return this.prisma.question.findMany({
+      select: {
+        id: true,
+        text: true,
+        answers: {
+          select: {
+            id: true,
+            text: true,
+            priority: true,
+          },
+          orderBy: {
+            priority: 'desc',
+          },
+        },
+      },
+      // Returns all Questions within a category that were not yet answered during a game
+      where: {
+        category: {
+          id: categoryId,
+        },
+        answeredQuestions: {
+          none: {
+            gameId: gameId,
+          },
+        },
+      },
+    });
+  }
 
   async fetchQuestions(categoryId: string): Promise<QuestionWithAnswers[]> {
     return this.prisma.question.findMany({

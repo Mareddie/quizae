@@ -43,7 +43,7 @@ model Question {
   answers          Answer[]           @relation
   correctAnswer    String?
   text             String
-  AnsweredQuestion AnsweredQuestion[]
+  answeredQuestions AnsweredQuestion[]
 }
 
 model Answer {
@@ -63,7 +63,7 @@ model Game {
   state            GameState
   players          Player[]           @relation
   startedAt        DateTime           @default(now())
-  AnsweredQuestion AnsweredQuestion[]
+  answeredQuestions AnsweredQuestion[]
 }
 
 model AnsweredQuestion {
@@ -86,5 +86,5 @@ model Player {
   gameId           String
   game             Game               @relation(fields: [gameId], references: [id], onDelete: Cascade)
   order            Int
-  AnsweredQuestion AnsweredQuestion[]
+  answeredQuestions AnsweredQuestion[]
 }

@@ -20,6 +20,7 @@ import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progres
 import { FinishedGameResult } from '../../../GameSession/Type/finished-game-result';
 import { GameFacade } from '../Facade/game.facade';
 import { GameInfo } from '../Type/game-session-types';
+import { QuestionCandidateForGame } from '../../../Quiz/Type/question-with-answers';
 
 @Controller('game-session')
 @UseGuards(AuthenticatedGuard)
@@ -57,8 +58,7 @@ export class GameSessionController {
   async getGameQuestion(
     @Param('gameId') gameId: string,
     @Param('categoryId') categoryId: string,
-  ): Promise<void> {
-    // TODO: reimplement fetch of game question
+  ): Promise<QuestionCandidateForGame> {
     return await this.gameFacade.getQuestionForGame(gameId, categoryId);
   }
 
