@@ -79,9 +79,6 @@ export class QuestionHandler {
   private prepareQuestionAnswers(
     answers: CreateUpdateAnswerDTO[],
   ): CreateUpdateAnswerDTO[] {
-    // We need to sort answers by order, if present
-    answers = answers.sort((a, b) => a.order - b.order);
-
     // The answer texts should not be identical
     if (this.answersHaveDuplicates(answers)) {
       throw new ConflictException("Answers don't have unique texts");

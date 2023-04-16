@@ -92,7 +92,7 @@ export class QuestionRepository {
         updateQuery.data.answers.createMany.data.push({
           id: answer.id,
           text: answer.text,
-          order: answer.order,
+          priority: answer.priority,
         });
       }
     }
@@ -125,7 +125,7 @@ export class QuestionRepository {
         createQuery.data.answers.createMany.data.push({
           id: answer.id,
           text: answer.text,
-          order: answer.order,
+          priority: answer.priority,
         });
       }
     }

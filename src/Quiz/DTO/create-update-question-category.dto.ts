@@ -14,5 +14,5 @@ export class CreateUpdateQuestionCategoryDTO {
 
   @IsOptional()
   @IsNumber()
-  order?: number | null;
+  priority?: number | null;
 }

@@ -13,7 +13,7 @@ export class QuestionCategoryRepository {
       select: {
         id: true,
         name: true,
-        order: true,
+        priority: true,
         _count: {
           select: {
             questions: true,
@@ -22,6 +22,9 @@ export class QuestionCategoryRepository {
       },
       where: {
         userId: startedById,
+      },
+      orderBy: {
+        priority: 'desc',
       },
     });
   }
@@ -54,7 +57,7 @@ export class QuestionCategoryRepository {
       data: {
         name: data.name,
         userId: userId,
-        order: data.order,
+        priority: data.priority,
       },
     });
   }
@@ -69,7 +72,7 @@ export class QuestionCategoryRepository {
       },
       data: {
         name: data.name,
-        order: data.order,
+        priority: data.priority,
       },
     });
   }

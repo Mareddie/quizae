@@ -18,7 +18,7 @@ export class CreateUpdateAnswerDTO {
 
   @IsNumber()
   @IsNotEmpty()
-  order?: number;
+  priority?: number;
 
   @IsBoolean()
   isCorrectAnswer?: boolean;

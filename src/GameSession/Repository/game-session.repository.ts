@@ -19,7 +19,11 @@ export class GameSessionRepository {
         startedById: true,
         state: true,
         startedAt: true,
-        players: true,
+        players: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
         currentPlayerId: true,
         nextPlayerId: true,
       },

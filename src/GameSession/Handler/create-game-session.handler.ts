@@ -3,24 +3,15 @@ import { InitGameSessionPlayerDTO } from '../DTO/create-game-session-request.dto
 import { GameSessionRepository } from '../Repository/game-session.repository';
 import { CreatedGameWithPlayers } from '../Type/created-game-with-players';
 import { QuestionWithAnswers } from '../../Quiz/Type/question-with-answers';
-import { ReorderService } from '../../Common/Service/reorder.service';
 
 @Injectable()
 export class CreateGameSessionHandler {
-  constructor(
-    private readonly gameSessionRepository: GameSessionRepository,
-    private readonly reorderService: ReorderService,
-  ) {}
+  constructor(private readonly gameSessionRepository: GameSessionRepository) {}
 
   async createGame(
     ownerId: string,
     players: InitGameSessionPlayerDTO[],
   ): Promise<CreatedGameWithPlayers> {
-    // Ensure that the order of players is correct
-    players.sort((a, b) =>
-      this.reorderService.reorderWithNull(a.order, b.order),
-    );
-
     return this.gameSessionRepository.createGame(ownerId, players);
   }
 
