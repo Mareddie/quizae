@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 import { QuestionRepository } from '../Repository/question.repository';
 import { CreateUpdateAnswerDTO } from '../DTO/create-update-answer.dto';
@@ -45,7 +49,8 @@ export class QuestionHandler {
     if (data.answers !== undefined) {
       this.prepareQuestionAnswers(data.answers);
 
-      data.correctAnswer = this.getCorrectAnswerFromList(data.answers).id;
+      // TODO correct answer processing
+      // data.correctAnswer = this.getCorrectAnswerFromList(data.answers).id;
     }
 
     return this.questionRepository.updateQuestion(questionId, data);
@@ -66,12 +71,19 @@ export class QuestionHandler {
       throw new ConflictException('Question with provided text already exists');
     }
 
-    // At this point, we can trust the upper application layer that the provided userId has access to categoryId
-    if (data.answers !== undefined) {
-      this.prepareQuestionAnswers(data.answers);
-
-      data.correctAnswer = this.getCorrectAnswerFromList(data.answers).id;
+    // New questions must have answers specified
+    if (data.answers === undefined) {
+      throw new BadRequestException(
+        'Answers must be provided with new question',
+      );
     }
+
+    // At this point, we can trust the upper application layer that the provided userId has access to categoryId
+    this.prepareQuestionAnswers(data.answers);
+
+    // TODO: process correct answer
+    // prepare question answers should extract the correct answer from other questions and return it separately
+    // data.correctAnswer = this.getCorrectAnswerFromList(data.answers).id;
 
     return this.questionRepository.createQuestion(categoryId, data);
   }
@@ -83,12 +95,19 @@ export class QuestionHandler {
     if (this.answersHaveDuplicates(answers)) {
       throw new ConflictException("Answers don't have unique texts");
     }
-
-    // We don't want to use the data here, however, we want to ensure that there's only one correct answer
-    this.getCorrectAnswerFromList(answers);
-
     // Generate object IDs, so we can later determine the correct answer
     answers.map((answer) => (answer.id = uuidv4()));
+
+    // TODO finish this
+    const correctAnswer = this.getCorrectAnswerFromList(answers);
+
+    console.log(
+      answers.filter(
+        (answer) =>
+          answer.isCorrectAnswer === undefined ||
+          answer.isCorrectAnswer === false,
+      ),
+    );
 
     return answers;
   }

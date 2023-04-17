@@ -111,7 +111,8 @@ export class QuestionRepository {
       },
       data: {
         text: data.text,
-        correctAnswer: data.correctAnswer,
+        // TODO this wont work, fix this
+        correctAnswerId: data.correctAnswer.id,
         answers: {
           createMany: {
             data: [],
@@ -143,7 +144,8 @@ export class QuestionRepository {
     const createQuery = {
       data: {
         categoryId: categoryId,
-        correctAnswer: data.correctAnswer,
+        // TODO this won't work, fix this
+        correctAnswerId: data.correctAnswer.id,
         text: data.text,
         answers: {
           createMany: {
@@ -165,6 +167,8 @@ export class QuestionRepository {
         });
       }
     }
+
+    return null;
 
     return this.prisma.question.create(createQuery);
   }
