@@ -7,7 +7,10 @@ import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 import { QuestionRepository } from '../Repository/question.repository';
 import { CreateUpdateAnswerDTO } from '../DTO/create-update-answer.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { QuestionWithAnswers } from '../Type/question-with-answers';
+import {
+  PreparedQuestionAnswers,
+  QuestionWithAnswers,
+} from '../Type/question-with-answers';
 
 @Injectable()
 export class QuestionHandler {
@@ -79,18 +82,17 @@ export class QuestionHandler {
     }
 
     // At this point, we can trust the upper application layer that the provided userId has access to categoryId
-    this.prepareQuestionAnswers(data.answers);
+    const preparedAnswers = this.prepareQuestionAnswers(data.answers);
 
-    // TODO: process correct answer
-    // prepare question answers should extract the correct answer from other questions and return it separately
-    // data.correctAnswer = this.getCorrectAnswerFromList(data.answers).id;
+    data.correctAnswer = preparedAnswers.correctAnswer;
+    data.answers = preparedAnswers.answers;
 
     return this.questionRepository.createQuestion(categoryId, data);
   }
 
   private prepareQuestionAnswers(
     answers: CreateUpdateAnswerDTO[],
-  ): CreateUpdateAnswerDTO[] {
+  ): PreparedQuestionAnswers {
     // The answer texts should not be identical
     if (this.answersHaveDuplicates(answers)) {
       throw new ConflictException("Answers don't have unique texts");
@@ -98,18 +100,12 @@ export class QuestionHandler {
     // Generate object IDs, so we can later determine the correct answer
     answers.map((answer) => (answer.id = uuidv4()));
 
-    // TODO finish this
     const correctAnswer = this.getCorrectAnswerFromList(answers);
 
-    console.log(
-      answers.filter(
-        (answer) =>
-          answer.isCorrectAnswer === undefined ||
-          answer.isCorrectAnswer === false,
-      ),
-    );
-
-    return answers;
+    return {
+      correctAnswer: correctAnswer,
+      answers: answers.filter((answer) => answer.id !== correctAnswer.id),
+    };
   }
 
   private getCorrectAnswerFromList(
@@ -126,7 +122,11 @@ export class QuestionHandler {
       );
     }
 
-    return correctAnswer[0];
+    const foundCorrectAnswer = correctAnswer[0];
+
+    delete foundCorrectAnswer.isCorrectAnswer;
+
+    return foundCorrectAnswer;
   }
 
   private answersHaveDuplicates(answers: CreateUpdateAnswerDTO[]): boolean {

@@ -4,8 +4,9 @@ import {
   QuestionCandidateForGame,
   QuestionWithAnswers,
 } from '../Type/question-with-answers';
-import { Question } from '@prisma/client';
+import { Prisma, Question } from '@prisma/client';
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class QuestionRepository {
@@ -137,39 +138,31 @@ export class QuestionRepository {
     return this.prisma.question.update(updateQuery);
   }
 
-  async createQuestion(
-    categoryId: string,
-    data: CreateUpdateQuestionDTO,
-  ): Promise<QuestionWithAnswers> {
-    const createQuery = {
+  async createQuestion(categoryId: string, data: CreateUpdateQuestionDTO) {
+    if (data.answers === undefined || data.correctAnswer === undefined) {
+      throw new Error(
+        'Question on creation must have correct answer and answers defined',
+      );
+    }
+
+    const questionId = uuidv4();
+
+    // TODO: process correct answer
+
+    return this.prisma.question.create({
       data: {
+        id: questionId,
         categoryId: categoryId,
-        // TODO this won't work, fix this
-        correctAnswerId: data.correctAnswer.id,
         text: data.text,
         answers: {
           createMany: {
-            data: [],
+            data: data.answers as Prisma.AnswerCreateManyInput[],
           },
         },
       },
       include: {
         answers: true,
       },
-    };
-
-    if (data.answers !== undefined) {
-      for (const answer of data.answers) {
-        createQuery.data.answers.createMany.data.push({
-          id: answer.id,
-          text: answer.text,
-          priority: answer.priority,
-        });
-      }
-    }
-
-    return null;
-
-    return this.prisma.question.create(createQuery);
+    });
   }
 }

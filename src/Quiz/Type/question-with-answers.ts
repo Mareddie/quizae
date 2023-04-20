@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { CreateUpdateAnswerDTO } from '../DTO/create-update-answer.dto';
 
 export type QuestionWithAnswers = Prisma.QuestionGetPayload<{
   include: { answers: true };
@@ -33,3 +34,8 @@ export type QuestionCandidateForGame = Prisma.QuestionGetPayload<{
     };
   };
 }>;
+
+export type PreparedQuestionAnswers = {
+  correctAnswer: CreateUpdateAnswerDTO;
+  answers: CreateUpdateAnswerDTO[];
+};
