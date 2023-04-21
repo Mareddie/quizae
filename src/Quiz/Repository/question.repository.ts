@@ -4,9 +4,8 @@ import {
   QuestionCandidateForGame,
   QuestionWithAnswers,
 } from '../Type/question-with-answers';
-import { Prisma, Question } from '@prisma/client';
+import { Question } from '@prisma/client';
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class QuestionRepository {
