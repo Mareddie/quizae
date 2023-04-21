@@ -34,8 +34,3 @@ export type QuestionCandidateForGame = Prisma.QuestionGetPayload<{
     };
   };
 }>;
-
-export type PreparedQuestionAnswers = {
-  correctAnswer: CreateUpdateAnswerDTO;
-  answers: CreateUpdateAnswerDTO[];
-};

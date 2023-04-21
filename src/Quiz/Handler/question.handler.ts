@@ -6,11 +6,7 @@ import {
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 import { QuestionRepository } from '../Repository/question.repository';
 import { CreateUpdateAnswerDTO } from '../DTO/create-update-answer.dto';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  PreparedQuestionAnswers,
-  QuestionWithAnswers,
-} from '../Type/question-with-answers';
+import { QuestionWithAnswers } from '../Type/question-with-answers';
 
 @Injectable()
 export class QuestionHandler {
@@ -49,12 +45,7 @@ export class QuestionHandler {
       );
     }
 
-    if (data.answers !== undefined) {
-      this.prepareQuestionAnswers(data.answers);
-
-      // TODO correct answer processing
-      // data.correctAnswer = this.getCorrectAnswerFromList(data.answers).id;
-    }
+    this.checkAnswers(data.answers);
 
     return this.questionRepository.updateQuestion(questionId, data);
   }
@@ -74,59 +65,30 @@ export class QuestionHandler {
       throw new ConflictException('Question with provided text already exists');
     }
 
-    // New questions must have answers specified
-    if (data.answers === undefined) {
-      throw new BadRequestException(
-        'Answers must be provided with new question',
-      );
-    }
+    this.checkAnswers(data.answers);
 
     // At this point, we can trust the upper application layer that the provided userId has access to categoryId
-    const preparedAnswers = this.prepareQuestionAnswers(data.answers);
-
-    data.correctAnswer = preparedAnswers.correctAnswer;
-    data.answers = preparedAnswers.answers;
-
     return this.questionRepository.createQuestion(categoryId, data);
   }
 
-  private prepareQuestionAnswers(
+  private checkAnswers(
     answers: CreateUpdateAnswerDTO[],
-  ): PreparedQuestionAnswers {
+  ): CreateUpdateAnswerDTO[] {
     // The answer texts should not be identical
     if (this.answersHaveDuplicates(answers)) {
       throw new ConflictException("Answers don't have unique texts");
     }
-    // Generate object IDs, so we can later determine the correct answer
-    answers.map((answer) => (answer.id = uuidv4()));
 
-    const correctAnswer = this.getCorrectAnswerFromList(answers);
+    const correctAnswer = answers.filter((answer) => answer.isCorrect === true);
 
-    return {
-      correctAnswer: correctAnswer,
-      answers: answers.filter((answer) => answer.id !== correctAnswer.id),
-    };
-  }
-
-  private getCorrectAnswerFromList(
-    answers: CreateUpdateAnswerDTO[],
-  ): CreateUpdateAnswerDTO {
-    const correctAnswer = answers.filter(
-      (answer) => answer.isCorrectAnswer === true,
-    );
-
-    // Enforce the validity of correct answer
+    // Enforce data integrity
     if (correctAnswer.length !== 1) {
       throw new ConflictException(
         'There must be always exactly one correct answer to the question',
       );
     }
 
-    const foundCorrectAnswer = correctAnswer[0];
-
-    delete foundCorrectAnswer.isCorrectAnswer;
-
-    return foundCorrectAnswer;
+    return answers;
   }
 
   private answersHaveDuplicates(answers: CreateUpdateAnswerDTO[]): boolean {

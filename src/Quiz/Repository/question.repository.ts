@@ -104,59 +104,40 @@ export class QuestionRepository {
       },
     };
 
-    await this.prisma.answer.deleteMany(deleteAnswersQuery);
+    this.prisma.answer.deleteMany(deleteAnswersQuery);
 
-    const updateQuery = {
+    return this.prisma.question.update({
       where: {
         id: questionId,
       },
       data: {
         text: data.text,
-        // TODO this wont work, fix this
-        correctAnswerId: data.correctAnswer.id,
         answers: {
           createMany: {
-            data: [],
+            data: data.answers,
           },
         },
       },
       include: {
         answers: true,
       },
-    };
-
-    if (data.answers !== undefined) {
-      for (const answer of data.answers) {
-        updateQuery.data.answers.createMany.data.push({
-          id: answer.id,
-          text: answer.text,
-          priority: answer.priority,
-        });
-      }
-    }
-
-    return this.prisma.question.update(updateQuery);
+    });
   }
 
   async createQuestion(categoryId: string, data: CreateUpdateQuestionDTO) {
-    if (data.answers === undefined || data.correctAnswer === undefined) {
+    if (data.answers === undefined) {
       throw new Error(
         'Question on creation must have correct answer and answers defined',
       );
     }
 
-    const questionId = uuidv4();
-
-    // TODO: process correct answer
-
     return this.prisma.question.create({
       data: {
-        id: questionId,
         categoryId: categoryId,
         text: data.text,
         answers: {
           createMany: {
-            data: data.answers as Prisma.AnswerCreateManyInput[],
+            data: data.answers,
           },
         },
       },

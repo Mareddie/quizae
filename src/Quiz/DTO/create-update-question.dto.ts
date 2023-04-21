@@ -5,8 +5,6 @@ import {
   IsArray,
   IsDefined,
   IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -18,16 +16,11 @@ export class CreateUpdateQuestionDTO {
   @IsNotEmpty()
   text: string;
 
+  @IsDefined()
   @IsArray()
   @ValidateNested()
   @ArrayUnique()
   @ArrayMinSize(1)
   @Type(() => CreateUpdateAnswerDTO)
-  answers?: CreateUpdateAnswerDTO[];
-
-  @IsObject()
-  @IsNotEmptyObject()
-  @ValidateNested()
-  @Type(() => CreateUpdateAnswerDTO)
-  correctAnswer?: CreateUpdateAnswerDTO;
+  answers: CreateUpdateAnswerDTO[];
 }

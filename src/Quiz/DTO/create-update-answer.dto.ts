@@ -21,5 +21,5 @@ export class CreateUpdateAnswerDTO {
   priority?: number;
 
   @IsBoolean()
-  isCorrectAnswer?: boolean;
+  isCorrect?: boolean;
 }

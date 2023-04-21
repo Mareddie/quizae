@@ -40,20 +40,18 @@ model Question {
   id                String             @id @default(uuid())
   category          QuestionCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId        String
-  answers           Answer[]           @relation(name: "questionAnswers")
-  correctAnswer     Answer?            @relation(name: "correctAnswer", fields: [correctAnswerId], references: [id], onDelete: Cascade)
-  correctAnswerId   String?            @unique
+  answers           Answer[]
   text              String
   answeredQuestions AnsweredQuestion[]
 }
 
 model Answer {
-  id                 String    @id @default(uuid())
-  question           Question  @relation(name: "questionAnswers", fields: [questionId], references: [id], onDelete: Cascade)
-  questionId         String
-  correctForQuestion Question? @relation(name: "correctAnswer")
-  text               String
-  priority           Int?
+  id         String   @id @default(uuid())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+  text       String
+  isCorrect  Boolean  @default(false)
+  priority   Int?
 }
 
 model Game {
