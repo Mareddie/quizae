@@ -3,6 +3,7 @@ import { ProgressGameRequestDTO } from '../DTO/progress-game-request.dto';
 import { GameSessionRepository } from '../Repository/game-session.repository';
 import { ReorderService } from '../../Common/Service/reorder.service';
 import { FinishedGameResult } from '../Type/finished-game-result';
+import { GameWithPlayers } from '../Type/game-with-players';
 
 @Injectable()
 export class ProgressGameSessionHandler {
@@ -56,23 +57,23 @@ export class ProgressGameSessionHandler {
     // return returnData;
   }
 
-  // private updateGamePlayerTurns(gameData: GameWithPlayers): void {
-  //   gameData.players.sort((a, b) =>
-  //     this.reorderService.reorderWithNull(a.order, b.order),
-  //   );
-  //
-  //   const nextPlayerIndex = gameData.players.findIndex(
-  //     (player) => player.id === gameData.nextPlayerId,
-  //   );
-  //
-  //   gameData.currentPlayerId = gameData.nextPlayerId;
-  //
-  //   // If the next guessed Player index doesn't exist, the next player is the first in order
-  //   gameData.nextPlayerId =
-  //     nextPlayerIndex + 1 > gameData.players.length - 1
-  //       ? gameData.players[0].id
-  //       : gameData.players[nextPlayerIndex + 1].id;
-  // }
+  private updateGamePlayerTurns(gameData: GameWithPlayers): void {
+    gameData.players.sort((a, b) =>
+      this.reorderService.reorderWithNull(a.order, b.order),
+    );
+
+    const nextPlayerIndex = gameData.players.findIndex(
+      (player) => player.id === gameData.nextPlayerId,
+    );
+
+    gameData.currentPlayerId = gameData.nextPlayerId;
+
+    // If the next guessed Player index doesn't exist, the next player is the first in order
+    gameData.nextPlayerId =
+      nextPlayerIndex + 1 > gameData.players.length - 1
+        ? gameData.players[0].id
+        : gameData.players[nextPlayerIndex + 1].id;
+  }
   //
   // private updateGameDataAfterProgress(
   //   gameData: GameWithPlayers,

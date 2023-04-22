@@ -5,3 +5,8 @@ export type GameInfo = {
   info: GameWithPlayers;
   categories?: QuestionCountByCategory[];
 };
+
+export type PlayerTurns = {
+  currentPlayerId: string | null;
+  nextPlayerId: string | null;
+};

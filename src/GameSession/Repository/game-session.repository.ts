@@ -7,6 +7,7 @@ import { Game } from '@prisma/client';
 import { GameWithPlayers } from '../Type/game-with-players';
 import { UpdateGameInternalDTO } from '../DTO/update-game.internal.dto';
 import { FinishedGameResult } from '../Type/finished-game-result';
+import { PlayerTurns } from '../../Presentation/GameSession/Type/game-session-types';
 
 @Injectable()
 export class GameSessionRepository {
@@ -84,6 +85,7 @@ export class GameSessionRepository {
   async createGame(
     startedBy: string,
     players: InitGameSessionPlayerDTO[],
+    turns: PlayerTurns,
   ): Promise<CreatedGameWithPlayers> {
     const createQuery = {
       data: {
@@ -94,18 +96,23 @@ export class GameSessionRepository {
             data: [],
           },
         },
+        currentPlayerId: turns.currentPlayerId,
+        nextPlayerId: turns.nextPlayerId,
       },
       select: {
         id: true,
         startedById: true,
         state: true,
         startedAt: true,
+        currentPlayerId: true,
+        nextPlayerId: true,
         players: true,
       },
     };
 
     for (const player of players) {
       createQuery.data.players.createMany.data.push({
+        id: player.id,
         name: player.name,
         order: player.order,
       });

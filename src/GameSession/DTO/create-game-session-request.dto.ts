@@ -19,6 +19,10 @@ export class CreateGameSessionRequestDTO {
 }
 
 export class InitGameSessionPlayerDTO {
+  @IsString()
+  @IsNotEmpty()
+  id?: string;
+
   @IsDefined()
   @IsString()
   @IsNotEmpty()
