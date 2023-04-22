@@ -1,10 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { ProgressGameRequestDTO } from '../DTO/progress-game-request.dto';
 import { GameSessionRepository } from '../Repository/game-session.repository';
-import { GameState, Player } from '@prisma/client';
-import { GameWithPlayers } from '../Type/game-with-players';
 import { ReorderService } from '../../Common/Service/reorder.service';
-import { GameProgressResult } from '../Type/game-progress-result';
 import { FinishedGameResult } from '../Type/finished-game-result';
 
 @Injectable()
