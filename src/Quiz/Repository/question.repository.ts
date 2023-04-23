@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../Common/Service/prisma.service';
 import {
   QuestionCandidateForGame,
+  QuestionForGameProgress,
   QuestionWithAnswers,
 } from '../Type/question-with-answers';
 import { Question } from '@prisma/client';
@@ -10,6 +11,41 @@ import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 @Injectable()
 export class QuestionRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async fetchForGameProgress(
+    questionId: string,
+    gameId: string,
+    startedById: string,
+  ): Promise<QuestionForGameProgress | undefined> {
+    return this.prisma.question.findFirst({
+      select: {
+        id: true,
+        text: true,
+        answers: {
+          select: {
+            id: true,
+            text: true,
+            isCorrect: true,
+          },
+        },
+      },
+      // The question must be made by the user that started the game
+      // The question must not have been answered in the game
+      where: {
+        id: questionId,
+        answeredQuestions: {
+          none: {
+            gameId: gameId,
+          },
+        },
+        category: {
+          is: {
+            userId: startedById,
+          },
+        },
+      },
+    });
+  }
 
   async fetchCandidatesForGame(
     categoryId: string,

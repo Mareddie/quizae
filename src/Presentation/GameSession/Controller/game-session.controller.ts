@@ -1,5 +1,6 @@
 import {
   Body,
+  ConflictException,
   Controller,
   Get,
   Param,
@@ -21,6 +22,7 @@ import { FinishedGameResult } from '../../../GameSession/Type/finished-game-resu
 import { GameFacade } from '../Facade/game.facade';
 import { GameInfo } from '../Type/game-session-types';
 import { QuestionCandidateForGame } from '../../../Quiz/Type/question-with-answers';
+import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
 
 @Controller('game-session')
 @UseGuards(AuthenticatedGuard)
@@ -28,6 +30,7 @@ export class GameSessionController {
   constructor(
     private readonly createHandler: CreateGameSessionHandler,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
+    private readonly questionRepository: QuestionRepository,
     private readonly progressGameHandler: ProgressGameSessionHandler,
     private readonly gameFacade: GameFacade,
   ) {}
@@ -67,9 +70,25 @@ export class GameSessionController {
   async progressGame(
     @Param('gameId') gameId: string,
     @Body() progressGameData: ProgressGameRequestDTO,
+    @Req() req: Request,
   ): Promise<void> {
     // TODO: reimplement progress logic
+
+    // We already are sure that the User can access game because of the guard check
+    const questionData = await this.questionRepository.fetchForGameProgress(
+      progressGameData.questionId,
+      gameId,
+      req.user['id'],
+    );
+
+    if (!questionData) {
+      throw new ConflictException(
+        'Question could not be found or has been already answered',
+      );
+    }
+
     return await this.progressGameHandler.progressGame(
+      questionData,
       progressGameData,
       gameId,
     );

@@ -4,6 +4,8 @@ import { GameSessionRepository } from '../Repository/game-session.repository';
 import { ReorderService } from '../../Common/Service/reorder.service';
 import { FinishedGameResult } from '../Type/finished-game-result';
 import { GameWithPlayers } from '../Type/game-with-players';
+import { GameState, Player } from '@prisma/client';
+import { QuestionForGameProgress } from '../../Quiz/Type/question-with-answers';
 
 @Injectable()
 export class ProgressGameSessionHandler {
@@ -19,17 +21,19 @@ export class ProgressGameSessionHandler {
   }
 
   async progressGame(
+    questionData: QuestionForGameProgress,
     requestData: ProgressGameRequestDTO,
     gameId: string,
   ): Promise<void> {
     const gameData = await this.gameRepository.fetchById(gameId);
 
-    // this.checkGameState(gameData);
-    // this.checkCurrentPlayer(requestData, gameData);
-    //
-    // const selectedPlayer = this.determinePlayer(gameData, requestData);
-    // const selectedQuestion = this.determineQuestion(gameData, requestData);
-    //
+    this.checkGameState(gameData);
+    this.checkCurrentPlayer(requestData, gameData);
+
+    const selectedPlayer = this.determinePlayer(gameData, requestData);
+
+    // TODO: implement question resolution
+
     // const returnData = {
     //   answeredCorrectly: false,
     //   correctAnswerId: selectedQuestion.correctAnswer,
@@ -55,6 +59,39 @@ export class ProgressGameSessionHandler {
     // );
     //
     // return returnData;
+  }
+
+  private checkGameState(gameData: GameWithPlayers): void {
+    if (gameData.state !== GameState.IN_PROGRESS) {
+      throw new ConflictException(
+        'The game needs to be in progress if there are any updates.',
+      );
+    }
+  }
+
+  private checkCurrentPlayer(
+    progressData: ProgressGameRequestDTO,
+    gameData: GameWithPlayers,
+  ): void {
+    if (gameData.currentPlayerId !== progressData.playerId) {
+      throw new ConflictException("It's not a provided player's turn");
+    }
+  }
+
+  private determinePlayer(
+    gameData: GameWithPlayers,
+    requestData: ProgressGameRequestDTO,
+  ): Player {
+    const selectedPlayer = gameData.players.find(
+      (player) => player.id === requestData.playerId,
+    );
+
+    // This is a sanity check and should never happen
+    if (selectedPlayer === undefined) {
+      throw new ConflictException('Provided Player was not found in the Game');
+    }
+
+    return selectedPlayer;
   }
 
   private updateGamePlayerTurns(gameData: GameWithPlayers): void {
@@ -89,57 +126,5 @@ export class ProgressGameSessionHandler {
   //     gameData.questionCategories[categoryIndex].questions.filter(
   //       (question) => question.id !== selectedQuestion.id,
   //     );
-  // }
-  //
-  // private determinePlayer(
-  //   gameData: GameWithPlayers,
-  //   requestData: ProgressGameRequestDTO,
-  // ): Player {
-  //   const selectedPlayer = gameData.players.find(
-  //     (player) => player.id === requestData.playerId,
-  //   );
-  //
-  //   // This is a sanity check and should never happen
-  //   if (selectedPlayer === undefined) {
-  //     throw new ConflictException('Provided Player was not found in the Game');
-  //   }
-  //
-  //   return selectedPlayer;
-  // }
-  //
-  // private determineQuestion(
-  //   gameData: GameWithPlayers,
-  //   requestData: ProgressGameRequestDTO,
-  // ): GameQuestion {
-  //   const selectedQuestion = gameData.questionCategories
-  //     .find(
-  //       (questionCategory) => questionCategory.id === requestData.categoryId,
-  //     )
-  //     ?.questions.find((question) => question.id === requestData.questionId);
-  //
-  //   if (selectedQuestion === undefined) {
-  //     throw new ConflictException(
-  //       'Question was not found in the Game Session. Do you have correct category and question IDs?',
-  //     );
-  //   }
-  //
-  //   return selectedQuestion;
-  // }
-  //
-  // private checkGameState(gameData: GameWithPlayers): void {
-  //   if (gameData.state !== GameState.IN_PROGRESS) {
-  //     throw new ConflictException(
-  //       'The game needs to be in progress if there are any updates.',
-  //     );
-  //   }
-  // }
-  //
-  // private checkCurrentPlayer(
-  //   progressData: ProgressGameRequestDTO,
-  //   gameData: GameWithPlayers,
-  // ): void {
-  //   if (gameData.currentPlayerId !== progressData.playerId) {
-  //     throw new ConflictException("It's not a provided player's turn");
-  //   }
   // }
 }

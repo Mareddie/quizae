@@ -33,3 +33,17 @@ export type QuestionCandidateForGame = Prisma.QuestionGetPayload<{
     };
   };
 }>;
+
+export type QuestionForGameProgress = Prisma.QuestionGetPayload<{
+  select: {
+    id: true;
+    text: true;
+    answers: {
+      select: {
+        id: true;
+        text: true;
+        isCorrect: true;
+      };
+    };
+  };
+}>;
