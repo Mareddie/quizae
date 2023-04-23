@@ -25,7 +25,10 @@ export class GameFacade {
     }
 
     const questionsAndAnswers =
-      await this.questionCategoryRepository.getForGame(gameData.startedById);
+      await this.questionCategoryRepository.getForGame(
+        gameData.startedById,
+        gameId,
+      );
 
     return {
       info: gameData,

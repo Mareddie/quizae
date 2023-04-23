@@ -8,15 +8,27 @@ import { QuestionCountByCategory } from '../Type/question-with-answers';
 export class QuestionCategoryRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getForGame(startedById: string): Promise<QuestionCountByCategory[]> {
+  async getForGame(
+    startedById: string,
+    gameId: string,
+  ): Promise<QuestionCountByCategory[]> {
     return this.prisma.questionCategory.findMany({
       select: {
         id: true,
         name: true,
         priority: true,
+        // We want to display only count of unanswered questions per category
         _count: {
           select: {
-            questions: true,
+            questions: {
+              where: {
+                answeredQuestions: {
+                  none: {
+                    gameId: gameId,
+                  },
+                },
+              },
+            },
           },
         },
       },
