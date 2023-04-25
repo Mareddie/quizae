@@ -34,10 +34,12 @@ export class ProgressGameSessionHandler {
 
     // TODO: implement question resolution
 
-    // const returnData = {
-    //   answeredCorrectly: false,
-    //   correctAnswerId: selectedQuestion.correctAnswer,
-    // };
+    const returnData = {
+      answeredCorrectly: false,
+      correctAnswerId: questionData.answers.filter(
+        (answer) => answer.isCorrect === true,
+      )[0].id,
+    };
     //
     // // If the player guessed correctly, add points
     // if (selectedQuestion.correctAnswer === requestData.answerId) {
