@@ -71,9 +71,7 @@ export class GameSessionController {
     @Param('gameId') gameId: string,
     @Body() progressGameData: ProgressGameRequestDTO,
     @Req() req: Request,
-  ): Promise<void> {
-    // TODO: reimplement progress logic
-
+  ): Promise<{ answeredCorrectly: boolean; correctAnswerId: string }> {
     // We already are sure that the User can access game because of the guard check
     const questionData = await this.questionRepository.fetchForGameProgress(
       progressGameData.questionId,

@@ -24,7 +24,7 @@ export class ProgressGameSessionHandler {
     questionData: QuestionForGameProgress,
     requestData: ProgressGameRequestDTO,
     gameId: string,
-  ): Promise<void> {
+  ): Promise<{ answeredCorrectly: boolean; correctAnswerId: string }> {
     const gameData = await this.gameRepository.fetchById(gameId);
 
     this.checkGameState(gameData);
@@ -32,35 +32,35 @@ export class ProgressGameSessionHandler {
 
     const selectedPlayer = this.determinePlayer(gameData, requestData);
 
-    // TODO: implement question resolution
-
     const returnData = {
       answeredCorrectly: false,
+      // We can assume that there's at least one correct answer
       correctAnswerId: questionData.answers.filter(
         (answer) => answer.isCorrect === true,
       )[0].id,
     };
-    //
-    // // If the player guessed correctly, add points
-    // if (selectedQuestion.correctAnswer === requestData.answerId) {
-    //   returnData.answeredCorrectly = true;
-    //   selectedPlayer.points = selectedPlayer.points + this.correctAnswerPoints;
-    // }
-    //
-    // this.updateGameDataAfterProgress(
-    //   gameData,
-    //   requestData.categoryId,
-    //   selectedQuestion,
-    // );
-    //
-    // this.updateGamePlayerTurns(gameData);
-    //
-    // await this.gameRepository.updateGameDataAfterProgress(
-    //   gameData,
-    //   selectedPlayer,
-    // );
-    //
-    // return returnData;
+
+    // If the player guessed correctly, add points
+    if (returnData.correctAnswerId === requestData.answerId) {
+      returnData.answeredCorrectly = true;
+      selectedPlayer.points = selectedPlayer.points + this.correctAnswerPoints;
+    }
+
+    this.updateGamePlayerTurns(gameData);
+
+    await this.gameRepository.saveGameProgress(
+      gameId,
+      requestData,
+      questionData,
+      returnData.answeredCorrectly,
+    );
+
+    await this.gameRepository.updateGameDataAfterProgress(
+      gameData,
+      selectedPlayer,
+    );
+
+    return returnData;
   }
 
   private checkGameState(gameData: GameWithPlayers): void {
@@ -113,20 +113,4 @@ export class ProgressGameSessionHandler {
         ? gameData.players[0].id
         : gameData.players[nextPlayerIndex + 1].id;
   }
-  //
-  // private updateGameDataAfterProgress(
-  //   gameData: GameWithPlayers,
-  //   categoryId: string,
-  //   selectedQuestion: GameQuestion,
-  // ): void {
-  //   const categoryIndex = gameData.questionCategories.findIndex(
-  //     (category) => category.id === categoryId,
-  //   );
-  //
-  //   // We want to delete the question that was answered from game dataset
-  //   gameData.questionCategories[categoryIndex].questions =
-  //     gameData.questionCategories[categoryIndex].questions.filter(
-  //       (question) => question.id !== selectedQuestion.id,
-  //     );
-  // }
 }

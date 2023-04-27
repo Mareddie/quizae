@@ -3,11 +3,13 @@ import { PrismaService } from '../../Common/Service/prisma.service';
 import { CreatedGameWithPlayers } from '../Type/created-game-with-players';
 import { GameState, Player } from '@prisma/client';
 import { InitGameSessionPlayerDTO } from '../DTO/create-game-session-request.dto';
-import { Game } from '@prisma/client';
+import { Game, AnsweredQuestion } from '@prisma/client';
 import { GameWithPlayers } from '../Type/game-with-players';
 import { UpdateGameInternalDTO } from '../DTO/update-game.internal.dto';
 import { FinishedGameResult } from '../Type/finished-game-result';
 import { PlayerTurns } from '../../Presentation/GameSession/Type/game-session-types';
+import { ProgressGameRequestDTO } from '../DTO/progress-game-request.dto';
+import { QuestionForGameProgress } from '../../Quiz/Type/question-with-answers';
 
 @Injectable()
 export class GameSessionRepository {
@@ -54,6 +56,28 @@ export class GameSessionRepository {
       },
       data: {
         state: GameState.FINISHED,
+      },
+    });
+  }
+
+  async saveGameProgress(
+    gameId: string,
+    progressData: ProgressGameRequestDTO,
+    questionData: QuestionForGameProgress,
+    answeredCorrectly: boolean,
+  ): Promise<AnsweredQuestion> {
+    return this.prisma.answeredQuestion.create({
+      data: {
+        gameId: gameId,
+        answeredById: progressData.playerId,
+        questionId: questionData.id,
+        metadata: {
+          question: questionData.text,
+          correctAnswer: questionData.answers.filter(
+            (answer) => answer.isCorrect === true,
+          )[0].text,
+        },
+        correctAnswer: answeredCorrectly,
       },
     });
   }
