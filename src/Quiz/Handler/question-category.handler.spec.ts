@@ -8,15 +8,15 @@ describe('CreateUpdateQuestionCategoryHandler', () => {
   let handler: QuestionCategoryHandler;
 
   const repositoryMock = {
-    createForGroup: jest.fn().mockResolvedValue({ test: true }),
+    createForUser: jest.fn().mockResolvedValue({ test: true }),
     updateQuestionCategory: jest.fn().mockResolvedValue({ test: true }),
-    fetchForGroup: jest
+    fetchForUser: jest
       .fn()
       .mockResolvedValueOnce([{ id: '123', name: 'test category' }])
       .mockResolvedValue([]),
     fetchById: jest.fn().mockResolvedValue({
       id: '123',
-      groupId: '123',
+      userId: '123',
       name: 'Some Question Category',
     }),
     deleteQuestionCategory: jest.fn().mockResolvedValue({ test: true }),
@@ -27,7 +27,7 @@ describe('CreateUpdateQuestionCategoryHandler', () => {
       repositoryMock as unknown as QuestionCategoryRepository,
     );
 
-    repositoryMock['fetchForGroup'].mockClear();
+    repositoryMock['fetchForUser'].mockClear();
   });
 
   describe('deleteQuestionCategory', () => {
@@ -57,13 +57,13 @@ describe('CreateUpdateQuestionCategoryHandler', () => {
         ConflictException,
       );
 
-      expect(repositoryMock['fetchForGroup']).toHaveBeenCalledTimes(1);
-      expect(repositoryMock['fetchForGroup']).toHaveBeenCalledWith(
+      expect(repositoryMock['fetchForUser']).toHaveBeenCalledTimes(1);
+      expect(repositoryMock['fetchForUser']).toHaveBeenCalledWith(
         '111',
         'Test Category',
       );
 
-      expect(repositoryMock['createForGroup']).not.toHaveBeenCalled();
+      expect(repositoryMock['createForUser']).not.toHaveBeenCalled();
     });
 
     it('creates question category', async () => {
@@ -74,14 +74,14 @@ describe('CreateUpdateQuestionCategoryHandler', () => {
 
       const result = await handler.createQuestionCategory('111', dto);
 
-      expect(repositoryMock['fetchForGroup']).toHaveBeenCalledTimes(1);
-      expect(repositoryMock['fetchForGroup']).toHaveBeenCalledWith(
+      expect(repositoryMock['fetchForUser']).toHaveBeenCalledTimes(1);
+      expect(repositoryMock['fetchForUser']).toHaveBeenCalledWith(
         '111',
         'This Is Great',
       );
 
-      expect(repositoryMock['createForGroup']).toHaveBeenCalledTimes(1);
-      expect(repositoryMock['createForGroup']).toHaveBeenCalledWith('111', dto);
+      expect(repositoryMock['createForUser']).toHaveBeenCalledTimes(1);
+      expect(repositoryMock['createForUser']).toHaveBeenCalledWith('111', dto);
 
       expect(result).toEqual({ test: true });
     });
@@ -96,8 +96,8 @@ describe('CreateUpdateQuestionCategoryHandler', () => {
 
       const result = await handler.updateQuestionCategory('123', '111', dto);
 
-      expect(repositoryMock['fetchForGroup']).toHaveBeenCalledTimes(1);
-      expect(repositoryMock['fetchForGroup']).toHaveBeenCalledWith(
+      expect(repositoryMock['fetchForUser']).toHaveBeenCalledTimes(1);
+      expect(repositoryMock['fetchForUser']).toHaveBeenCalledWith(
         '111',
         'This Is Great Update',
       );

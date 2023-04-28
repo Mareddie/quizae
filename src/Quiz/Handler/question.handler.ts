@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 import { QuestionRepository } from '../Repository/question.repository';
 import { CreateUpdateAnswerDTO } from '../DTO/create-update-answer.dto';
@@ -39,7 +35,7 @@ export class QuestionHandler {
         questionId,
       );
 
-    if (questionCandidate === null) {
+    if (!questionCandidate) {
       throw new ConflictException(
         "Question for update was not found - it probably doesn't exist or belongs to another category.",
       );
