@@ -20,7 +20,7 @@ describe('CreateGameSessionHandler', () => {
   });
 
   describe('createGame', () => {
-    it('throws exception on empty category questions', async () => {
+    it('throws exception on empty players', async () => {
       await expect(handler.createGame('123', [])).rejects.toThrow(
         ConflictException,
       );
@@ -45,48 +45,29 @@ describe('CreateGameSessionHandler', () => {
 
       expect(repositoryMock['createGame']).toHaveBeenCalledWith(
         '123',
-        [
-          {
-            id: '999',
-            name: 'Some Category',
-            order: 1,
-            questions: [
-              {
-                id: '1',
-                categoryId: '999',
-                correctAnswer: '2',
-                text: 'How much is 4x4?',
-                answers: [
-                  {
-                    id: '3',
-                    questionId: '1',
-                    text: 'I do not know',
-                    order: 1,
-                  },
-                  {
-                    id: '4',
-                    questionId: '1',
-                    text: '20',
-                    order: 2,
-                  },
-                  {
-                    id: '2',
-                    questionId: '1',
-                    text: '16',
-                    order: 3,
-                  },
-                  {
-                    id: '1',
-                    questionId: '1',
-                    text: '9',
-                    order: 4,
-                  },
-                ],
-              },
-            ],
-          },
-        ],
         players,
+        expect.any(Object),
+      );
+    });
+
+    it('creates game with one player', async () => {
+      const players = [
+        plainToClass(InitGameSessionPlayerDTO, {
+          name: 'Eddie',
+          order: 1,
+        }),
+      ];
+
+      const createdGame = await handler.createGame('123', players);
+
+      expect(createdGame).toMatchObject({ test: true });
+
+      expect(repositoryMock['createGame']).toHaveBeenCalledTimes(2);
+
+      expect(repositoryMock['createGame']).toHaveBeenCalledWith(
+        '123',
+        players,
+        expect.any(Object),
       );
     });
   });
