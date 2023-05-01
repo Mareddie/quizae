@@ -2,7 +2,6 @@ import { QuestionResourceController } from './question-resource.controller';
 import { Test } from '@nestjs/testing';
 import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
 import { QuestionHandler } from '../../../Quiz/Handler/question.handler';
-import { getMockedAuthRequest } from '../../../../test/testUtils';
 import { CanAccessCategoryGuard } from '../Guard/can-access-category.guard';
 import { CreateUpdateQuestionDTO } from '../../../Quiz/DTO/create-update-question.dto';
 import { plainToClass } from 'class-transformer';
@@ -47,7 +46,7 @@ describe('QuestionResourceController', () => {
 
       expect(questions).toEqual([{ test: true }]);
 
-      expect(questionRepositoryMock['fetchQuestions']).toHaveBeenCalledTimes(2);
+      expect(questionRepositoryMock['fetchQuestions']).toHaveBeenCalledTimes(1);
 
       expect(questionRepositoryMock['fetchQuestions']).toHaveBeenCalledWith(
         '123',
@@ -57,22 +56,19 @@ describe('QuestionResourceController', () => {
 
   describe('createResource', () => {
     it('creates question', async () => {
-      const req = getMockedAuthRequest();
-
       const dto = plainToClass(CreateUpdateQuestionDTO, {
         text: 'test question',
-        correctAnswer: 'edd',
         answers: [
           {
             text: 'yo boi',
             id: 'edd',
-            order: 1,
-            isCorrectAnswer: true,
+            priority: 1,
+            isCorrect: true,
           },
         ],
       });
 
-      const createQuestion = await controller.createResource('123', dto, req);
+      const createQuestion = await controller.createResource('123', dto);
 
       expect(createQuestion).toEqual({ test: true });
 
@@ -80,7 +76,6 @@ describe('QuestionResourceController', () => {
 
       expect(questionHandlerMock['createQuestion']).toHaveBeenCalledWith(
         '123',
-        req.user.id,
         dto,
       );
     });
