@@ -5,51 +5,21 @@ import { GameState } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
 import { ProgressGameRequestDTO } from '../DTO/progress-game-request.dto';
 import { ConflictException } from '@nestjs/common';
+import { QuestionForGameProgress } from '../../Quiz/Type/question-with-answers';
 
 describe('ProgressGameSessionHandler', () => {
   let handler: ProgressGameSessionHandler;
 
   const baseGameData = {
     state: GameState.IN_PROGRESS,
-    questionCategories: [
+    categories: [
       {
         id: '999',
         name: 'Some Category',
-        order: 1,
-        questions: [
-          {
-            id: '1',
-            categoryId: '999',
-            correctAnswer: '2',
-            text: 'How much is 4x4?',
-            answers: [
-              {
-                id: '3',
-                questionId: '1',
-                text: 'I do not know',
-                order: 1,
-              },
-              {
-                id: '4',
-                questionId: '1',
-                text: '20',
-                order: 2,
-              },
-              {
-                id: '2',
-                questionId: '1',
-                text: '16',
-                order: 3,
-              },
-              {
-                id: '1',
-                questionId: '1',
-                text: '9',
-                order: 4,
-              },
-            ],
-          },
-        ],
+        priority: 1,
+        _count: {
+          questions: 3,
+        },
       },
     ],
   };
@@ -100,6 +70,23 @@ describe('ProgressGameSessionHandler', () => {
     ],
   };
 
+  const questionForGameProgress: QuestionForGameProgress = {
+    id: '123',
+    text: 'Some Question',
+    answers: [
+      {
+        id: '111',
+        text: 'Incorrect',
+        isCorrect: false,
+      },
+      {
+        id: '222',
+        text: 'Correct',
+        isCorrect: true,
+      },
+    ],
+  };
+
   const repositoryMock = {
     endGame: jest.fn().mockResolvedValue('test'),
     fetchById: jest
@@ -122,6 +109,7 @@ describe('ProgressGameSessionHandler', () => {
         JSON.parse(JSON.stringify(gameDataWithThreePlayers)),
       ),
     updateGameDataAfterProgress: jest.fn().mockResolvedValue('test'),
+    saveGameProgress: jest.fn().mockResolvedValue('test'),
   };
 
   beforeEach(() => {
@@ -151,9 +139,9 @@ describe('ProgressGameSessionHandler', () => {
         playerId: '123',
       });
 
-      await expect(handler.progressGame(dto, '111')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        handler.progressGame(questionForGameProgress, dto, '111'),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('prohibits to play players outside their turn', async () => {
@@ -164,9 +152,9 @@ describe('ProgressGameSessionHandler', () => {
         playerId: '123',
       });
 
-      await expect(handler.progressGame(dto, '111')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        handler.progressGame(questionForGameProgress, dto, '111'),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('throws an exception on undefined player', async () => {
@@ -177,9 +165,9 @@ describe('ProgressGameSessionHandler', () => {
         playerId: '123',
       });
 
-      await expect(handler.progressGame(dto, '111')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        handler.progressGame(questionForGameProgress, dto, '111'),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('throws an exception on invalid question ID', async () => {
@@ -190,9 +178,9 @@ describe('ProgressGameSessionHandler', () => {
         playerId: '123',
       });
 
-      await expect(handler.progressGame(dto, '111')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        handler.progressGame(questionForGameProgress, dto, '111'),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('processes incorrect answer', async () => {
@@ -203,7 +191,11 @@ describe('ProgressGameSessionHandler', () => {
         playerId: '123',
       });
 
-      const result = await handler.progressGame(dto, '111');
+      const result = await handler.progressGame(
+        questionForGameProgress,
+        dto,
+        '111',
+      );
 
       expect(
         repositoryMock['updateGameDataAfterProgress'],
@@ -241,7 +233,11 @@ describe('ProgressGameSessionHandler', () => {
         playerId: '123',
       });
 
-      const result = await handler.progressGame(dto, '111');
+      const result = await handler.progressGame(
+        questionForGameProgress,
+        dto,
+        '111',
+      );
 
       expect(
         repositoryMock['updateGameDataAfterProgress'],
