@@ -89,6 +89,7 @@ describe('ProgressGameSessionHandler', () => {
 
   const repositoryMock = {
     endGame: jest.fn().mockResolvedValue('test'),
+    // TODO: Move mocking to separate tests!!!!
     fetchById: jest
       .fn()
       .mockResolvedValueOnce({
@@ -133,7 +134,6 @@ describe('ProgressGameSessionHandler', () => {
   describe('progressGame', () => {
     it('prohibits to play finished game', async () => {
       const dto = plainToClass(ProgressGameRequestDTO, {
-        categoryId: '123',
         questionId: '123',
         answerId: '123',
         playerId: '123',
@@ -146,7 +146,6 @@ describe('ProgressGameSessionHandler', () => {
 
     it('prohibits to play players outside their turn', async () => {
       const dto = plainToClass(ProgressGameRequestDTO, {
-        categoryId: '123',
         questionId: '123',
         answerId: '123',
         playerId: '123',
@@ -159,20 +158,6 @@ describe('ProgressGameSessionHandler', () => {
 
     it('throws an exception on undefined player', async () => {
       const dto = plainToClass(ProgressGameRequestDTO, {
-        categoryId: '999',
-        questionId: '123',
-        answerId: '123',
-        playerId: '123',
-      });
-
-      await expect(
-        handler.progressGame(questionForGameProgress, dto, '111'),
-      ).rejects.toThrow(ConflictException);
-    });
-
-    it('throws an exception on invalid question ID', async () => {
-      const dto = plainToClass(ProgressGameRequestDTO, {
-        categoryId: '999',
         questionId: '123',
         answerId: '123',
         playerId: '123',
@@ -185,7 +170,6 @@ describe('ProgressGameSessionHandler', () => {
 
     it('processes incorrect answer', async () => {
       const dto = plainToClass(ProgressGameRequestDTO, {
-        categoryId: '999',
         questionId: '1',
         answerId: '123',
         playerId: '123',
@@ -208,9 +192,7 @@ describe('ProgressGameSessionHandler', () => {
           state: GameState.IN_PROGRESS,
           currentPlayerId: '456',
           nextPlayerId: '123',
-          questionCategories: [
-            { id: '999', name: 'Some Category', order: 1, questions: [] },
-          ],
+          categories: [{ _count: { questions: 3 } }],
           players: [
             { id: '123', name: 'Charlie', points: 0, order: 1 },
             { id: '456', name: 'John', points: 0, order: 2 },
@@ -227,7 +209,6 @@ describe('ProgressGameSessionHandler', () => {
 
     it('processes correct answer', async () => {
       const dto = plainToClass(ProgressGameRequestDTO, {
-        categoryId: '999',
         questionId: '1',
         answerId: '2',
         playerId: '123',
