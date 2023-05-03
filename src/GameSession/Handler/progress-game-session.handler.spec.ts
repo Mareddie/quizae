@@ -24,10 +24,30 @@ describe('ProgressGameSessionHandler', () => {
     ],
   };
 
+  const gameDataWithTwoPlayers = {
+    ...baseGameData,
+    currentPlayerId: '123',
+    nextPlayerId: '456',
+    players: [
+      {
+        id: '123',
+        name: 'Charlie',
+        points: 0,
+        order: 1,
+      },
+      {
+        id: '456',
+        name: 'John',
+        points: 0,
+        order: 2,
+      },
+    ],
+  };
+
   const gameDataWithThreePlayers = {
     ...baseGameData,
     currentPlayerId: '123',
-    nextPlayerId: '123',
+    nextPlayerId: '456',
     players: [
       {
         id: '123',
@@ -46,26 +66,6 @@ describe('ProgressGameSessionHandler', () => {
         name: 'Dave',
         points: 0,
         order: 3,
-      },
-    ],
-  };
-
-  const gameDataWithTwoPlayers = {
-    ...baseGameData,
-    currentPlayerId: '123',
-    nextPlayerId: '456',
-    players: [
-      {
-        id: '123',
-        name: 'Charlie',
-        points: 0,
-        order: 1,
-      },
-      {
-        id: '456',
-        name: 'John',
-        points: 0,
-        order: 2,
       },
     ],
   };
