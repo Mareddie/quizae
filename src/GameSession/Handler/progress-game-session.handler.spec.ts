@@ -18,28 +18,8 @@ describe('ProgressGameSessionHandler', () => {
         name: 'Some Category',
         priority: 1,
         _count: {
-          questions: 3,
+          questions: 2,
         },
-      },
-    ],
-  };
-
-  const gameDataWithTwoPlayers = {
-    ...baseGameData,
-    currentPlayerId: '123',
-    nextPlayerId: '456',
-    players: [
-      {
-        id: '123',
-        name: 'Charlie',
-        points: 0,
-        order: 1,
-      },
-      {
-        id: '456',
-        name: 'John',
-        points: 0,
-        order: 2,
       },
     ],
   };
@@ -89,26 +69,9 @@ describe('ProgressGameSessionHandler', () => {
 
   const repositoryMock = {
     endGame: jest.fn().mockResolvedValue('test'),
-    // TODO: Move mocking to separate tests!!!!
     fetchById: jest
       .fn()
-      .mockResolvedValueOnce({
-        state: GameState.FINISHED,
-      })
-      .mockResolvedValueOnce({
-        state: GameState.IN_PROGRESS,
-        currentPlayerId: '456',
-      })
-      .mockResolvedValueOnce({
-        state: GameState.IN_PROGRESS,
-        currentPlayerId: '123',
-        players: [],
-      })
-      .mockResolvedValueOnce(JSON.parse(JSON.stringify(gameDataWithTwoPlayers)))
-      .mockResolvedValueOnce(JSON.parse(JSON.stringify(gameDataWithTwoPlayers)))
-      .mockResolvedValueOnce(
-        JSON.parse(JSON.stringify(gameDataWithThreePlayers)),
-      ),
+      .mockResolvedValue(JSON.parse(JSON.stringify(gameDataWithThreePlayers))),
     updateGameDataAfterProgress: jest.fn().mockResolvedValue('test'),
     saveGameProgress: jest.fn().mockResolvedValue('test'),
   };
@@ -133,6 +96,10 @@ describe('ProgressGameSessionHandler', () => {
 
   describe('progressGame', () => {
     it('prohibits to play finished game', async () => {
+      repositoryMock['fetchById'].mockResolvedValueOnce({
+        state: GameState.FINISHED,
+      });
+
       const dto = plainToClass(ProgressGameRequestDTO, {
         questionId: '123',
         answerId: '123',
@@ -145,6 +112,11 @@ describe('ProgressGameSessionHandler', () => {
     });
 
     it('prohibits to play players outside their turn', async () => {
+      repositoryMock['fetchById'].mockResolvedValueOnce({
+        state: GameState.IN_PROGRESS,
+        currentPlayerId: '456',
+      });
+
       const dto = plainToClass(ProgressGameRequestDTO, {
         questionId: '123',
         answerId: '123',
@@ -157,6 +129,12 @@ describe('ProgressGameSessionHandler', () => {
     });
 
     it('throws an exception on undefined player', async () => {
+      repositoryMock['fetchById'].mockResolvedValueOnce({
+        state: GameState.IN_PROGRESS,
+        currentPlayerId: '123',
+        players: [],
+      });
+
       const dto = plainToClass(ProgressGameRequestDTO, {
         questionId: '123',
         answerId: '123',
@@ -169,6 +147,11 @@ describe('ProgressGameSessionHandler', () => {
     });
 
     it('processes incorrect answer', async () => {
+      // TODO: fix this test
+      repositoryMock['fetchById'].mockResolvedValueOnce(
+        JSON.parse(JSON.stringify(gameDataWithThreePlayers)),
+      );
+
       const dto = plainToClass(ProgressGameRequestDTO, {
         questionId: '1',
         answerId: '123',
@@ -208,6 +191,11 @@ describe('ProgressGameSessionHandler', () => {
     });
 
     it('processes correct answer', async () => {
+      // TODO: fix this test
+      repositoryMock['fetchById'].mockResolvedValueOnce(
+        JSON.parse(JSON.stringify(gameDataWithThreePlayers)),
+      );
+
       const dto = plainToClass(ProgressGameRequestDTO, {
         questionId: '1',
         answerId: '2',
