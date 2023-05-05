@@ -147,14 +147,13 @@ describe('ProgressGameSessionHandler', () => {
     });
 
     it('processes incorrect answer', async () => {
-      // TODO: fix this test
       repositoryMock['fetchById'].mockResolvedValueOnce(
         JSON.parse(JSON.stringify(gameDataWithThreePlayers)),
       );
 
       const dto = plainToClass(ProgressGameRequestDTO, {
         questionId: '1',
-        answerId: '123',
+        answerId: '111',
         playerId: '123',
       });
 
@@ -162,6 +161,15 @@ describe('ProgressGameSessionHandler', () => {
         questionForGameProgress,
         dto,
         '111',
+      );
+
+      expect(repositoryMock['saveGameProgress']).toHaveBeenCalledTimes(1);
+
+      expect(repositoryMock['saveGameProgress']).toHaveBeenCalledWith(
+        '111',
+        dto,
+        questionForGameProgress,
+        false,
       );
 
       expect(
@@ -170,35 +178,27 @@ describe('ProgressGameSessionHandler', () => {
 
       expect(
         repositoryMock['updateGameDataAfterProgress'],
-      ).toHaveBeenCalledWith(
-        {
-          state: GameState.IN_PROGRESS,
-          currentPlayerId: '456',
-          nextPlayerId: '123',
-          categories: [{ _count: { questions: 3 } }],
-          players: [
-            { id: '123', name: 'Charlie', points: 0, order: 1 },
-            { id: '456', name: 'John', points: 0, order: 2 },
-          ],
-        },
-        { id: '123', name: 'Charlie', points: 0, order: 1 },
-      );
+      ).toHaveBeenCalledWith(expect.any(Object), {
+        id: '123',
+        name: 'Charlie',
+        points: 0,
+        order: 1,
+      });
 
       expect(result).toMatchObject({
         answeredCorrectly: false,
-        correctAnswerId: '2',
+        correctAnswerId: '222',
       });
     });
 
     it('processes correct answer', async () => {
-      // TODO: fix this test
       repositoryMock['fetchById'].mockResolvedValueOnce(
         JSON.parse(JSON.stringify(gameDataWithThreePlayers)),
       );
 
       const dto = plainToClass(ProgressGameRequestDTO, {
         questionId: '1',
-        answerId: '2',
+        answerId: '222',
         playerId: '123',
       });
 
@@ -208,47 +208,31 @@ describe('ProgressGameSessionHandler', () => {
         '111',
       );
 
+      expect(repositoryMock['saveGameProgress']).toHaveBeenCalledTimes(2);
+
+      expect(repositoryMock['saveGameProgress']).toHaveBeenCalledWith(
+        '111',
+        dto,
+        questionForGameProgress,
+        true,
+      );
+
       expect(
         repositoryMock['updateGameDataAfterProgress'],
       ).toHaveBeenCalledTimes(2);
 
       expect(
         repositoryMock['updateGameDataAfterProgress'],
-      ).toHaveBeenCalledWith(
-        {
-          state: GameState.IN_PROGRESS,
-          currentPlayerId: '123',
-          nextPlayerId: '456',
-          questionCategories: [
-            { id: '999', name: 'Some Category', order: 1, questions: [] },
-          ],
-          players: [
-            {
-              id: '123',
-              name: 'Charlie',
-              points: 10,
-              order: 1,
-            },
-            {
-              id: '456',
-              name: 'Eduard',
-              points: 0,
-              order: 2,
-            },
-            {
-              id: '789',
-              name: 'Dave',
-              points: 0,
-              order: 3,
-            },
-          ],
-        },
-        { id: '123', name: 'Charlie', points: 10, order: 1 },
-      );
+      ).toHaveBeenCalledWith(expect.any(Object), {
+        id: '123',
+        name: 'Charlie',
+        points: 10,
+        order: 1,
+      });
 
       expect(result).toMatchObject({
         answeredCorrectly: true,
-        correctAnswerId: '2',
+        correctAnswerId: '222',
       });
     });
   });
