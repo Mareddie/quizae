@@ -1,7 +1,6 @@
 import { CanAccessCategoryGuard } from './can-access-category.guard';
 import { Test } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { GroupRepository } from '../../../User/Repository/group.repository';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { ExecutionContext } from '@nestjs/common';
 
@@ -17,14 +16,6 @@ describe('CanAccessCategoryGuard', () => {
       .mockResolvedValue(null),
   };
 
-  const groupRepositoryMock = {
-    getAccessibleGroups: jest
-      .fn()
-      .mockResolvedValueOnce(['582'])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(['123', '456']),
-  };
-
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [CanAccessCategoryGuard],
@@ -33,14 +24,14 @@ describe('CanAccessCategoryGuard', () => {
         switch (token) {
           case QuestionCategoryRepository:
             return questionCategoryRepositoryMock;
-          case GroupRepository:
-            return groupRepositoryMock;
         }
       })
       .compile();
 
     guard = moduleRef.get(CanAccessCategoryGuard);
   });
+
+  // TODO: fix this test
 
   describe('canActivate', () => {
     it('returns false on invalid input data', async () => {
