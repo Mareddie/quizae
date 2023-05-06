@@ -11,6 +11,7 @@ import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-r
 import { GameFacade } from '../Facade/game.facade';
 
 describe('GameSessionController', () => {
+  // TODO: These tests are not working, rewrite them
   let controller: GameSessionController;
 
   const createHandlerMock = {
@@ -134,7 +135,11 @@ describe('GameSessionController', () => {
         playerId: '123',
       });
 
-      const progressGame = await controller.progressGame('123', dto);
+      const progressGame = await controller.progressGame(
+        '123',
+        dto,
+        getMockedAuthRequest(),
+      );
 
       expect(progressGameHandlerMock['progressGame']).toHaveBeenCalledTimes(1);
 
