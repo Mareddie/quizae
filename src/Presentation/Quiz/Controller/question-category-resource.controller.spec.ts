@@ -4,12 +4,13 @@ import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-ca
 import { QuestionCategoryHandler } from '../../../Quiz/Handler/question-category.handler';
 import { plainToClass } from 'class-transformer';
 import { CreateUpdateQuestionCategoryDTO } from '../../../Quiz/DTO/create-update-question-category.dto';
+import { getMockedAuthRequest } from '../../../../test/testUtils';
 
 describe('QuestionCategoryResourceController', () => {
   let controller: QuestionCategoryResourceController;
 
   const repositoryMock = {
-    fetchForGroup: jest.fn().mockResolvedValue([{ test: true }]),
+    fetchForUser: jest.fn().mockResolvedValue([{ test: true }]),
   };
 
   const handlerMock = {
@@ -39,12 +40,12 @@ describe('QuestionCategoryResourceController', () => {
 
   describe('resourceList', () => {
     it('fetches categories for group', async () => {
-      const listData = await controller.resourceList('123');
+      const listData = await controller.resourceList(getMockedAuthRequest());
 
       expect(listData).toEqual([{ test: true }]);
 
-      expect(repositoryMock['fetchForGroup']).toHaveBeenCalledTimes(1);
-      expect(repositoryMock['fetchForGroup']).toHaveBeenCalledWith('123');
+      expect(repositoryMock['fetchForUser']).toHaveBeenCalledTimes(1);
+      expect(repositoryMock['fetchForUser']).toHaveBeenCalledWith('1');
     });
   });
 
@@ -55,14 +56,17 @@ describe('QuestionCategoryResourceController', () => {
         order: 1,
       });
 
-      const createdCategory = await controller.createResource('123', dto);
+      const createdCategory = await controller.createResource(
+        getMockedAuthRequest(),
+        dto,
+      );
 
       expect(createdCategory).toEqual({ test: true });
 
       expect(handlerMock['createQuestionCategory']).toHaveBeenCalledTimes(1);
 
       expect(handlerMock['createQuestionCategory']).toHaveBeenCalledWith(
-        '123',
+        '1',
         dto,
       );
     });
@@ -76,7 +80,7 @@ describe('QuestionCategoryResourceController', () => {
       });
 
       const updatedCategory = await controller.updateResource(
-        '123',
+        getMockedAuthRequest(),
         '456',
         dto,
       );
@@ -87,7 +91,7 @@ describe('QuestionCategoryResourceController', () => {
 
       expect(handlerMock['updateQuestionCategory']).toHaveBeenCalledWith(
         '456',
-        '123',
+        '1',
         dto,
       );
     });
@@ -95,12 +99,12 @@ describe('QuestionCategoryResourceController', () => {
 
   describe('deleteResource', () => {
     it('deletes question category', async () => {
-      await controller.deleteResource('123', '456');
+      await controller.deleteResource(getMockedAuthRequest(), '456');
 
       expect(handlerMock['deleteQuestionCategory']).toHaveBeenCalledTimes(1);
 
       expect(handlerMock['deleteQuestionCategory']).toHaveBeenCalledWith(
-        '123',
+        '1',
         '456',
       );
     });
