@@ -8,12 +8,12 @@ describe('CanAccessCategoryGuard', () => {
   let guard: CanAccessCategoryGuard;
 
   const questionCategoryRepositoryMock = {
-    fetchById: jest
-      .fn()
-      .mockResolvedValueOnce({ groupId: '123' })
-      .mockResolvedValueOnce({ groupId: '123' })
-      .mockResolvedValueOnce({ groupId: '123' })
-      .mockResolvedValue(null),
+    fetchById: jest.fn().mockResolvedValue({
+      id: '999',
+      name: 'testing category',
+      userId: '1',
+      priority: 20,
+    }),
   };
 
   beforeEach(async () => {
@@ -39,10 +39,11 @@ describe('CanAccessCategoryGuard', () => {
     });
 
     it('returns false on inaccessible group', async () => {
-      await runGuard(guard, false, '999', '1');
-    });
+      questionCategoryRepositoryMock['fetchById'].mockResolvedValueOnce({
+        id: '999',
+        userId: '123',
+      });
 
-    it('returns false on empty accessible categories', async () => {
       await runGuard(guard, false, '999', '1');
     });
 
