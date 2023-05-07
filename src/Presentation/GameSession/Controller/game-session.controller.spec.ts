@@ -23,7 +23,9 @@ describe('GameSessionController', () => {
     fetchForGame: jest.fn().mockResolvedValue('fetchedForGame'),
   };
 
-  const questionRepositoryMock = {};
+  const questionRepositoryMock = {
+    fetchForGameProgress: jest.fn().mockResolvedValue('game question boi'),
+  };
 
   const progressGameHandlerMock = {
     progressGame: jest.fn().mockResolvedValue('progressGame'),
@@ -32,6 +34,7 @@ describe('GameSessionController', () => {
 
   const gameFacadeMock = {
     getQuestionForGame: jest.fn().mockResolvedValue('questionForGame'),
+    getGameData: jest.fn().mockResolvedValue('gameData'),
   };
 
   beforeEach(async () => {
@@ -84,19 +87,10 @@ describe('GameSessionController', () => {
 
       const createGame = await controller.createGame(req, dto);
 
-      expect(
-        questionCategoryRepositoryMock['fetchForGame'],
-      ).toHaveBeenCalledTimes(1);
-
-      expect(
-        questionCategoryRepositoryMock['fetchForGame'],
-      ).toHaveBeenCalledWith('123');
-
       expect(createHandlerMock['createGame']).toHaveBeenCalledTimes(1);
 
       expect(createHandlerMock['createGame']).toHaveBeenCalledWith(
         req.user.id,
-        'fetchedForGame',
         dto.players,
       );
 
@@ -104,67 +98,74 @@ describe('GameSessionController', () => {
     });
   });
 
-  // describe('getGameStatus', () => {
-  //   it('returns game status', async () => {
-  //     const gameStatus = await controller.getGameStatus('123');
-  //
-  //     // TODO: fix tests once new logic is implemented
-  //
-  //     expect(gameStatus).toEqual('gameStatus');
-  //   });
-  // });
-  //
-  // describe('getGameQuestion', () => {
-  //   it('returns game question', async () => {
-  //     const gameQuestion = await controller.getGameQuestion('123', '456');
-  //
-  //     expect(
-  //       gameQuestionFacadeMock['getQuestionForGame'],
-  //     ).toHaveBeenCalledTimes(1);
-  //
-  //     expect(gameQuestionFacadeMock['getQuestionForGame']).toHaveBeenCalledWith(
-  //       '123',
-  //       '456',
-  //     );
-  //
-  //     expect(gameQuestion).toEqual('questionForGame');
-  //   });
-  // });
-  //
-  // describe('progressGame', () => {
-  //   it('progresses game', async () => {
-  //     const dto = plainToClass(ProgressGameRequestDTO, {
-  //       categoryId: '123',
-  //       questionId: '456',
-  //       answerId: '456',
-  //       playerId: '123',
-  //     });
-  //
-  //     const progressGame = await controller.progressGame(
-  //       '123',
-  //       dto,
-  //       getMockedAuthRequest(),
-  //     );
-  //
-  //     expect(progressGameHandlerMock['progressGame']).toHaveBeenCalledTimes(1);
-  //
-  //     expect(progressGameHandlerMock['progressGame']).toHaveBeenCalledWith(
-  //       dto,
-  //       '123',
-  //     );
-  //
-  //     expect(progressGame).toEqual('progressGame');
-  //   });
-  // });
-  //
-  // describe('finishGame', () => {
-  //   it('finishes game', async () => {
-  //     const finishGame = await controller.finishGame('123');
-  //
-  //     expect(progressGameHandlerMock['endGame']).toHaveBeenCalledTimes(1);
-  //     expect(progressGameHandlerMock['endGame']).toHaveBeenCalledWith('123');
-  //
-  //     expect(finishGame).toEqual('endGame');
-  //   });
-  // });
+  describe('getGameStatus', () => {
+    it('returns game status', async () => {
+      const gameStatus = await controller.getGameStatus('123');
+
+      expect(gameFacadeMock['getGameData']).toHaveBeenCalledTimes(1);
+      expect(gameFacadeMock['getGameData']).toHaveBeenCalledWith('123');
+
+      expect(gameStatus).toEqual('gameData');
+    });
+  });
+
+  describe('getGameQuestion', () => {
+    it('returns game question', async () => {
+      const gameQuestion = await controller.getGameQuestion('123', '456');
+
+      expect(gameFacadeMock['getQuestionForGame']).toHaveBeenCalledTimes(1);
+
+      expect(gameFacadeMock['getQuestionForGame']).toHaveBeenCalledWith(
+        '123',
+        '456',
+      );
+
+      expect(gameQuestion).toEqual('questionForGame');
+    });
+  });
+
+  describe('progressGame', () => {
+    it('progresses game', async () => {
+      const dto = plainToClass(ProgressGameRequestDTO, {
+        questionId: '456',
+        answerId: '456',
+        playerId: '123',
+      });
+
+      const progressGame = await controller.progressGame(
+        '123',
+        dto,
+        getMockedAuthRequest(),
+      );
+
+      expect(
+        questionRepositoryMock['fetchForGameProgress'],
+      ).toHaveBeenCalledTimes(1);
+
+      expect(
+        questionRepositoryMock['fetchForGameProgress'],
+      ).toHaveBeenCalledWith(dto.questionId, '123', '1');
+
+      expect(progressGameHandlerMock['progressGame']).toHaveBeenCalledTimes(1);
+
+      expect(progressGameHandlerMock['progressGame']).toHaveBeenCalledWith(
+        'game question boi',
+        dto,
+        '123',
+      );
+
+      expect(progressGame).toEqual('progressGame');
+    });
+  });
+
+  describe('finishGame', () => {
+    it('finishes game', async () => {
+      const finishGame = await controller.finishGame('123');
+
+      expect(progressGameHandlerMock['endGame']).toHaveBeenCalledTimes(1);
+      expect(progressGameHandlerMock['endGame']).toHaveBeenCalledWith('123');
+
+      expect(finishGame).toEqual('endGame');
+    });
+  });
 });
