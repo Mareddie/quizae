@@ -9,37 +9,48 @@ describe('GameFacade', () => {
   let facade: GameFacade;
 
   const gameRepositoryMock = {
-    fetchById: jest
-      .fn()
-      .mockResolvedValueOnce({
-        state: GameState.FINISHED,
-      })
-      .mockResolvedValue({
-        state: GameState.IN_PROGRESS,
-        questionCategories: [
-          {
-            id: '123',
-            questions: [
-              {
-                correctAnswer: '1',
-                question: 'What is this Test?',
-              },
-              {
-                correctAnswer: '2',
-                question: 'Oh yes it is indeed a test',
-              },
-            ],
-          },
-        ],
-      }),
+    fetchById: jest.fn().mockResolvedValue({
+      id: '123',
+      startedById: '456',
+      state: GameState.IN_PROGRESS,
+      startedAt: '2022-01-01',
+      players: [
+        {
+          id: '111',
+          name: 'Diva',
+          points: 0,
+          gameId: '123',
+          order: 1,
+        },
+        {
+          id: '222',
+          name: 'Eddie',
+          points: 10,
+          gameId: '123',
+          order: 2,
+        },
+      ],
+      currentPlayerId: '111',
+      nextPlayerId: '222',
+    }),
   };
 
   const questionCategoryRepositoryMock = {
-    getForGame: jest.fn(),
+    getForGame: jest.fn().mockResolvedValue([
+      {
+        id: '000',
+        name: 'Testing Category',
+        priority: 10,
+        _count: { questions: 3 },
+      },
+    ]),
   };
 
   const questionRepositoryMock = {
-    fetchCandidatesForGame: jest.fn(),
+    fetchCandidatesForGame: jest.fn().mockResolvedValue([
+      { id: '12345', text: 'Some testing question' },
+      { id: '45678', text: 'Second Question' },
+    ]),
   };
 
   beforeEach(() => {
@@ -50,10 +61,16 @@ describe('GameFacade', () => {
     );
   });
 
-  // TODO: check coverage, maybe improve tests here
+  describe('getGameData', () => {
+    // TODO: Implement tests for this method
+  });
 
   describe('getQuestionForGame', () => {
     it('throws error on finished game input', async () => {
+      gameRepositoryMock['fetchById'].mockResolvedValueOnce({
+        state: GameState.FINISHED,
+      });
+
       await expect(facade.getQuestionForGame('111', '222')).rejects.toThrow(
         BadRequestException,
       );
@@ -63,23 +80,66 @@ describe('GameFacade', () => {
     });
 
     it('throws error on undefined question category', async () => {
-      await expect(facade.getQuestionForGame('111', '222')).rejects.toThrow(
+      questionRepositoryMock['fetchCandidatesForGame'].mockResolvedValueOnce(
+        [],
+      );
+
+      await expect(facade.getQuestionForGame('123', '222')).rejects.toThrow(
         BadRequestException,
       );
 
       expect(gameRepositoryMock['fetchById']).toHaveBeenCalledTimes(2);
       expect(gameRepositoryMock['fetchById']).toHaveBeenCalledWith('111');
+
+      expect(
+        questionRepositoryMock['fetchCandidatesForGame'],
+      ).toHaveBeenCalledTimes(1);
+
+      expect(
+        questionRepositoryMock['fetchCandidatesForGame'],
+      ).toHaveBeenCalledWith('222', '123');
     });
 
-    it('returns question from game category without correct answer', async () => {
-      const question = await facade.getQuestionForGame('111', '123');
+    it('returns first question if only one present', async () => {
+      const questions = [
+        { id: '11-11', text: 'Frist and last testing question' },
+      ];
+
+      questionRepositoryMock['fetchCandidatesForGame'].mockResolvedValueOnce(
+        questions,
+      );
+
+      const result = await facade.getQuestionForGame('123', '222');
 
       expect(gameRepositoryMock['fetchById']).toHaveBeenCalledTimes(3);
       expect(gameRepositoryMock['fetchById']).toHaveBeenCalledWith('111');
 
-      expect(question).toMatchObject({
-        question: expect.any(String),
-      });
+      expect(
+        questionRepositoryMock['fetchCandidatesForGame'],
+      ).toHaveBeenCalledTimes(2);
+
+      expect(
+        questionRepositoryMock['fetchCandidatesForGame'],
+      ).toHaveBeenCalledWith('222', '123');
+
+      expect(result).toEqual(questions[0]);
+    });
+
+    it('returns any question available', async () => {
+      const result = await facade.getQuestionForGame('123', '222');
+
+      expect(gameRepositoryMock['fetchById']).toHaveBeenCalledTimes(4);
+      expect(gameRepositoryMock['fetchById']).toHaveBeenCalledWith('111');
+
+      expect(
+        questionRepositoryMock['fetchCandidatesForGame'],
+      ).toHaveBeenCalledTimes(3);
+
+      expect(
+        questionRepositoryMock['fetchCandidatesForGame'],
+      ).toHaveBeenCalledWith('222', '123');
+
+      expect(result).toEqual(expect.any(Object));
     });
   });
 });
