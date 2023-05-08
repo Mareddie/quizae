@@ -10,6 +10,7 @@ import { CreateGameSessionRequestDTO } from '../../../GameSession/DTO/create-gam
 import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-request.dto';
 import { GameFacade } from '../Facade/game.facade';
 import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
+import { ConflictException } from '@nestjs/common';
 
 describe('GameSessionController', () => {
   // TODO: These tests are not working, rewrite them
@@ -155,6 +156,26 @@ describe('GameSessionController', () => {
       );
 
       expect(progressGame).toEqual('progressGame');
+    });
+
+    it('throws exception on undefined question data', async () => {
+      questionRepositoryMock['fetchForGameProgress'].mockResolvedValueOnce(
+        undefined,
+      );
+
+      const dto = plainToClass(ProgressGameRequestDTO, {
+        questionId: '456',
+        answerId: '456',
+        playerId: '123',
+      });
+
+      await expect(
+        controller.progressGame('123', dto, getMockedAuthRequest()),
+      ).rejects.toThrow(ConflictException);
+
+      expect(
+        questionRepositoryMock['fetchForGameProgress'],
+      ).toHaveBeenCalledTimes(2);
     });
   });
 
