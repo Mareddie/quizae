@@ -5,7 +5,6 @@ import { GameState, Player } from '@prisma/client';
 import { InitGameSessionPlayerDTO } from '../DTO/create-game-session-request.dto';
 import { Game, AnsweredQuestion } from '@prisma/client';
 import { GameWithPlayers } from '../Type/game-with-players';
-import { UpdateGameInternalDTO } from '../DTO/update-game.internal.dto';
 import { FinishedGameResult } from '../Type/finished-game-result';
 import { PlayerTurns } from '../../Presentation/GameSession/Type/game-session-types';
 import { ProgressGameRequestDTO } from '../DTO/progress-game-request.dto';
@@ -143,17 +142,5 @@ export class GameSessionRepository {
     }
 
     return this.prisma.game.create(createQuery);
-  }
-
-  async updateGameFromInternalData(data: UpdateGameInternalDTO): Promise<Game> {
-    return this.prisma.game.update({
-      where: {
-        id: data.gameId,
-      },
-      data: {
-        currentPlayerId: data.currentPlayerId,
-        nextPlayerId: data.nextPlayerId,
-      },
-    });
   }
 }
