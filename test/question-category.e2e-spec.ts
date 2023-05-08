@@ -24,7 +24,7 @@ describe('Question Categories', () => {
     fixture = new QuestionCategoryFixture(prisma);
 
     testData = await fixture.up();
-    authToken = await authService.generateToken(testData.firstUser);
+    authToken = await authService.generateToken(testData.user);
   });
 
   afterAll(async () => {
@@ -33,30 +33,24 @@ describe('Question Categories', () => {
   });
 
   it('requires authentication', async () => {
+    await request(app.getHttpServer()).get(`/question-categories`).expect(401);
+
     await request(app.getHttpServer())
-      .get(`/question-categories/${testData.group.id}`)
+      .post(`/question-categories/create`)
       .expect(401);
 
     await request(app.getHttpServer())
-      .post(`/question-categories/${testData.group.id}/create`)
+      .patch(`/question-categories/${testData.questionCategory.id}`)
       .expect(401);
 
     await request(app.getHttpServer())
-      .patch(
-        `/question-categories/${testData.group.id}/${testData.categories[0].id}`,
-      )
-      .expect(401);
-
-    await request(app.getHttpServer())
-      .delete(
-        `/question-categories/${testData.group.id}/${testData.categories[0].id}`,
-      )
+      .delete(`/question-categories/${testData.questionCategory.id}`)
       .expect(401);
   });
 
   it('lists question categories', async () => {
     const listResponse = await request(app.getHttpServer())
-      .get(`/question-categories/${testData.group.id}`)
+      .get(`/question-categories`)
       .set('Authorization', `Bearer ${authToken}`)
       .set('Accept', 'application/json');
 
@@ -64,16 +58,15 @@ describe('Question Categories', () => {
     expect(listResponse.headers['content-type']).toMatch(/json/);
 
     expect(listResponse.body).toBeInstanceOf(Array);
-    expect(listResponse.body[0]).toMatchObject(testData.categories[0]);
-    expect(listResponse.body[1]).toMatchObject(testData.categories[1]);
+    expect(listResponse.body[0]).toMatchObject(testData.questionCategory);
   });
 
   it('creates question category', async () => {
     const createResponse = await request(app.getHttpServer())
-      .post(`/question-categories/${testData.group.id}/create`)
+      .post(`/question-categories/create`)
       .set('Authorization', `Bearer ${authToken}`)
       .set('Accept', 'application/json')
-      .send({ name: 'Created Question Category', order: 3 });
+      .send({ name: 'Created Question Category', priority: 3 });
 
     expect(createResponse.statusCode).toEqual(201);
     expect(createResponse.headers['content-type']).toMatch(/json/);
@@ -81,8 +74,7 @@ describe('Question Categories', () => {
     expect(createResponse.body).toMatchObject({
       id: expect.any(String),
       name: 'Created Question Category',
-      groupId: testData.group.id,
-      order: 3,
+      priority: 3,
     });
 
     const createdQuestionCategory = await prisma.questionCategory.findUnique({
@@ -94,28 +86,24 @@ describe('Question Categories', () => {
     expect(createdQuestionCategory).toMatchObject({
       id: createResponse.body.id,
       name: createResponse.body.name,
-      groupId: createResponse.body.groupId,
-      order: createResponse.body.order,
+      priority: createResponse.body.priority,
     });
   });
 
   it('updates question category', async () => {
     const updateResponse = await request(app.getHttpServer())
-      .patch(
-        `/question-categories/${testData.group.id}/${testData.categories[0].id}`,
-      )
+      .patch(`/question-categories/${testData.questionCategory.id}`)
       .set('Authorization', `Bearer ${authToken}`)
       .set('Accept', 'application/json')
-      .send({ name: 'Updated Question Category', order: 55 });
+      .send({ name: 'Updated Question Category', priority: 55 });
 
     expect(updateResponse.statusCode).toEqual(200);
     expect(updateResponse.headers['content-type']).toMatch(/json/);
 
     expect(updateResponse.body).toMatchObject({
-      id: testData.categories[0].id,
+      id: testData.questionCategory.id,
       name: 'Updated Question Category',
-      groupId: testData.group.id,
-      order: 55,
+      priority: 55,
     });
 
     const updatedQuestionCategory = await prisma.questionCategory.findUnique({
@@ -127,16 +115,13 @@ describe('Question Categories', () => {
     expect(updatedQuestionCategory).toMatchObject({
       id: updateResponse.body.id,
       name: updateResponse.body.name,
-      groupId: updateResponse.body.groupId,
-      order: updateResponse.body.order,
+      priority: updateResponse.body.priority,
     });
   });
 
   it('deletes question category', async () => {
     const deleteResponse = await request(app.getHttpServer())
-      .delete(
-        `/question-categories/${testData.group.id}/${testData.categories[0].id}`,
-      )
+      .delete(`/question-categories/${testData.questionCategory.id}`)
       .set('Authorization', `Bearer ${authToken}`)
       .set('Accept', 'application/json');
 
@@ -144,7 +129,7 @@ describe('Question Categories', () => {
 
     const deletedQuestionCategory = await prisma.questionCategory.findUnique({
       where: {
-        id: testData.categories[0].id,
+        id: testData.questionCategory.id,
       },
     });
 
