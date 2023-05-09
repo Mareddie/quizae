@@ -9,26 +9,41 @@ export interface QuestionCategoryFixtureData {
   questionCategory: QuestionCategory;
 }
 
+export interface UserInitData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}
+
+export interface CategoryInitData {
+  name: string;
+}
+
 export class QuestionCategoryFixture
   implements AbstractFixture<QuestionCategoryFixtureData>
 {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userData?: UserInitData,
+    private readonly categoryData?: CategoryInitData,
+  ) {}
 
   private data: QuestionCategoryFixtureData;
 
   public async up(): Promise<QuestionCategoryFixtureData> {
+    const userData = this.getUserInitData();
+
     const user = await this.prisma.user.create({
       data: {
-        email: 'quescat@testing.test',
-        firstName: 'Alfa',
-        lastName: 'QuestionUser',
-        password: await argon2.hash('testing'),
+        ...userData,
+        password: await argon2.hash(userData.password),
       },
     });
 
     const questionCategory = await this.prisma.questionCategory.create({
       data: {
-        name: 'Testing Category',
+        name: this.getCategoryInitData().name,
         userId: user.id,
         priority: 10,
       },
@@ -57,5 +72,28 @@ export class QuestionCategoryFixture
         id: this.data.user.id,
       },
     });
+  }
+
+  private getCategoryInitData(): CategoryInitData {
+    if (this.categoryData) {
+      return this.categoryData;
+    }
+
+    return {
+      name: 'Testing Category',
+    };
+  }
+
+  private getUserInitData(): UserInitData {
+    if (this.userData) {
+      return this.userData;
+    }
+
+    return {
+      email: 'quescat@testing.test',
+      firstName: 'Alfa',
+      lastName: 'QuestionUser',
+      password: 'testing',
+    };
   }
 }

@@ -23,7 +23,16 @@ describe('Questions', () => {
     const authService = app.get<AuthService>(AuthService);
 
     prisma = app.get<PrismaService>(PrismaService);
-    fixture = new QuestionCategoryFixture(prisma);
+    fixture = new QuestionCategoryFixture(
+      prisma,
+      {
+        email: 'question@testing.test',
+        firstName: 'Question',
+        lastName: 'e2e Tester',
+        password: 'testing',
+      },
+      { name: 'Question e2e test' },
+    );
 
     testData = await fixture.up();
     authToken = await authService.generateToken(testData.user);
