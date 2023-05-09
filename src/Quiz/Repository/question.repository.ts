@@ -139,7 +139,7 @@ export class QuestionRepository {
       },
     };
 
-    this.prisma.answer.deleteMany(deleteAnswersQuery);
+    await this.prisma.answer.deleteMany(deleteAnswersQuery);
 
     return this.prisma.question.update({
       where: {

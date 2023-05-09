@@ -69,7 +69,8 @@ describe('Questions', () => {
           },
           {
             text: 'Steve Jobs',
-            isCorrectAnswer: true,
+            isCorrect: true,
+            priority: 10,
           },
           {
             text: 'Steve Harris',
@@ -82,9 +83,7 @@ describe('Questions', () => {
 
     expect(createResponse.body).toMatchObject({
       id: expect.any(String),
-      userId: testData.user.id,
       categoryId: testData.questionCategory.id,
-      correctAnswer: expect.any(String),
       text: 'Who founded Apple?',
       answers: expect.any(Array),
     });
@@ -97,23 +96,24 @@ describe('Questions', () => {
           id: expect.any(String),
           questionId: createResponse.body.id,
           text: 'Bill Gatsby',
+          isCorrect: false,
+          priority: null,
         }),
         expect.objectContaining({
           id: expect.any(String),
           questionId: createResponse.body.id,
           text: 'Steve Jobs',
+          isCorrect: true,
+          priority: 10,
         }),
         expect.objectContaining({
           id: expect.any(String),
           questionId: createResponse.body.id,
           text: 'Steve Harris',
+          isCorrect: false,
+          priority: null,
         }),
       ]),
-    );
-
-    expect(createResponse.body.correctAnswer).toEqual(
-      createResponse.body.answers.find((answer) => answer.text === 'Steve Jobs')
-        .id,
     );
 
     testQuestion = await prisma.question.findUnique({
@@ -127,107 +127,106 @@ describe('Questions', () => {
 
     expect(testQuestion).toMatchObject(createResponse.body);
   });
-  //
-  // it('lists questions', async () => {
-  //   const listResponse = await request(app.getHttpServer())
-  //     .get(`/questions/${testData.questionCategory.id}`)
-  //     .set('Accept', 'application/json')
-  //     .set('Authorization', `Bearer ${authToken}`);
-  //
-  //   expect(listResponse.statusCode).toEqual(200);
-  //   expect(listResponse.headers['content-type']).toMatch(/json/);
-  //
-  //   expect(listResponse.body).toBeInstanceOf(Array);
-  //   expect(listResponse.body.length).toEqual(1);
-  //   expect(listResponse.body[0]).toMatchObject(testQuestion);
-  // });
-  //
-  // it('updates question', async () => {
-  //   const updateResponse = await request(app.getHttpServer())
-  //     .patch(`/questions/${testData.questionCategory.id}/${testQuestion.id}`)
-  //     .set('Accept', 'application/json')
-  //     .set('Authorization', `Bearer ${authToken}`)
-  //     .send({
-  //       text: 'Who founded Apple?',
-  //       answers: [
-  //         {
-  //           text: 'Harry Potter',
-  //         },
-  //         {
-  //           text: 'Steve Jobs',
-  //           isCorrectAnswer: true,
-  //         },
-  //         {
-  //           text: 'Dumbledore',
-  //         },
-  //       ],
-  //     });
-  //
-  //   expect(updateResponse.statusCode).toEqual(200);
-  //   expect(updateResponse.headers['content-type']).toMatch(/json/);
-  //
-  //   expect(updateResponse.body).toMatchObject({
-  //     id: expect.any(String),
-  //     userId: testData.user.id,
-  //     categoryId: testData.questionCategory.id,
-  //     correctAnswer: expect.any(String),
-  //     text: 'Who founded Apple?',
-  //     answers: expect.any(Array),
-  //   });
-  //
-  //   expect(updateResponse.body.answers.length).toEqual(3);
-  //
-  //   expect(updateResponse.body.answers).toEqual(
-  //     expect.arrayContaining([
-  //       expect.objectContaining({
-  //         id: expect.any(String),
-  //         questionId: updateResponse.body.id,
-  //         text: 'Harry Potter',
-  //       }),
-  //       expect.objectContaining({
-  //         id: expect.any(String),
-  //         questionId: updateResponse.body.id,
-  //         text: 'Steve Jobs',
-  //       }),
-  //       expect.objectContaining({
-  //         id: expect.any(String),
-  //         questionId: updateResponse.body.id,
-  //         text: 'Dumbledore',
-  //       }),
-  //     ]),
-  //   );
-  //
-  //   expect(updateResponse.body.correctAnswer).toEqual(
-  //     updateResponse.body.answers.find((answer) => answer.text === 'Steve Jobs')
-  //       .id,
-  //   );
-  //
-  //   testQuestion = await prisma.question.findUnique({
-  //     include: {
-  //       answers: true,
-  //     },
-  //     where: {
-  //       id: updateResponse.body.id,
-  //     },
-  //   });
-  //
-  //   expect(testQuestion).toMatchObject(updateResponse.body);
-  // });
-  //
-  // it('deletes question', async () => {
-  //   const deleteResponse = await request(app.getHttpServer())
-  //     .delete(`/questions/${testData.questionCategory.id}/${testQuestion.id}`)
-  //     .set('Accept', 'application/json')
-  //     .set('Authorization', `Bearer ${authToken}`);
-  //
-  //   expect(deleteResponse.statusCode).toEqual(204);
-  //
-  //   const deletedQuestion = await prisma.question.findUnique({
-  //     where: {
-  //       id: testQuestion.id,
-  //     },
-  //   });
-  //
-  //   expect(deletedQuestion).toBeNull();
-  // });
+
+  it('lists questions', async () => {
+    const listResponse = await request(app.getHttpServer())
+      .get(`/questions/${testData.questionCategory.id}`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(listResponse.statusCode).toEqual(200);
+    expect(listResponse.headers['content-type']).toMatch(/json/);
+
+    expect(listResponse.body).toBeInstanceOf(Array);
+    expect(listResponse.body.length).toEqual(1);
+    expect(listResponse.body[0]).toMatchObject(testQuestion);
+  });
+
+  it('updates question', async () => {
+    const updateResponse = await request(app.getHttpServer())
+      .patch(`/questions/${testData.questionCategory.id}/${testQuestion.id}`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        text: 'Who founded Apple?',
+        answers: [
+          {
+            text: 'Harry Potter',
+          },
+          {
+            text: 'Steve Jobs',
+            isCorrect: true,
+          },
+          {
+            text: 'Dumbledore',
+          },
+        ],
+      });
+
+    expect(updateResponse.statusCode).toEqual(200);
+    expect(updateResponse.headers['content-type']).toMatch(/json/);
+
+    expect(updateResponse.body).toMatchObject({
+      id: expect.any(String),
+      categoryId: testData.questionCategory.id,
+      text: 'Who founded Apple?',
+      answers: expect.any(Array),
+    });
+
+    expect(updateResponse.body.answers.length).toEqual(3);
+
+    expect(updateResponse.body.answers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          questionId: updateResponse.body.id,
+          text: 'Harry Potter',
+          isCorrect: false,
+          priority: null,
+        }),
+        expect.objectContaining({
+          id: expect.any(String),
+          questionId: updateResponse.body.id,
+          text: 'Steve Jobs',
+          isCorrect: true,
+          priority: null,
+        }),
+        expect.objectContaining({
+          id: expect.any(String),
+          questionId: updateResponse.body.id,
+          text: 'Dumbledore',
+          isCorrect: false,
+          priority: null,
+        }),
+      ]),
+    );
+
+    testQuestion = await prisma.question.findUnique({
+      include: {
+        answers: true,
+      },
+      where: {
+        id: updateResponse.body.id,
+      },
+    });
+
+    expect(testQuestion).toMatchObject(updateResponse.body);
+  });
+
+  it('deletes question', async () => {
+    const deleteResponse = await request(app.getHttpServer())
+      .delete(`/questions/${testData.questionCategory.id}/${testQuestion.id}`)
+      .set('Accept', 'application/json')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(deleteResponse.statusCode).toEqual(204);
+
+    const deletedQuestion = await prisma.question.findUnique({
+      where: {
+        id: testQuestion.id,
+      },
+    });
+
+    expect(deletedQuestion).toBeNull();
+  });
 });
