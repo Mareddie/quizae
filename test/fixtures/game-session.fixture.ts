@@ -18,15 +18,13 @@ export class GameSessionFixture
   private data: GameSessionFixtureData;
 
   public async up(): Promise<GameSessionFixtureData> {
-    const selectQuery = {
-      id: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-    };
-
     const firstUser = await this.prisma.user.create({
-      select: selectQuery,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+      },
       data: {
         email: 'gametester@test.game',
         firstName: 'Gamie',
