@@ -2,15 +2,13 @@ import { AuthenticatedUser } from '../../src/User/Type/authenticated-user';
 import { AbstractFixture } from './abstract.fixture';
 import { PrismaService } from '../../src/Common/Service/prisma.service';
 import * as argon2 from 'argon2';
-import { Group, Question, QuestionCategory, Answer } from '@prisma/client';
-import { ObjectID } from 'bson';
+import { QuestionCategory, Prisma } from '@prisma/client';
+import { QuestionWithAnswers } from '../../src/Quiz/Type/question-with-answers';
 
 export interface GameSessionFixtureData {
   user: AuthenticatedUser;
-  group: Group;
   questionCategory: QuestionCategory;
-  questions: Question[];
-  answers: Answer[];
+  questionsWithAnswers: QuestionWithAnswers[];
 }
 
 export class GameSessionFixture
@@ -27,126 +25,113 @@ export class GameSessionFixture
       lastName: true,
     };
 
-    const usersToCreate = [
-      {
+    const firstUser = await this.prisma.user.create({
+      select: selectQuery,
+      data: {
         email: 'gametester@test.game',
         firstName: 'Gamie',
         lastName: 'Administrator',
         password: await argon2.hash('testing'),
       },
-    ];
+    });
 
-    const [firstUser] = await Promise.all(
-      usersToCreate.map(
-        async (userData) =>
-          await this.prisma.user.create({
-            select: selectQuery,
-            data: userData,
-          }),
-      ),
-    );
-
-    const groupWithCategory = await this.prisma.group.create({
-      include: {
-        questionCategories: true,
-      },
+    const questionCategory = await this.prisma.questionCategory.create({
       data: {
-        name: 'Gaming Group',
-        ownerId: firstUser.id,
-        questionCategories: {
-          createMany: {
-            data: [
-              {
-                name: 'Games',
-                order: 1,
-              },
-            ],
-          },
-        },
+        name: 'Games',
+        userId: firstUser.id,
+        priority: 10,
       },
     });
 
-    const { questionCategories, ...group } = groupWithCategory;
-
-    const categoryQuestions = [
+    const categoryQuestions: Prisma.QuestionCreateInput[] = [
       {
-        id: new ObjectID().toString(),
-        userId: firstUser.id,
-        categoryId: questionCategories[0].id,
+        category: {
+          connect: {
+            id: questionCategory.id,
+          },
+        },
         text: "Who owns Assassin's Creed IP?",
-        correctAnswer: undefined,
+        answers: {
+          create: [
+            {
+              text: 'Electronic Arts',
+              priority: 1,
+              isCorrect: false,
+            },
+            {
+              text: 'Ubisoft',
+              priority: 2,
+              isCorrect: true,
+            },
+            {
+              text: 'Square Enix',
+              priority: 3,
+              isCorrect: false,
+            },
+          ],
+        },
       },
       {
-        id: new ObjectID().toString(),
-        userId: firstUser.id,
-        categoryId: questionCategories[0].id,
+        category: {
+          connect: {
+            id: questionCategory.id,
+          },
+        },
         text: 'What is current Xbox console name?',
-        correctAnswer: undefined,
+        answers: {
+          create: [
+            {
+              text: 'Xbox One X',
+              priority: 1,
+              isCorrect: false,
+            },
+            {
+              text: 'Xbox Ultra',
+              priority: 2,
+              isCorrect: false,
+            },
+            {
+              text: 'Xbox Series X',
+              priority: 3,
+              isCorrect: true,
+            },
+          ],
+        },
       },
     ];
 
-    const questionsAnswers = [
-      {
-        id: new ObjectID().toString(),
-        questionId: categoryQuestions[0].id,
-        text: 'Electronic Arts',
-        order: 1,
-      },
-      {
-        id: new ObjectID().toString(),
-        questionId: categoryQuestions[0].id,
-        text: 'Ubisoft',
-        order: 2,
-      },
-      {
-        id: new ObjectID().toString(),
-        questionId: categoryQuestions[0].id,
-        text: 'Square Enix',
-        order: 3,
-      },
-      {
-        id: new ObjectID().toString(),
-        questionId: categoryQuestions[1].id,
-        text: 'Xbox One X',
-        order: 1,
-      },
-      {
-        id: new ObjectID().toString(),
-        questionId: categoryQuestions[1].id,
-        text: 'Xbox Ultra',
-        order: 2,
-      },
-      {
-        id: new ObjectID().toString(),
-        questionId: categoryQuestions[1].id,
-        text: 'Xbox Series X',
-        order: 3,
-      },
-    ];
+    const createdQuestionsWithAnswers: QuestionWithAnswers[] = [];
 
-    categoryQuestions[0].correctAnswer = questionsAnswers[1].id;
-    categoryQuestions[1].correctAnswer = questionsAnswers[5].id;
-
-    await this.prisma.question.createMany({ data: categoryQuestions });
-    await this.prisma.answer.createMany({ data: questionsAnswers });
+    for (const question of categoryQuestions) {
+      createdQuestionsWithAnswers.push(
+        await this.prisma.question.create({
+          include: {
+            answers: true,
+          },
+          data: question,
+        }),
+      );
+    }
 
     this.data = {
       user: firstUser,
-      group,
-      questionCategory: questionCategories[0],
-      questions: categoryQuestions,
-      answers: questionsAnswers,
+      questionCategory: questionCategory,
+      questionsWithAnswers: createdQuestionsWithAnswers,
     };
 
     return this.data;
   }
 
   public async down(): Promise<void> {
+    await this.prisma.questionCategory.deleteMany({
+      where: {
+        userId: this.data.user.id,
+      },
+    });
+
     await this.prisma.user.deleteMany({
       where: {
-        id: {
-          in: [this.data.user.id],
-        },
+        id: this.data.user.id,
       },
     });
 
