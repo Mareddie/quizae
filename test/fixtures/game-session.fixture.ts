@@ -127,6 +127,12 @@ export class GameSessionFixture
       },
     });
 
+    await this.prisma.game.deleteMany({
+      where: {
+        startedById: this.data.user.id,
+      },
+    });
+
     await this.prisma.user.deleteMany({
       where: {
         id: this.data.user.id,
