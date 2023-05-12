@@ -2,99 +2,98 @@ import { AuthenticatedUser } from '../../src/User/Type/authenticated-user';
 import { AbstractFixture } from './abstract.fixture';
 import { PrismaService } from '../../src/Common/Service/prisma.service';
 import * as argon2 from 'argon2';
-import { Group, QuestionCategory } from '@prisma/client';
+import { QuestionCategory } from '@prisma/client';
 
 export interface QuestionCategoryFixtureData {
-  firstUser: AuthenticatedUser;
-  secondUser: AuthenticatedUser;
-  group: Group;
-  categories: QuestionCategory[];
+  user: AuthenticatedUser;
+  questionCategory: QuestionCategory;
+}
+
+export interface UserInitData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}
+
+export interface CategoryInitData {
+  name: string;
 }
 
 export class QuestionCategoryFixture
   implements AbstractFixture<QuestionCategoryFixtureData>
 {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userData?: UserInitData,
+    private readonly categoryData?: CategoryInitData,
+  ) {}
+
   private data: QuestionCategoryFixtureData;
 
   public async up(): Promise<QuestionCategoryFixtureData> {
-    const selectQuery = {
-      id: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-    };
+    const userData = this.getUserInitData();
 
-    const usersToCreate = [
-      {
-        email: 'quescat@testing.test',
-        firstName: 'Alfa',
-        lastName: 'QuestionUser',
-        password: await argon2.hash('testing'),
-      },
-      {
-        email: 'secondquescat@testing.test',
-        firstName: 'Beta',
-        lastName: 'QuestionUser',
-        password: await argon2.hash('testing'),
-      },
-    ];
-
-    const [firstUser, secondUser] = await Promise.all(
-      usersToCreate.map(
-        async (userData) =>
-          await this.prisma.user.create({
-            select: selectQuery,
-            data: userData,
-          }),
-      ),
-    );
-
-    const groupWithCategory = await this.prisma.group.create({
-      include: {
-        questionCategories: true,
-      },
+    const user = await this.prisma.user.create({
       data: {
-        name: 'Group With Questions',
-        ownerId: firstUser.id,
-        questionCategories: {
-          createMany: {
-            data: [
-              {
-                name: 'Essentials',
-                order: 1,
-              },
-              {
-                name: 'History',
-                order: 2,
-              },
-            ],
-          },
-        },
+        ...userData,
+        password: await argon2.hash(userData.password),
       },
     });
 
-    const { questionCategories, ...group } = groupWithCategory;
+    const questionCategory = await this.prisma.questionCategory.create({
+      data: {
+        name: this.getCategoryInitData().name,
+        userId: user.id,
+        priority: 10,
+      },
+    });
 
     this.data = {
-      firstUser,
-      secondUser,
-      group,
-      categories: questionCategories,
+      user,
+      questionCategory,
     };
 
     return this.data;
   }
 
   public async down(): Promise<void> {
-    await this.prisma.user.deleteMany({
+    await this.prisma.questionCategory.deleteMany({
       where: {
-        id: {
-          in: [this.data.firstUser.id, this.data.secondUser.id],
-        },
+        OR: [
+          { id: this.data.questionCategory.id },
+          { userId: this.data.user.id },
+        ],
       },
     });
 
-    return;
+    await this.prisma.user.delete({
+      where: {
+        id: this.data.user.id,
+      },
+    });
+  }
+
+  private getCategoryInitData(): CategoryInitData {
+    if (this.categoryData) {
+      return this.categoryData;
+    }
+
+    return {
+      name: 'Testing Category',
+    };
+  }
+
+  private getUserInitData(): UserInitData {
+    if (this.userData) {
+      return this.userData;
+    }
+
+    return {
+      email: 'quescat@testing.test',
+      firstName: 'Alfa',
+      lastName: 'QuestionUser',
+      password: 'testing',
+    };
   }
 }

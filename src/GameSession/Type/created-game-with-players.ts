@@ -6,6 +6,8 @@ export type CreatedGameWithPlayers = Prisma.GameGetPayload<{
     startedById: true;
     state: true;
     startedAt: true;
+    currentPlayerId: true;
+    nextPlayerId: true;
     players: true;
   };
 }>;

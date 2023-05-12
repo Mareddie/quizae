@@ -1,12 +1,12 @@
-import { CheckObjectIdGuard } from './check-object-id.guard';
+import { CheckUuidGuard } from './check-uuid.guard';
 import { createMock } from '@golevelup/ts-jest';
 import { BadRequestException, ExecutionContext } from '@nestjs/common';
 
-describe('CheckObjectIdGuard', () => {
-  let guard: CheckObjectIdGuard;
+describe('CheckUuidGuard', () => {
+  let guard: CheckUuidGuard;
 
   beforeEach(() => {
-    guard = new CheckObjectIdGuard('testId');
+    guard = new CheckUuidGuard('testId');
   });
 
   describe('canActivate', () => {
@@ -24,14 +24,14 @@ describe('CheckObjectIdGuard', () => {
       );
     });
 
-    it('passes correct object id', async () => {
-      await runGuard(guard, '637604b344c8d0e01686f288', true);
+    it('passes correct uuid v4', async () => {
+      await runGuard(guard, '9ea56bec-9902-499f-acbd-37d50e8f8525', true);
     });
   });
 });
 
 async function runGuard(
-  guard: CheckObjectIdGuard,
+  guard: CheckUuidGuard,
   testId?: any,
   expectedResult?: boolean,
 ) {

@@ -1,5 +1,6 @@
 import {
   Body,
+  ConflictException,
   Controller,
   Get,
   Param,
@@ -7,23 +8,21 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
+import { CheckUuidGuard } from '../../../Common/Guard/check-uuid.guard';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
-import { CanAccessGroupGuard } from '../../../Common/Guard/can-access-group.guard';
 import { CreateGameSessionRequestDTO } from '../../../GameSession/DTO/create-game-session-request.dto';
 import { CreateGameSessionHandler } from '../../../GameSession/Handler/create-game-session.handler';
 import { Request } from 'express';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { CreatedGameWithPlayers } from '../../../GameSession/Type/created-game-with-players';
 import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
-import { GameStatusFacade } from '../../../GameSession/Facade/game-status.facade';
-import { GameStatus } from '../../../GameSession/Type/game-status';
 import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-request.dto';
-import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.facade';
-import { QuestionForGame } from '../../../GameSession/Type/question-for-game';
 import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progress-game-session.handler';
-import { GameProgressResult } from '../../../GameSession/Type/game-progress-result';
 import { FinishedGameResult } from '../../../GameSession/Type/finished-game-result';
+import { GameFacade } from '../Facade/game.facade';
+import { GameInfo } from '../Type/game-session-types';
+import { QuestionCandidateForGame } from '../../../Quiz/Type/question-with-answers';
+import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
 
 @Controller('game-session')
 @UseGuards(AuthenticatedGuard)
@@ -31,61 +30,70 @@ export class GameSessionController {
   constructor(
     private readonly createHandler: CreateGameSessionHandler,
     private readonly questionCategoryRepository: QuestionCategoryRepository,
+    private readonly questionRepository: QuestionRepository,
     private readonly progressGameHandler: ProgressGameSessionHandler,
-    private readonly statusFacade: GameStatusFacade,
-    private readonly gameQuestionFacade: GameQuestionFacade,
+    private readonly gameFacade: GameFacade,
   ) {}
 
-  @Post(':groupId/create')
-  @UseGuards(new CheckObjectIdGuard('groupId'), CanAccessGroupGuard)
+  @Post('/create')
   async createGame(
     @Req() request: Request,
-    @Param('groupId') groupId: string,
     @Body() createGameSession: CreateGameSessionRequestDTO,
   ): Promise<CreatedGameWithPlayers> {
-    const questionCategories =
-      await this.questionCategoryRepository.fetchForGame(groupId);
-
     return await this.createHandler.createGame(
       request.user['id'],
-      questionCategories,
       createGameSession.players,
     );
   }
 
   @Get(':gameId')
-  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
-  async getGameStatus(@Param('gameId') gameId: string): Promise<GameStatus> {
-    return this.statusFacade.getGameStatus(gameId);
+  @UseGuards(new CheckUuidGuard('gameId'), CanAccessGameGuard)
+  async getGameStatus(@Param('gameId') gameId: string): Promise<GameInfo> {
+    return await this.gameFacade.getGameData(gameId);
   }
 
   @Get(':gameId/get-question/:categoryId')
   @UseGuards(
-    new CheckObjectIdGuard('gameId'),
-    new CheckObjectIdGuard('categoryId'),
+    new CheckUuidGuard('gameId'),
+    new CheckUuidGuard('categoryId'),
     CanAccessGameGuard,
   )
   async getGameQuestion(
     @Param('gameId') gameId: string,
     @Param('categoryId') categoryId: string,
-  ): Promise<QuestionForGame> {
-    return await this.gameQuestionFacade.getQuestionForGame(gameId, categoryId);
+  ): Promise<QuestionCandidateForGame> {
+    return await this.gameFacade.getQuestionForGame(gameId, categoryId);
   }
 
   @Post(':gameId/progress')
-  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
+  @UseGuards(new CheckUuidGuard('gameId'), CanAccessGameGuard)
   async progressGame(
     @Param('gameId') gameId: string,
     @Body() progressGameData: ProgressGameRequestDTO,
-  ): Promise<GameProgressResult> {
+    @Req() req: Request,
+  ): Promise<{ answeredCorrectly: boolean; correctAnswerId: string }> {
+    // We already are sure that the User can access game because of the guard check
+    const questionData = await this.questionRepository.fetchForGameProgress(
+      progressGameData.questionId,
+      gameId,
+      req.user['id'],
+    );
+
+    if (!questionData) {
+      throw new ConflictException(
+        'Question could not be found or has been already answered',
+      );
+    }
+
     return await this.progressGameHandler.progressGame(
+      questionData,
       progressGameData,
       gameId,
     );
   }
 
   @Post(':gameId/finish')
-  @UseGuards(new CheckObjectIdGuard('gameId'), CanAccessGameGuard)
+  @UseGuards(new CheckUuidGuard('gameId'), CanAccessGameGuard)
   async finishGame(
     @Param('gameId') gameId: string,
   ): Promise<FinishedGameResult> {

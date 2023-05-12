@@ -2,120 +2,90 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "mongodb"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
-}
-
-model User {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    email String  @unique
-    password String
-    firstName String
-    lastName String
-    ownedGroups Group[] @relation()
-    ownedQuestions Question[] @relation()
-    memberships GroupMembership[] @relation()
-    startedGames Game[] @relation()
-}
-
-model Group {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    name String
-    createdAt DateTime @default(now())
-    owner User @relation(fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    ownerId String @db.ObjectId
-    userMemberships GroupMembership[] @relation()
-    questionCategories QuestionCategory[] @relation()
-}
-
-model GroupMembership {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    userId String @db.ObjectId
-    group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    groupId String @db.ObjectId
-
-    @@unique([userId, groupId])
-}
-
-model Game {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    startedById String @db.ObjectId
-    startedBy User @relation(fields: [startedById], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    questionCategories GameQuestionCategory[]
-    currentPlayerId String? @db.ObjectId
-    nextPlayerId String? @db.ObjectId
-    state GameState
-    players Player[] @relation()
-    startedAt DateTime @default(now())
+  previewFeatures = ["filteredRelationCount"]
 }
 
 enum GameState {
-    IN_PROGRESS
-    FINISHED
+  IN_PROGRESS
+  FINISHED
 }
 
-type GameQuestionCategory {
-    id String @db.ObjectId
-    name String
-    questions GameQuestion[]
-    order Int?
-}
-
-type GameQuestion {
-    id String @db.ObjectId
-    categoryId String @db.ObjectId
-    correctAnswer String @db.ObjectId
-    answers GameQuestionAnswer[]
-    text String
-}
-
-type GameQuestionAnswer {
-    id String @db.ObjectId
-    questionId String @db.ObjectId
-    text String
-    order Int?
-}
-
-model Player {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    name String
-    points Int @default(0)
-    gameId String @db.ObjectId
-    game Game @relation(fields: [gameId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    order Int
+model User {
+  id                 String             @id @default(uuid())
+  email              String             @unique
+  password           String
+  firstName          String
+  lastName           String
+  questionCategories QuestionCategory[]
+  startedGames       Game[]
 }
 
 model QuestionCategory {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    name String
-    group Group @relation(fields: [groupId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    groupId String @db.ObjectId
-    questions Question[] @relation()
-    order Int?
+  id        String     @id @default(uuid())
+  name      String
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  questions Question[]
+  priority  Int?
 
-    @@unique([groupId, name])
+  @@unique([userId, name])
 }
 
 model Question {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    user User @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    userId String @db.ObjectId
-    category QuestionCategory @relation(fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    categoryId String @db.ObjectId
-    answers Answer[] @relation()
-    correctAnswer String? @db.ObjectId
-    text String
+  id                String             @id @default(uuid())
+  category          QuestionCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId        String
+  answers           Answer[]
+  text              String
+  answeredQuestions AnsweredQuestion[]
 }
 
 model Answer {
-    id String @id @default(auto()) @map("_id") @db.ObjectId
-    question Question @relation(fields: [questionId], references: [id], onUpdate: Cascade, onDelete: Cascade)
-    questionId String @db.ObjectId
-    text String
-    order Int?
+  id         String   @id @default(uuid())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+  text       String
+  isCorrect  Boolean  @default(false)
+  priority   Int?
+}
+
+model Game {
+  id                String             @id @default(uuid())
+  startedById       String
+  startedBy         User               @relation(fields: [startedById], references: [id])
+  currentPlayerId   String?
+  nextPlayerId      String?
+  state             GameState
+  players           Player[]
+  startedAt         DateTime           @default(now())
+  answeredQuestions AnsweredQuestion[]
+}
+
+model AnsweredQuestion {
+  id            String    @id @default(uuid())
+  gameId        String
+  game          Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  answeredById  String
+  answeredBy    Player    @relation(fields: [answeredById], references: [id], onDelete: Cascade)
+  questionId    String?
+  question      Question? @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  metadata      Json
+  correctAnswer Boolean
+  answeredAt    DateTime  @default(now())
+}
+
+model Player {
+  id                String             @id @default(uuid())
+  name              String
+  points            Int                @default(0)
+  gameId            String
+  game              Game               @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  order             Int
+  answeredQuestions AnsweredQuestion[]
 }

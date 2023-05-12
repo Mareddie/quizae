@@ -16,14 +16,11 @@ export class CreateUpdateQuestionDTO {
   @IsNotEmpty()
   text: string;
 
+  @IsDefined()
   @IsArray()
   @ValidateNested()
   @ArrayUnique()
   @ArrayMinSize(1)
   @Type(() => CreateUpdateAnswerDTO)
-  answers?: CreateUpdateAnswerDTO[];
-
-  @IsString()
-  @IsNotEmpty()
-  correctAnswer?: string;
+  answers: CreateUpdateAnswerDTO[];
 }

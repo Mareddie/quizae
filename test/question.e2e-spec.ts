@@ -3,17 +3,17 @@ import { bootstrapApplication } from './testUtils';
 import { AuthService } from '../src/Auth/Service/auth.service';
 import { PrismaService } from '../src/Common/Service/prisma.service';
 import { INestApplication } from '@nestjs/common';
-import {
-  QuestionFixture,
-  QuestionFixtureData,
-} from './fixtures/question.fixture';
 import { QuestionWithAnswers } from '../src/Quiz/Type/question-with-answers';
+import {
+  QuestionCategoryFixture,
+  QuestionCategoryFixtureData,
+} from './fixtures/question-category.fixture';
 
 describe('Questions', () => {
   let app: INestApplication;
   let prisma: PrismaService;
-  let fixture: QuestionFixture;
-  let testData: QuestionFixtureData;
+  let fixture: QuestionCategoryFixture;
+  let testData: QuestionCategoryFixtureData;
   let authToken: string;
   let testQuestion: QuestionWithAnswers;
 
@@ -23,7 +23,16 @@ describe('Questions', () => {
     const authService = app.get<AuthService>(AuthService);
 
     prisma = app.get<PrismaService>(PrismaService);
-    fixture = new QuestionFixture(prisma);
+    fixture = new QuestionCategoryFixture(
+      prisma,
+      {
+        email: 'question@testing.test',
+        firstName: 'Question',
+        lastName: 'e2e Tester',
+        password: 'testing',
+      },
+      { name: 'Question e2e test' },
+    );
 
     testData = await fixture.up();
     authToken = await authService.generateToken(testData.user);
@@ -69,7 +78,8 @@ describe('Questions', () => {
           },
           {
             text: 'Steve Jobs',
-            isCorrectAnswer: true,
+            isCorrect: true,
+            priority: 10,
           },
           {
             text: 'Steve Harris',
@@ -82,9 +92,7 @@ describe('Questions', () => {
 
     expect(createResponse.body).toMatchObject({
       id: expect.any(String),
-      userId: testData.user.id,
       categoryId: testData.questionCategory.id,
-      correctAnswer: expect.any(String),
       text: 'Who founded Apple?',
       answers: expect.any(Array),
     });
@@ -97,23 +105,24 @@ describe('Questions', () => {
           id: expect.any(String),
           questionId: createResponse.body.id,
           text: 'Bill Gatsby',
+          isCorrect: false,
+          priority: null,
         }),
         expect.objectContaining({
           id: expect.any(String),
           questionId: createResponse.body.id,
           text: 'Steve Jobs',
+          isCorrect: true,
+          priority: 10,
         }),
         expect.objectContaining({
           id: expect.any(String),
           questionId: createResponse.body.id,
           text: 'Steve Harris',
+          isCorrect: false,
+          priority: null,
         }),
       ]),
-    );
-
-    expect(createResponse.body.correctAnswer).toEqual(
-      createResponse.body.answers.find((answer) => answer.text === 'Steve Jobs')
-        .id,
     );
 
     testQuestion = await prisma.question.findUnique({
@@ -155,7 +164,7 @@ describe('Questions', () => {
           },
           {
             text: 'Steve Jobs',
-            isCorrectAnswer: true,
+            isCorrect: true,
           },
           {
             text: 'Dumbledore',
@@ -168,9 +177,7 @@ describe('Questions', () => {
 
     expect(updateResponse.body).toMatchObject({
       id: expect.any(String),
-      userId: testData.user.id,
       categoryId: testData.questionCategory.id,
-      correctAnswer: expect.any(String),
       text: 'Who founded Apple?',
       answers: expect.any(Array),
     });
@@ -183,23 +190,24 @@ describe('Questions', () => {
           id: expect.any(String),
           questionId: updateResponse.body.id,
           text: 'Harry Potter',
+          isCorrect: false,
+          priority: null,
         }),
         expect.objectContaining({
           id: expect.any(String),
           questionId: updateResponse.body.id,
           text: 'Steve Jobs',
+          isCorrect: true,
+          priority: null,
         }),
         expect.objectContaining({
           id: expect.any(String),
           questionId: updateResponse.body.id,
           text: 'Dumbledore',
+          isCorrect: false,
+          priority: null,
         }),
       ]),
-    );
-
-    expect(updateResponse.body.correctAnswer).toEqual(
-      updateResponse.body.answers.find((answer) => answer.text === 'Steve Jobs')
-        .id,
     );
 
     testQuestion = await prisma.question.findUnique({

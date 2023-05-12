@@ -7,46 +7,32 @@ import {
   Param,
   Patch,
   Post,
-  Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
-import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
+import { CheckUuidGuard } from '../../../Common/Guard/check-uuid.guard';
 import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
-import { Request } from 'express';
 import { CanAccessCategoryGuard } from '../Guard/can-access-category.guard';
 import { QuestionWithAnswers } from '../../../Quiz/Type/question-with-answers';
 import { CreateUpdateQuestionDTO } from '../../../Quiz/DTO/create-update-question.dto';
-import { CreateUpdateQuestionHandler } from '../../../Quiz/Handler/create-update-question.handler';
-import { DeleteQuestionHandler } from '../../../Quiz/Handler/delete-question.handler';
+import { QuestionHandler } from '../../../Quiz/Handler/question.handler';
 
 @Controller('questions/:categoryId')
 @UseGuards(
-  new CheckObjectIdGuard('categoryId'),
+  new CheckUuidGuard('categoryId'),
   AuthenticatedGuard,
   CanAccessCategoryGuard,
 )
 export class QuestionResourceController {
   constructor(
     private readonly questionRepository: QuestionRepository,
-    private readonly questionHandler: CreateUpdateQuestionHandler,
-    private readonly deleteHandler: DeleteQuestionHandler,
+    private readonly questionHandler: QuestionHandler,
   ) {}
 
   @Get()
   async resourceList(
     @Param('categoryId') categoryId: string,
-    @Req() request: Request,
-    @Query('filter') filter?: string,
   ): Promise<QuestionWithAnswers[]> {
-    if (filter === 'myOwn') {
-      return await this.questionRepository.fetchQuestions(
-        categoryId,
-        request.user['id'],
-      );
-    }
-
     return await this.questionRepository.fetchQuestions(categoryId);
   }
 
@@ -54,17 +40,15 @@ export class QuestionResourceController {
   async createResource(
     @Param('categoryId') categoryId: string,
     @Body() createQuestion: CreateUpdateQuestionDTO,
-    @Req() request: Request,
   ): Promise<QuestionWithAnswers> {
     return await this.questionHandler.createQuestion(
       categoryId,
-      request.user['id'],
       createQuestion,
     );
   }
 
   @Patch(':questionId')
-  @UseGuards(new CheckObjectIdGuard('questionId'))
+  @UseGuards(new CheckUuidGuard('questionId'))
   async updateResource(
     @Param('categoryId') categoryId: string,
     @Param('questionId') questionId: string,
@@ -79,13 +63,12 @@ export class QuestionResourceController {
   }
 
   @Delete(':questionId')
-  @UseGuards(new CheckObjectIdGuard('questionId'))
+  @UseGuards(new CheckUuidGuard('questionId'))
   @HttpCode(204)
   async deleteResource(
     @Param('categoryId') categoryId: string,
     @Param('questionId') questionId: string,
   ): Promise<void> {
-    // Anyone inside the group can delete questions (with answers)
-    await this.deleteHandler.deleteQuestion(categoryId, questionId);
+    await this.questionHandler.deleteQuestion(categoryId, questionId);
   }
 }

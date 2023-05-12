@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../Common/Service/prisma.service';
-import { QuestionWithAnswers } from '../Type/question-with-answers';
+import {
+  QuestionCandidateForGame,
+  QuestionForGameProgress,
+  QuestionWithAnswers,
+} from '../Type/question-with-answers';
 import { Question } from '@prisma/client';
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 
@@ -8,14 +12,78 @@ import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 export class QuestionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async fetchQuestions(
+  async fetchForGameProgress(
+    questionId: string,
+    gameId: string,
+    startedById: string,
+  ): Promise<QuestionForGameProgress | undefined> {
+    return this.prisma.question.findFirst({
+      select: {
+        id: true,
+        text: true,
+        answers: {
+          select: {
+            id: true,
+            text: true,
+            isCorrect: true,
+          },
+        },
+      },
+      // The question must be made by the user that started the game
+      // The question must not have been answered in the game
+      where: {
+        id: questionId,
+        answeredQuestions: {
+          none: {
+            gameId: gameId,
+          },
+        },
+        category: {
+          is: {
+            userId: startedById,
+          },
+        },
+      },
+    });
+  }
+
+  async fetchCandidatesForGame(
     categoryId: string,
-    userId?: string,
-  ): Promise<QuestionWithAnswers[]> {
+    gameId: string,
+  ): Promise<QuestionCandidateForGame[]> {
+    return this.prisma.question.findMany({
+      select: {
+        id: true,
+        text: true,
+        answers: {
+          select: {
+            id: true,
+            text: true,
+            priority: true,
+          },
+          orderBy: {
+            priority: 'desc',
+          },
+        },
+      },
+      // Returns all Questions within a category that were not yet answered during a game
+      where: {
+        category: {
+          id: categoryId,
+        },
+        answeredQuestions: {
+          none: {
+            gameId: gameId,
+          },
+        },
+      },
+    });
+  }
+
+  async fetchQuestions(categoryId: string): Promise<QuestionWithAnswers[]> {
     return this.prisma.question.findMany({
       where: {
         categoryId: categoryId,
-        userId: userId,
       },
       include: {
         answers: true,
@@ -45,10 +113,7 @@ export class QuestionRepository {
     return this.prisma.question.findFirst({
       where: {
         categoryId: categoryId,
-        text: {
-          equals: text,
-          mode: 'insensitive',
-        },
+        text: text,
       },
     });
   }
@@ -76,69 +141,44 @@ export class QuestionRepository {
 
     await this.prisma.answer.deleteMany(deleteAnswersQuery);
 
-    const updateQuery = {
+    return this.prisma.question.update({
       where: {
         id: questionId,
       },
       data: {
         text: data.text,
-        correctAnswer: data.correctAnswer,
         answers: {
           createMany: {
-            data: [],
+            data: data.answers,
           },
         },
       },
       include: {
         answers: true,
       },
-    };
-
-    if (data.answers !== undefined) {
-      for (const answer of data.answers) {
-        updateQuery.data.answers.createMany.data.push({
-          id: answer.id,
-          text: answer.text,
-          order: answer.order,
-        });
-      }
-    }
-
-    return this.prisma.question.update(updateQuery);
+    });
   }
 
-  async createQuestion(
-    categoryId: string,
-    userId: string,
-    data: CreateUpdateQuestionDTO,
-  ): Promise<QuestionWithAnswers> {
-    const createQuery = {
+  async createQuestion(categoryId: string, data: CreateUpdateQuestionDTO) {
+    if (data.answers === undefined) {
+      throw new Error(
+        'Question on creation must have correct answer and answers defined',
+      );
+    }
+
+    return this.prisma.question.create({
       data: {
         categoryId: categoryId,
-        userId: userId,
-        correctAnswer: data.correctAnswer,
         text: data.text,
         answers: {
           createMany: {
-            data: [],
+            data: data.answers,
           },
         },
       },
       include: {
         answers: true,
       },
-    };
-
-    if (data.answers !== undefined) {
-      for (const answer of data.answers) {
-        createQuery.data.answers.createMany.data.push({
-          id: answer.id,
-          text: answer.text,
-          order: answer.order,
-        });
-      }
-    }
-
-    return this.prisma.question.create(createQuery);
+    });
   }
 }

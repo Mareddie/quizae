@@ -1,9 +1,7 @@
 import { QuestionResourceController } from './question-resource.controller';
 import { Test } from '@nestjs/testing';
 import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
-import { CreateUpdateQuestionHandler } from '../../../Quiz/Handler/create-update-question.handler';
-import { DeleteQuestionHandler } from '../../../Quiz/Handler/delete-question.handler';
-import { getMockedAuthRequest } from '../../../../test/testUtils';
+import { QuestionHandler } from '../../../Quiz/Handler/question.handler';
 import { CanAccessCategoryGuard } from '../Guard/can-access-category.guard';
 import { CreateUpdateQuestionDTO } from '../../../Quiz/DTO/create-update-question.dto';
 import { plainToClass } from 'class-transformer';
@@ -18,9 +16,6 @@ describe('QuestionResourceController', () => {
   const questionHandlerMock = {
     createQuestion: jest.fn().mockResolvedValue({ test: true }),
     updateQuestion: jest.fn().mockResolvedValue({ test: true }),
-  };
-
-  const deleteHandlerMock = {
     deleteQuestion: jest.fn().mockResolvedValue(undefined),
   };
 
@@ -32,10 +27,8 @@ describe('QuestionResourceController', () => {
         switch (token) {
           case QuestionRepository:
             return questionRepositoryMock;
-          case CreateUpdateQuestionHandler:
+          case QuestionHandler:
             return questionHandlerMock;
-          case DeleteQuestionHandler:
-            return deleteHandlerMock;
           default:
             throw new Error(`Undefined token for mocking: ${String(token)}`);
         }
@@ -48,29 +41,12 @@ describe('QuestionResourceController', () => {
   });
 
   describe('resourceList', () => {
-    it('fetches my questions', async () => {
-      const req = getMockedAuthRequest();
-
-      const questions = await controller.resourceList('123', req, 'myOwn');
+    it('fetches questions within category', async () => {
+      const questions = await controller.resourceList('123');
 
       expect(questions).toEqual([{ test: true }]);
 
       expect(questionRepositoryMock['fetchQuestions']).toHaveBeenCalledTimes(1);
-
-      expect(questionRepositoryMock['fetchQuestions']).toHaveBeenCalledWith(
-        '123',
-        req.user.id,
-      );
-    });
-
-    it('fetches questions within category', async () => {
-      const req = getMockedAuthRequest();
-
-      const questions = await controller.resourceList('123', req);
-
-      expect(questions).toEqual([{ test: true }]);
-
-      expect(questionRepositoryMock['fetchQuestions']).toHaveBeenCalledTimes(2);
 
       expect(questionRepositoryMock['fetchQuestions']).toHaveBeenCalledWith(
         '123',
@@ -80,22 +56,19 @@ describe('QuestionResourceController', () => {
 
   describe('createResource', () => {
     it('creates question', async () => {
-      const req = getMockedAuthRequest();
-
       const dto = plainToClass(CreateUpdateQuestionDTO, {
         text: 'test question',
-        correctAnswer: 'edd',
         answers: [
           {
             text: 'yo boi',
             id: 'edd',
-            order: 1,
-            isCorrectAnswer: true,
+            priority: 1,
+            isCorrect: true,
           },
         ],
       });
 
-      const createQuestion = await controller.createResource('123', dto, req);
+      const createQuestion = await controller.createResource('123', dto);
 
       expect(createQuestion).toEqual({ test: true });
 
@@ -103,7 +76,6 @@ describe('QuestionResourceController', () => {
 
       expect(questionHandlerMock['createQuestion']).toHaveBeenCalledWith(
         '123',
-        req.user.id,
         dto,
       );
     });
@@ -148,9 +120,9 @@ describe('QuestionResourceController', () => {
     it('deletes question', async () => {
       await controller.deleteResource('123', '456');
 
-      expect(deleteHandlerMock['deleteQuestion']).toHaveBeenCalledTimes(1);
+      expect(questionHandlerMock['deleteQuestion']).toHaveBeenCalledTimes(1);
 
-      expect(deleteHandlerMock['deleteQuestion']).toHaveBeenCalledWith(
+      expect(questionHandlerMock['deleteQuestion']).toHaveBeenCalledWith(
         '123',
         '456',
       );

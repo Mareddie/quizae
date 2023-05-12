@@ -4,11 +4,6 @@ export class ProgressGameRequestDTO {
   @IsDefined()
   @IsString()
   @IsNotEmpty()
-  categoryId: string;
-
-  @IsDefined()
-  @IsString()
-  @IsNotEmpty()
   questionId: string;
 
   @IsDefined()

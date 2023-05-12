@@ -3,16 +3,17 @@ import { Test } from '@nestjs/testing';
 import { CreateGameSessionHandler } from '../../../GameSession/Handler/create-game-session.handler';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { ProgressGameSessionHandler } from '../../../GameSession/Handler/progress-game-session.handler';
-import { GameStatusFacade } from '../../../GameSession/Facade/game-status.facade';
-import { GameQuestionFacade } from '../../../GameSession/Facade/game-question.facade';
-import { CanAccessGroupGuard } from '../../../Common/Guard/can-access-group.guard';
 import { CanAccessGameGuard } from '../Guard/can-access-game.guard';
 import { getMockedAuthRequest } from '../../../../test/testUtils';
 import { plainToClass } from 'class-transformer';
 import { CreateGameSessionRequestDTO } from '../../../GameSession/DTO/create-game-session-request.dto';
 import { ProgressGameRequestDTO } from '../../../GameSession/DTO/progress-game-request.dto';
+import { GameFacade } from '../Facade/game.facade';
+import { QuestionRepository } from '../../../Quiz/Repository/question.repository';
+import { ConflictException } from '@nestjs/common';
 
 describe('GameSessionController', () => {
+  // TODO: These tests are not working, rewrite them
   let controller: GameSessionController;
 
   const createHandlerMock = {
@@ -23,17 +24,18 @@ describe('GameSessionController', () => {
     fetchForGame: jest.fn().mockResolvedValue('fetchedForGame'),
   };
 
+  const questionRepositoryMock = {
+    fetchForGameProgress: jest.fn().mockResolvedValue('game question boi'),
+  };
+
   const progressGameHandlerMock = {
     progressGame: jest.fn().mockResolvedValue('progressGame'),
     endGame: jest.fn().mockResolvedValue('endGame'),
   };
 
-  const statusFacadeMock = {
-    getGameStatus: jest.fn().mockResolvedValue('gameStatus'),
-  };
-
-  const gameQuestionFacadeMock = {
+  const gameFacadeMock = {
     getQuestionForGame: jest.fn().mockResolvedValue('questionForGame'),
+    getGameData: jest.fn().mockResolvedValue('gameData'),
   };
 
   beforeEach(async () => {
@@ -46,18 +48,16 @@ describe('GameSessionController', () => {
             return createHandlerMock;
           case QuestionCategoryRepository:
             return questionCategoryRepositoryMock;
+          case QuestionRepository:
+            return questionRepositoryMock;
           case ProgressGameSessionHandler:
             return progressGameHandlerMock;
-          case GameStatusFacade:
-            return statusFacadeMock;
-          case GameQuestionFacade:
-            return gameQuestionFacadeMock;
+          case GameFacade:
+            return gameFacadeMock;
           default:
             throw new Error(`Undefined token for mocking: ${String(token)}`);
         }
       })
-      .overrideGuard(CanAccessGroupGuard)
-      .useValue({ canActivate: () => true })
       .overrideGuard(CanAccessGameGuard)
       .useValue({ canActivate: () => true })
       .compile();
@@ -86,21 +86,12 @@ describe('GameSessionController', () => {
 
       const req = getMockedAuthRequest();
 
-      const createGame = await controller.createGame(req, '123', dto);
-
-      expect(
-        questionCategoryRepositoryMock['fetchForGame'],
-      ).toHaveBeenCalledTimes(1);
-
-      expect(
-        questionCategoryRepositoryMock['fetchForGame'],
-      ).toHaveBeenCalledWith('123');
+      const createGame = await controller.createGame(req, dto);
 
       expect(createHandlerMock['createGame']).toHaveBeenCalledTimes(1);
 
       expect(createHandlerMock['createGame']).toHaveBeenCalledWith(
         req.user.id,
-        'fetchedForGame',
         dto.players,
       );
 
@@ -112,11 +103,10 @@ describe('GameSessionController', () => {
     it('returns game status', async () => {
       const gameStatus = await controller.getGameStatus('123');
 
-      expect(statusFacadeMock['getGameStatus']).toHaveBeenCalledTimes(1);
+      expect(gameFacadeMock['getGameData']).toHaveBeenCalledTimes(1);
+      expect(gameFacadeMock['getGameData']).toHaveBeenCalledWith('123');
 
-      expect(statusFacadeMock['getGameStatus']).toHaveBeenCalledWith('123');
-
-      expect(gameStatus).toEqual('gameStatus');
+      expect(gameStatus).toEqual('gameData');
     });
   });
 
@@ -124,11 +114,9 @@ describe('GameSessionController', () => {
     it('returns game question', async () => {
       const gameQuestion = await controller.getGameQuestion('123', '456');
 
-      expect(
-        gameQuestionFacadeMock['getQuestionForGame'],
-      ).toHaveBeenCalledTimes(1);
+      expect(gameFacadeMock['getQuestionForGame']).toHaveBeenCalledTimes(1);
 
-      expect(gameQuestionFacadeMock['getQuestionForGame']).toHaveBeenCalledWith(
+      expect(gameFacadeMock['getQuestionForGame']).toHaveBeenCalledWith(
         '123',
         '456',
       );
@@ -140,22 +128,54 @@ describe('GameSessionController', () => {
   describe('progressGame', () => {
     it('progresses game', async () => {
       const dto = plainToClass(ProgressGameRequestDTO, {
-        categoryId: '123',
         questionId: '456',
         answerId: '456',
         playerId: '123',
       });
 
-      const progressGame = await controller.progressGame('123', dto);
+      const progressGame = await controller.progressGame(
+        '123',
+        dto,
+        getMockedAuthRequest(),
+      );
+
+      expect(
+        questionRepositoryMock['fetchForGameProgress'],
+      ).toHaveBeenCalledTimes(1);
+
+      expect(
+        questionRepositoryMock['fetchForGameProgress'],
+      ).toHaveBeenCalledWith(dto.questionId, '123', '1');
 
       expect(progressGameHandlerMock['progressGame']).toHaveBeenCalledTimes(1);
 
       expect(progressGameHandlerMock['progressGame']).toHaveBeenCalledWith(
+        'game question boi',
         dto,
         '123',
       );
 
       expect(progressGame).toEqual('progressGame');
+    });
+
+    it('throws exception on undefined question data', async () => {
+      questionRepositoryMock['fetchForGameProgress'].mockResolvedValueOnce(
+        undefined,
+      );
+
+      const dto = plainToClass(ProgressGameRequestDTO, {
+        questionId: '456',
+        answerId: '456',
+        playerId: '123',
+      });
+
+      await expect(
+        controller.progressGame('123', dto, getMockedAuthRequest()),
+      ).rejects.toThrow(ConflictException);
+
+      expect(
+        questionRepositoryMock['fetchForGameProgress'],
+      ).toHaveBeenCalledTimes(2);
     });
   });
 

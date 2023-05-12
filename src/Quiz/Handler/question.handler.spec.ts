@@ -1,11 +1,11 @@
-import { CreateUpdateQuestionHandler } from './create-update-question.handler';
+import { QuestionHandler } from './question.handler';
 import { QuestionRepository } from '../Repository/question.repository';
 import { CreateUpdateQuestionDTO } from '../DTO/create-update-question.dto';
 import { ConflictException } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 
 describe('CreateUpdateQuestionHandler', () => {
-  let handler: CreateUpdateQuestionHandler;
+  let handler: QuestionHandler;
 
   const questionWithAnswers = {
     id: '123',
@@ -16,22 +16,26 @@ describe('CreateUpdateQuestionHandler', () => {
       {
         questionId: '123',
         text: 'Oh Yes',
-        order: 1,
+        priority: 1,
+        isCorrect: false,
       },
       {
         questionId: '123',
         text: 'Correct Answer',
-        order: 2,
+        priority: 2,
+        isCorrect: true,
       },
       {
         questionId: '123',
         text: 'Oh No',
-        order: null,
+        priority: null,
+        isCorrect: false,
       },
       {
         questionId: '123',
         text: 'Definitely No',
-        order: null,
+        priority: null,
+        isCorrect: false,
       },
     ],
   };
@@ -39,26 +43,43 @@ describe('CreateUpdateQuestionHandler', () => {
   const repositoryMock = {
     fetchByIdAndCategory: jest
       .fn()
-      .mockResolvedValueOnce(null)
       .mockResolvedValue(JSON.parse(JSON.stringify(questionWithAnswers))),
 
-    fetchByTextAndCategory: jest
-      .fn()
-      .mockResolvedValueOnce(JSON.parse(JSON.stringify(questionWithAnswers)))
-      .mockResolvedValue(null),
+    fetchByTextAndCategory: jest.fn().mockResolvedValue(null),
 
     updateQuestion: jest.fn().mockResolvedValue({ test: true }),
     createQuestion: jest.fn().mockResolvedValue({ test: true }),
+    deleteQuestion: jest.fn().mockResolvedValue({ test: true }),
   };
 
   beforeEach(() => {
-    handler = new CreateUpdateQuestionHandler(
+    handler = new QuestionHandler(
       repositoryMock as unknown as QuestionRepository,
     );
   });
 
+  describe('deleteQuestion', () => {
+    it('throws exception because question does not exist', async () => {
+      repositoryMock['fetchByIdAndCategory'].mockResolvedValueOnce(null);
+
+      await expect(handler.deleteQuestion('123', '456')).rejects.toThrow(
+        ConflictException,
+      );
+    });
+
+    it('deletes question', async () => {
+      await handler.deleteQuestion('222', '123');
+
+      expect(repositoryMock['fetchByIdAndCategory']).toHaveBeenCalledTimes(2);
+      expect(repositoryMock['deleteQuestion']).toHaveBeenCalledTimes(1);
+      expect(repositoryMock['deleteQuestion']).toHaveBeenCalledWith('123');
+    });
+  });
+
   describe('updateQuestion', () => {
     it('throws an exception on non-existing question update', async () => {
+      repositoryMock['fetchByIdAndCategory'].mockResolvedValueOnce(null);
+
       await expect(
         handler.updateQuestion(
           '123',
@@ -74,13 +95,13 @@ describe('CreateUpdateQuestionHandler', () => {
         answers: [
           {
             text: 'Correct Answer',
-            order: 1,
-            isCorrectAnswer: true,
+            priority: 1,
+            isCorrect: true,
           },
           {
             text: 'Correct Answer',
-            order: 2,
-            isCorrectAnswer: false,
+            priority: 2,
+            isCorrect: false,
           },
         ],
       });
@@ -96,13 +117,13 @@ describe('CreateUpdateQuestionHandler', () => {
         answers: [
           {
             text: 'Correct Answer',
-            order: 1,
-            isCorrectAnswer: true,
+            priority: 1,
+            isCorrect: true,
           },
           {
             text: 'Also Correct',
-            order: 2,
-            isCorrectAnswer: true,
+            priority: 2,
+            isCorrect: true,
           },
         ],
       });
@@ -118,8 +139,8 @@ describe('CreateUpdateQuestionHandler', () => {
         answers: [
           {
             text: 'Correct Answer',
-            order: 1,
-            isCorrectAnswer: true,
+            priority: 1,
+            isCorrect: true,
           },
         ],
       });
@@ -133,12 +154,10 @@ describe('CreateUpdateQuestionHandler', () => {
         answers: [
           {
             text: 'Correct Answer',
-            order: 1,
-            isCorrectAnswer: true,
-            id: expect.any(String),
+            priority: 1,
+            isCorrect: true,
           },
         ],
-        correctAnswer: expect.any(String),
       });
 
       expect(result).toEqual({ test: true });
@@ -147,18 +166,22 @@ describe('CreateUpdateQuestionHandler', () => {
 
   describe('createQuestion', () => {
     it('throws exception on similar existing question', async () => {
+      repositoryMock['fetchByTextAndCategory'].mockResolvedValueOnce(
+        JSON.parse(JSON.stringify(questionWithAnswers)),
+      );
+
       const dto = plainToClass(CreateUpdateQuestionDTO, {
         text: 'Test Question',
         answers: [
           {
             text: 'Correct Answer',
-            order: 1,
-            isCorrectAnswer: true,
+            priority: 1,
+            isCorrect: true,
           },
         ],
       });
 
-      await expect(handler.createQuestion('222', '222', dto)).rejects.toThrow(
+      await expect(handler.createQuestion('222', dto)).rejects.toThrow(
         ConflictException,
       );
     });
@@ -169,32 +192,26 @@ describe('CreateUpdateQuestionHandler', () => {
         answers: [
           {
             text: 'New Correct Answer',
-            order: 1,
-            isCorrectAnswer: true,
+            priority: 1,
+            isCorrect: true,
           },
         ],
       });
 
-      await handler.createQuestion('222', '222', dto);
+      await handler.createQuestion('222', dto);
 
       expect(repositoryMock['createQuestion']).toHaveBeenCalledTimes(1);
 
-      expect(repositoryMock['createQuestion']).toHaveBeenCalledWith(
-        '222',
-        '222',
-        {
-          text: dto.text,
-          answers: [
-            {
-              text: 'New Correct Answer',
-              order: 1,
-              isCorrectAnswer: true,
-              id: expect.any(String),
-            },
-          ],
-          correctAnswer: expect.any(String),
-        },
-      );
+      expect(repositoryMock['createQuestion']).toHaveBeenCalledWith('222', {
+        text: dto.text,
+        answers: [
+          {
+            text: 'New Correct Answer',
+            priority: 1,
+            isCorrect: true,
+          },
+        ],
+      });
     });
   });
 });

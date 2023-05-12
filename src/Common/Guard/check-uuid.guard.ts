@@ -4,9 +4,10 @@ import {
   CanActivate,
   BadRequestException,
 } from '@nestjs/common';
+import { validate as uuidValidate } from 'uuid';
 
 @Injectable()
-export class CheckObjectIdGuard implements CanActivate {
+export class CheckUuidGuard implements CanActivate {
   constructor(private readonly idProperty: string) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -18,18 +19,18 @@ export class CheckObjectIdGuard implements CanActivate {
       );
     }
 
-    const objectIdCandidate = request.params[this.idProperty];
+    const uuidCandidate = request.params[this.idProperty];
 
-    if (typeof objectIdCandidate !== 'string') {
+    if (typeof uuidCandidate !== 'string') {
       throw new BadRequestException('Property ID must be a string');
     }
 
-    if (objectIdCandidate.match(/^[0-9a-fA-F]{24}$/) !== null) {
+    if (uuidValidate(uuidCandidate) === true) {
       return true;
     }
 
     throw new BadRequestException(
-      `Parameter '${this.idProperty}' must be a valid Object ID`,
+      `Parameter '${this.idProperty}' must be a valid UUID`,
     );
   }
 }

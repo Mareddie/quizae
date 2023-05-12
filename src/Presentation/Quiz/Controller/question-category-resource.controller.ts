@@ -7,73 +7,66 @@ import {
   Param,
   Patch,
   Post,
-  Res,
+  Req,
   UseGuards,
 } from '@nestjs/common';
-import { CheckObjectIdGuard } from '../../../Common/Guard/check-object-id.guard';
+import { CheckUuidGuard } from '../../../Common/Guard/check-uuid.guard';
 import { AuthenticatedGuard } from '../../../Auth/Guard/authenticated.guard';
 import { QuestionCategoryRepository } from '../../../Quiz/Repository/question-category.repository';
 import { QuestionCategory } from '@prisma/client';
 import { CreateUpdateQuestionCategoryDTO } from '../../../Quiz/DTO/create-update-question-category.dto';
-import { CreateUpdateQuestionCategoryHandler } from '../../../Quiz/Handler/create-update-question-category.handler';
-import { Response } from 'express';
-import { DeleteQuestionCategoryHandler } from '../../../Quiz/Handler/delete-question-category.handler';
-import { CanAccessGroupGuard } from '../../../Common/Guard/can-access-group.guard';
+import { QuestionCategoryHandler } from '../../../Quiz/Handler/question-category.handler';
+import { Request } from 'express';
 
-@Controller('/question-categories/:groupId')
-@UseGuards(
-  new CheckObjectIdGuard('groupId'),
-  AuthenticatedGuard,
-  CanAccessGroupGuard,
-)
+@Controller('/question-categories')
+@UseGuards(AuthenticatedGuard)
 export class QuestionCategoryResourceController {
   constructor(
     private readonly questionCategoryRepository: QuestionCategoryRepository,
-    private readonly handler: CreateUpdateQuestionCategoryHandler,
-    private readonly deleteHandler: DeleteQuestionCategoryHandler,
+    private readonly handler: QuestionCategoryHandler,
   ) {}
 
   @Get()
-  async resourceList(
-    @Param('groupId') groupId: string,
-  ): Promise<QuestionCategory[]> {
-    return await this.questionCategoryRepository.fetchForGroup(groupId);
+  async resourceList(@Req() request: Request): Promise<QuestionCategory[]> {
+    return await this.questionCategoryRepository.fetchForUser(
+      request.user['id'],
+    );
   }
 
   @Post('create')
   async createResource(
-    @Param('groupId') groupId: string,
+    @Req() request: Request,
     @Body() createQuestionCategory: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
     return await this.handler.createQuestionCategory(
-      groupId,
+      request.user['id'],
       createQuestionCategory,
     );
   }
 
   @Patch(':questionCategoryId')
-  @UseGuards(new CheckObjectIdGuard('questionCategoryId'))
+  @UseGuards(new CheckUuidGuard('questionCategoryId'))
   async updateResource(
-    @Param('groupId') groupId: string,
+    @Req() request: Request,
     @Param('questionCategoryId') questionCategoryId: string,
     @Body() updateQuestionCategory: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
     return await this.handler.updateQuestionCategory(
       questionCategoryId,
-      groupId,
+      request.user['id'],
       updateQuestionCategory,
     );
   }
 
   @Delete(':questionCategoryId')
-  @UseGuards(new CheckObjectIdGuard('questionCategoryId'))
+  @UseGuards(new CheckUuidGuard('questionCategoryId'))
   @HttpCode(204)
   async deleteResource(
-    @Param('groupId') groupId: string,
+    @Req() request: Request,
     @Param('questionCategoryId') questionCategoryId: string,
   ): Promise<void> {
-    await this.deleteHandler.deleteQuestionCategory(
-      groupId,
+    await this.handler.deleteQuestionCategory(
+      request.user['id'],
       questionCategoryId,
     );
   }
