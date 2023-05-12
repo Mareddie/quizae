@@ -214,106 +214,115 @@ describe('Game Session', () => {
       }),
     );
 
-    // expect(statusResponse.body.players[0]).toMatchObject({
-    //   id: gameStatus.players[0].id,
-    //   name: gameStatus.players[0].name,
-    //   points: 10,
-    // });
-    //
-    // expect(statusResponse.body.players[1]).toMatchObject({
-    //   id: gameStatus.players[1].id,
-    //   name: gameStatus.players[1].name,
-    //   points: 0,
-    // });
-    //
-    // expect(statusResponse.body.categoryStatuses[0]).toMatchObject({
-    //   id: testData.questionCategory.id,
-    //   name: testData.questionCategory.name,
-    //   order: testData.questionCategory.order,
-    //   questionCount: 1,
-    // });
+    const firstPlayerFromStatus = statusResponse.body.info.players.filter(
+      (player) => player.order === 1,
+    )[0];
+
+    const actualFirstPlayer = game.players.filter(
+      (player) => player.order === 1,
+    )[0];
+
+    expect(firstPlayerFromStatus).toMatchObject({
+      id: actualFirstPlayer.id,
+      name: actualFirstPlayer.name,
+      points: 10,
+    });
+
+    expect(statusResponse.body.categories[0]).toMatchObject({
+      id: testData.questionCategory.id,
+      name: testData.questionCategory.name,
+      priority: testData.questionCategory.priority,
+      _count: {
+        questions: 1,
+      },
+    });
   });
-  //
-  // it('progresses the Game - 2nd question answer', async () => {
-  //   const answer = await prisma.answer.findFirst({
-  //     where: {
-  //       questionId: testData.questions[1].id,
-  //       NOT: {
-  //         id: testData.questions[1].correctAnswer,
-  //       },
-  //     },
-  //   });
-  //
-  //   const progressResponse = await request(app.getHttpServer())
-  //     .post(`/game-session/${gameStatus.id}/progress`)
-  //     .set('Authorization', `Bearer ${authToken}`)
-  //     .set('Accept', 'application/json')
-  //     .send({
-  //       categoryId: testData.questionCategory.id,
-  //       questionId: testData.questions[1].id,
-  //       answerId: answer.id,
-  //       playerId: gameStatus.players[1].id,
-  //     });
-  //
-  //   expect(progressResponse.statusCode).toEqual(201);
-  //
-  //   expect(progressResponse.body).toMatchObject({
-  //     answeredCorrectly: false,
-  //     correctAnswerId: testData.questions[1].correctAnswer,
-  //   });
-  //
-  //   const statusResponse = await request(app.getHttpServer())
-  //     .get(`/game-session/${gameStatus.id}`)
-  //     .set('Authorization', `Bearer ${authToken}`)
-  //     .set('Accept', 'application/json');
-  //
-  //   expect(statusResponse.statusCode).toEqual(200);
-  //
-  //   expect(statusResponse.body).toMatchObject({
-  //     currentPlayerId: gameStatus.players[0].id,
-  //     nextPlayerId: gameStatus.players[1].id,
-  //   });
-  //
-  //   expect(statusResponse.body.players[0]).toMatchObject({
-  //     id: gameStatus.players[0].id,
-  //     name: gameStatus.players[0].name,
-  //     points: 10,
-  //   });
-  //
-  //   expect(statusResponse.body.players[1]).toMatchObject({
-  //     id: gameStatus.players[1].id,
-  //     name: gameStatus.players[1].name,
-  //     points: 0,
-  //   });
-  //
-  //   expect(statusResponse.body.categoryStatuses.length).toEqual(0);
-  // });
-  //
-  // it('finalizes the Game', async () => {
-  //   const endGameResponse = await request(app.getHttpServer())
-  //     .post(`/game-session/${gameStatus.id}/finish`)
-  //     .set('Authorization', `Bearer ${authToken}`)
-  //     .set('Accept', 'application/json');
-  //
-  //   expect(endGameResponse.statusCode).toEqual(201);
-  //
-  //   expect(endGameResponse.body).toMatchObject({
-  //     id: gameStatus.id,
-  //     state: GameState.FINISHED,
-  //     players: expect.any(Array),
-  //   });
-  //
-  //   expect(endGameResponse.body.players).toEqual(
-  //     expect.arrayContaining([
-  //       expect.objectContaining({
-  //         name: 'Charlie',
-  //         points: 10,
-  //       }),
-  //       expect.objectContaining({
-  //         name: 'Matt',
-  //         points: 0,
-  //       }),
-  //     ]),
-  //   );
-  // });
+
+  it('progresses the Game - 2nd question answer', async () => {
+    const secondPlayer = game.players.filter((player) => player.order === 2)[0];
+
+    const progressResponse = await request(app.getHttpServer())
+      .post(`/game-session/${game.id}/progress`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json')
+      .send({
+        categoryId: testData.questionCategory.id,
+        questionId: testData.questionsWithAnswers[1].id,
+        answerId: testData.questionsWithAnswers[1].answers.filter(
+          (answer) => answer.isCorrect === false,
+        )[0].id,
+        playerId: secondPlayer.id,
+      });
+
+    expect(progressResponse.statusCode).toEqual(201);
+
+    expect(progressResponse.body).toMatchObject({
+      answeredCorrectly: false,
+      correctAnswerId: testData.questionsWithAnswers[1].answers.filter(
+        (answer) => answer.isCorrect === true,
+      )[0].id,
+    });
+
+    const statusResponse = await request(app.getHttpServer())
+      .get(`/game-session/${game.id}`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json');
+
+    expect(statusResponse.statusCode).toEqual(200);
+
+    expect(statusResponse.body.info).toEqual(
+      expect.objectContaining({
+        currentPlayerId: game.players.filter((player) => player.order === 1)[0]
+          .id,
+        nextPlayerId: game.players.filter((player) => player.order === 2)[0].id,
+      }),
+    );
+
+    const secondPlayerFromStatus = statusResponse.body.info.players.filter(
+      (player) => player.order === 2,
+    )[0];
+
+    expect(secondPlayerFromStatus).toMatchObject({
+      id: secondPlayer.id,
+      name: secondPlayer.name,
+      points: 0,
+    });
+
+    expect(statusResponse.body.categories[0]).toMatchObject({
+      id: testData.questionCategory.id,
+      name: testData.questionCategory.name,
+      priority: testData.questionCategory.priority,
+      _count: {
+        questions: 0,
+      },
+    });
+  });
+
+  it('finalizes the Game', async () => {
+    const endGameResponse = await request(app.getHttpServer())
+      .post(`/game-session/${game.id}/finish`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('Accept', 'application/json');
+
+    expect(endGameResponse.statusCode).toEqual(201);
+
+    expect(endGameResponse.body).toMatchObject({
+      id: game.id,
+      state: GameState.FINISHED,
+      players: expect.any(Array),
+    });
+
+    expect(endGameResponse.body.players).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'Charlie',
+          points: 10,
+        }),
+        expect.objectContaining({
+          name: 'Matt',
+          points: 0,
+        }),
+      ]),
+    );
+  });
 });
