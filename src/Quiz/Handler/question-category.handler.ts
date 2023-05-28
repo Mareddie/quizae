@@ -23,7 +23,16 @@ export class QuestionCategoryHandler {
     userId: string,
     data: CreateUpdateQuestionCategoryDTO,
   ): Promise<QuestionCategory> {
-    await this.testQuestionCategoryUniqueness(userId, data.name);
+    const predicate = await this.questionCategoryRepository.fetchForUser(
+      userId,
+      data.name,
+    );
+
+    if (predicate.length !== 0 && predicate[0].id !== questionCategoryId) {
+      throw new ConflictException(
+        'You cannot use this name - you already have category with such name!',
+      );
+    }
 
     return this.questionCategoryRepository.updateQuestionCategory(
       questionCategoryId,
